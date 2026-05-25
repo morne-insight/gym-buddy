@@ -96,20 +96,20 @@
 ## Phase 4: System Prompt + Persona
 
 ### 4.1 Write base system prompt
-- [ ] Create `server/prompts/base.ts` with the shared prompt layer
-- [ ] Cover: voice brevity rules, workout flow, accountability rules, history awareness, sentiment detection, tool usage instructions
-- [ ] Export as a function that accepts user context (name, history summary)
+- [x] Create `server/prompts/base.ts` with the shared prompt layer
+- [x] Cover: voice brevity rules, workout flow, accountability rules, history awareness, sentiment detection, tool usage instructions
+- [x] Export as a function that accepts user context (name, history summary)
 
 ### 4.2 Create Drill Sergeant persona
-- [ ] Create `server/prompts/personas/drill-sergeant.ts`
-- [ ] Define: tone, skip reactions, show-up reactions, PR reactions, struggle reactions
-- [ ] Map to TTS voice preset
-- [ ] Export as prompt string + voice config
+- [x] Create `server/prompts/personas/drill-sergeant.ts`
+- [x] Define: tone, skip reactions, show-up reactions, PR reactions, struggle reactions
+- [x] Map to TTS voice preset
+- [x] Export as prompt string + voice config
 
 ### 4.3 Prompt composition
-- [ ] Create `server/prompts/index.ts` that combines base + persona into final system prompt
-- [ ] Accept user ID, load persona preference and user context from DB
-- [ ] Test: composed prompt includes both layers, persona-specific content is present
+- [x] Create `server/prompts/index.ts` that combines base + persona into final system prompt
+- [x] Accept user ID, load persona preference and user context from DB
+- [x] Test: composed prompt includes both layers, persona-specific content is present
 
 ---
 
