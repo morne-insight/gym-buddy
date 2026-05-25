@@ -1,6 +1,7 @@
 import { getExerciseHistoryTool } from './getExerciseHistory.js';
 import { createTestDatabase, seedTestUser, seedTestPersona, seedTestSchedule } from '../db/test-helpers.js';
 import { createSession, logExercise, completeSession } from '../db/index.js';
+import { beforeEach, afterEach, describe, it, expect } from '@jest/globals';
 import type Database from 'better-sqlite3';
 
 let db: Database.Database;

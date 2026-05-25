@@ -9,7 +9,7 @@ interface SendTelegramMediaParams {
   caption?: string;
 }
 
-interface SendTelegramMediaResult {
+export interface SendTelegramMediaResult {
   sent: boolean;
   error?: string;
 }

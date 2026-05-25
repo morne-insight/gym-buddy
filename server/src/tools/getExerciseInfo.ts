@@ -7,7 +7,7 @@ export interface ExerciseInfoData {
 
 export type ExerciseInfoFetcher = (exerciseName: string) => Promise<ExerciseInfoData | null>;
 
-interface ExerciseInfoResult {
+export interface ExerciseInfoResult {
   found: boolean;
   exercise: ExerciseInfoData | null;
   error?: string;

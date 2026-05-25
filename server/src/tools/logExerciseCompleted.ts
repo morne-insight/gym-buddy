@@ -19,7 +19,7 @@ interface LogExerciseParams {
   notes?: string;
 }
 
-interface LogExerciseResult {
+export interface LogExerciseResult {
   logged: boolean;
   alreadyLogged?: boolean;
   skipped?: boolean;

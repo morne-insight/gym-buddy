@@ -7,7 +7,7 @@ interface ScheduleMotivationalParams {
   context: string;
 }
 
-interface ScheduleMotivationalResult {
+export interface ScheduleMotivationalResult {
   scheduled: boolean;
   messageId?: string;
   deliverAt?: string;

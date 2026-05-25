@@ -12,7 +12,7 @@ interface HistoryEntry {
 
 type WeightTrend = 'increasing' | 'decreasing' | 'stable' | 'none';
 
-interface ExerciseHistoryResult {
+export interface ExerciseHistoryResult {
   entries: HistoryEntry[];
   skipCount: number;
   totalSessions: number;
