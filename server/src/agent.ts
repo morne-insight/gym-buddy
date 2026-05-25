@@ -71,6 +71,18 @@ export default defineAgent({
     });
 
     await ctx.connect();
+
+    ctx.room.on('participantDisconnected', (participant) => {
+      console.log(`[Session] Participant ${participant.identity} disconnected — waiting for reconnect`);
+    });
+
+    ctx.room.on('participantConnected', (participant) => {
+      console.log(`[Session] Participant ${participant.identity} reconnected`);
+      session.generateReply({
+        instructions: 'The user just reconnected after a network drop. Briefly acknowledge the interruption and remind them where you left off.',
+      });
+    });
+
     await ctx.waitForParticipant();
 
     const agent = new voice.Agent({

@@ -7,6 +7,7 @@ import { getExerciseHistoryTool } from './getExerciseHistory.js';
 import { getExerciseInfo, type ExerciseInfoFetcher } from './getExerciseInfo.js';
 import { sendTelegramMedia, type TelegramSender } from './sendTelegramMedia.js';
 import { scheduleMotivationalMessage } from './scheduleMotivationalMessage.js';
+import { updateSentiment } from './updateSentiment.js';
 
 export function createAgentTools(
   db: Database.Database,
@@ -97,6 +98,21 @@ export function createAgentTools(
       }),
       execute: async (params) => {
         return scheduleMotivationalMessage(db, params);
+      },
+    }),
+
+    updateSentiment: llm.tool({
+      description:
+        'Record the user\'s detected emotional state during the session. Call when you notice a shift in mood — frustration, excitement, fatigue, motivation, doubt.',
+      parameters: z.object({
+        sessionId: z.string().optional().describe('Current session ID'),
+        userId: z.string().optional().describe('User ID (to find active session)'),
+        sentiment: z
+          .string()
+          .describe('Detected sentiment, e.g. "frustrated", "motivated", "tired", "energized", "doubtful"'),
+      }),
+      execute: async (params) => {
+        return updateSentiment(db, params);
       },
     }),
   };
