@@ -291,7 +291,7 @@ export function getExerciseHistory(
        JOIN sessions s ON el.session_id = s.id
        JOIN workout_exercises we ON el.workout_exercise_id = we.id
        WHERE s.user_id = ? AND we.exercise_name = ?
-       ORDER BY s.started_at DESC
+       ORDER BY s.started_at DESC, el.rowid DESC
        LIMIT ?`,
     )
     .all(userId, exerciseName, limit) as Array<ExerciseLog & { started_at: string }>;

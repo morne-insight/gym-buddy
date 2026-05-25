@@ -11,9 +11,9 @@
 ### 1.2 Set up Expo mobile app
 - [x] `npx create-expo-app apps/mobile`
 - [x] Configure Expo Router for navigation
-- [ ] Install `@livekit/react-native` and required native dependencies
+- [x] Install `@livekit/react-native` and required native dependencies
 - [x] Create placeholder screens: home (`index.tsx`), session (`session.tsx`)
-- [ ] Verify app runs on device/simulator
+- [x] Verify app runs on device/simulator
 
 ### 1.3 Set up Node.js agent server
 - [x] Initialize `server/` with TypeScript + ts-node
@@ -21,7 +21,7 @@
 - [x] Install `better-sqlite3`, `zod`, `node-cron`, `node-telegram-bot-api`
 - [x] Create agent entrypoint (`agent.ts`) with minimal LiveKit agent that connects and echoes
 - [x] Set up environment variable handling (LiveKit keys, OpenAI key, Telegram token)
-- [ ] Verify agent starts and registers with LiveKit Cloud
+- [x] Verify agent starts and registers with LiveKit Cloud
 
 ### 1.4 Set up testing infrastructure
 - [x] Configure Jest with `ts-jest` for the server package
@@ -46,50 +46,50 @@
   - 4-6 exercises per workout day with sets/reps/rest
   - ExerciseDB IDs for each exercise where available
 - [x] Create seed script that runs schema + seed in sequence
-- [ ] Test: seed runs cleanly, getCurrentWorkout query returns correct data for each day (manual verification needed)
+- [x] Test: seed runs cleanly, getCurrentWorkout query returns correct data for each day (manual verification needed)
 
 ---
 
 ## Phase 3: Agent Tools (TDD)
 
 ### 3.1 getCurrentWorkout tool
-- [ ] Implement: query schedule + workout_exercises for current day of week
-- [ ] Return structured data: workout name, ordered exercise list with sets/reps/rest
-- [ ] Handle: no workout scheduled today (rest day)
-- [ ] Test: correct workout for each day, rest day returns appropriate message
-- [ ] Register as LiveKit agent tool with Zod schema
+- [x] Implement: query schedule + workout_exercises for current day of week
+- [x] Return structured data: workout name, ordered exercise list with sets/reps/rest
+- [x] Handle: no workout scheduled today (rest day)
+- [x] Test: correct workout for each day, rest day returns appropriate message
+- [x] Register as LiveKit agent tool with Zod schema
 
 ### 3.2 logExerciseCompleted tool
-- [ ] Implement: create/update exercise_logs entry
-- [ ] Track actual sets, reps, weight, and skip status
-- [ ] Return: confirmation + remaining exercise count
-- [ ] Handle: logging a skip (skipped = true, with note)
-- [ ] Handle: session auto-creation if none exists
-- [ ] Test: log completion, log skip, verify counts, duplicate prevention
+- [x] Implement: create/update exercise_logs entry
+- [x] Track actual sets, reps, weight, and skip status
+- [x] Return: confirmation + remaining exercise count
+- [x] Handle: logging a skip (skipped = true, with note)
+- [x] Handle: session auto-creation if none exists
+- [x] Test: log completion, log skip, verify counts, duplicate prevention
 
 ### 3.3 getExerciseHistory tool
-- [ ] Implement: query exercise_logs + sessions for a given exercise name
-- [ ] Return: last 10 sessions with weights, reps, skip/complete status, dates
-- [ ] Calculate: skip frequency, weight progression trend
-- [ ] Test: history with mixed skips/completions, empty history for new exercise
+- [x] Implement: query exercise_logs + sessions for a given exercise name
+- [x] Return: last 10 sessions with weights, reps, skip/complete status, dates
+- [x] Calculate: skip frequency, weight progression trend
+- [x] Test: history with mixed skips/completions, empty history for new exercise
 
 ### 3.4 getExerciseInfo tool
-- [ ] Implement: HTTP call to ExerciseDB API by exercise name
-- [ ] Return: description, target muscles, instructions, GIF URL
-- [ ] Handle: exercise not found, API timeout, rate limiting
-- [ ] Cache results in-memory to avoid repeated API calls for same exercise
-- [ ] Test: successful lookup, not found, API error handling (mocked)
+- [x] Implement: HTTP call to ExerciseDB API by exercise name
+- [x] Return: description, target muscles, instructions, GIF URL
+- [x] Handle: exercise not found, API timeout, rate limiting
+- [x] Cache results in-memory to avoid repeated API calls for same exercise
+- [x] Test: successful lookup, not found, API error handling (mocked)
 
 ### 3.5 sendTelegramMedia tool
-- [ ] Implement: look up user's telegram_chat_id, send image/GIF via bot API
-- [ ] Handle: user has no Telegram linked, send failure
-- [ ] Test: successful send, missing chat ID, API error (mocked)
+- [x] Implement: look up user's telegram_chat_id, send image/GIF via bot API
+- [x] Handle: user has no Telegram linked, send failure
+- [x] Test: successful send, missing chat ID, API error (mocked)
 
 ### 3.6 scheduleMotivationalMessage tool
-- [ ] Implement: insert into scheduled_messages with calculated deliver_at
-- [ ] Store context string for later LLM-generated content
-- [ ] Handle: validation (deliverInHours must be reasonable, 1-24)
-- [ ] Test: message scheduled with correct delivery time, context stored
+- [x] Implement: insert into scheduled_messages with calculated deliver_at
+- [x] Store context string for later LLM-generated content
+- [x] Handle: validation (deliverInHours must be reasonable, 1-24)
+- [x] Test: message scheduled with correct delivery time, context stored
 
 ---
 
