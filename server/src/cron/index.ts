@@ -1,8 +1,7 @@
 import cron from 'node-cron';
 import type Database from 'better-sqlite3';
 import { deliverPendingMessages, type MessageContentGenerator } from './deliverMessages.js';
-import { schedulePreWorkoutCheckIns } from './preWorkoutCheckIn.js';
-import { detectMissedWorkouts } from './missedWorkout.js';
+import { runEveningCheckIn } from './eveningCheckIn.js';
 import type { TelegramSender } from '../tools/sendTelegramMedia.js';
 
 export interface CronDependencies {
@@ -23,14 +22,9 @@ export function startCronJobs(deps: CronDependencies): void {
   });
 
   cron.schedule('0 21 * * *', () => {
-    const result = schedulePreWorkoutCheckIns(db);
-    console.log(`[Cron] Pre-workout check-ins: ${result.scheduled} scheduled, ${result.skipped} rest days`);
+    const result = runEveningCheckIn(db);
+    console.log(`[Cron] Evening check-in: ${result.messaged} messaged, ${result.skipped} skipped`);
   });
 
-  cron.schedule('0 22 * * *', () => {
-    const result = detectMissedWorkouts(db);
-    console.log(`[Cron] Missed workouts: ${result.missed} missed, ${result.completed} completed`);
-  });
-
-  console.log('Cron jobs started (delivery: every minute, pre-workout: 21:00, missed: 22:00)');
+  console.log('Cron jobs started (delivery: every minute, evening check-in: 21:00)');
 }
