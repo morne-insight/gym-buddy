@@ -2,6 +2,7 @@ import { scheduleMotivationalMessage } from './scheduleMotivationalMessage.js';
 import { createTestDatabase, seedTestUser, seedTestPersona } from '../db/test-helpers.js';
 import { getPendingMessages } from '../db/index.js';
 import type Database from 'better-sqlite3';
+import { beforeEach, afterEach, describe, it, expect } from '@jest/globals';
 
 let db: Database.Database;
 
@@ -43,6 +44,8 @@ describe('scheduleMotivationalMessage', () => {
       deliverInHours: 2,
       context: 'User said they want to quit',
     });
+
+    expect(result.scheduled).toBe(true);
 
     const futureTime = new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString();
     const pending = getPendingMessages(db, futureTime);

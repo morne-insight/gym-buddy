@@ -2,6 +2,7 @@ import { sendTelegramMedia, type TelegramSender } from './sendTelegramMedia.js';
 import { createTestDatabase, seedTestUser, seedTestPersona } from '../db/test-helpers.js';
 import { updateUserTelegram } from '../db/index.js';
 import type Database from 'better-sqlite3';
+import { beforeEach, afterEach, describe, it, expect } from '@jest/globals';
 
 let db: Database.Database;
 

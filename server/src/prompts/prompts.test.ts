@@ -1,6 +1,7 @@
 import { buildSystemPrompt } from './index.js';
 import { getBasePrompt } from './base.js';
 import { drillSergeant } from './personas/drill-sergeant.js';
+import { beforeEach, afterEach, describe, it, expect } from '@jest/globals';
 import { createTestDatabase, seedTestUser, seedTestPersona } from '../db/test-helpers.js';
 import type Database from 'better-sqlite3';
 

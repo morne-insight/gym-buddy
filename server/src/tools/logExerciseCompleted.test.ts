@@ -2,6 +2,7 @@ import { logExerciseCompleted } from './logExerciseCompleted.js';
 import { createTestDatabase, seedTestUser, seedTestPersona, seedTestSchedule } from '../db/test-helpers.js';
 import { createSession, getExerciseLogsForSession, getActiveSession } from '../db/index.js';
 import type Database from 'better-sqlite3';
+import { beforeEach, afterEach, describe, it, expect } from '@jest/globals';
 
 let db: Database.Database;
 

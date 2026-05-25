@@ -1,4 +1,5 @@
 import { getExerciseInfo, clearExerciseInfoCache, type ExerciseInfoFetcher } from './getExerciseInfo.js';
+import { beforeEach, describe, it, expect } from '@jest/globals';
 
 beforeEach(() => {
   clearExerciseInfoCache();
