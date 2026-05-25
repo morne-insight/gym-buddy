@@ -19,6 +19,8 @@ import type { ExerciseInfoFetcher } from './tools/getExerciseInfo.js';
 import { createTelegramBot } from './telegram/bot.js';
 import { createTelegramSender } from './telegram/sender.js';
 import { createMessageHandler } from './telegram/chat.js';
+import { sendTextMessage } from './telegram/sender.js';
+import { startCronJobs } from './cron/index.js';
 import type { TelegramSender } from './tools/sendTelegramMedia.js';
 
 dotenv.config();
@@ -56,6 +58,12 @@ if (typeof process.send !== 'function') {
 
     telegramSender = createTelegramSender(bot);
     console.log('Telegram bot started');
+
+    startCronJobs({
+      db: mainDb,
+      sendText: (chatId, text) => sendTextMessage(bot, chatId, text),
+      sendMedia: telegramSender,
+    });
   }
 }
 

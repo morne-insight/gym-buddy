@@ -42,6 +42,10 @@ export function getUser(db: Database.Database, userId: string): User | undefined
   return db.prepare('SELECT * FROM users WHERE id = ?').get(userId) as User | undefined;
 }
 
+export function getAllUsers(db: Database.Database): User[] {
+  return db.prepare('SELECT * FROM users').all() as User[];
+}
+
 export function insertUser(
   db: Database.Database,
   user: Omit<User, 'created_at'>,
