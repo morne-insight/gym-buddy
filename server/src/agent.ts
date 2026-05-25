@@ -78,10 +78,19 @@ export default defineAgent({
       tools,
     });
 
+    const backgroundAudio = new voice.BackgroundAudioPlayer({
+      thinkingSound: {
+        source: voice.BuiltinAudioClip.KEYBOARD_TYPING,
+        volume: 0.5,
+      },
+    });
+
     await session.start({
       agent,
       room: ctx.room,
     });
+
+    await backgroundAudio.start({ room: ctx.room, agentSession: session });
 
     const greeting = workout.restDay
       ? 'Greet the user. Tell them today is a rest day. Ask how they are recovering.'

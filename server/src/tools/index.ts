@@ -59,8 +59,11 @@ export function createAgentTools(
       parameters: z.object({
         exerciseName: z.string().describe('Name of the exercise to look up'),
       }),
-      execute: async ({ exerciseName }) => {
-        return getExerciseInfo(exerciseName, exerciseInfoFetcher);
+      execute: async ({ exerciseName }, { ctx }) => {
+        const filler = ctx.session.say('Let me look that up.', { addToChatCtx: false });
+        const result = await getExerciseInfo(exerciseName, exerciseInfoFetcher);
+        if (!filler.done()) filler.interrupt();
+        return result;
       },
     }),
 
@@ -72,8 +75,11 @@ export function createAgentTools(
         imageUrl: z.string().describe('URL of the image or GIF to send'),
         caption: z.string().optional().describe('Caption for the media'),
       }),
-      execute: async (params) => {
-        return sendTelegramMedia(db, params, telegramSender);
+      execute: async (params, { ctx }) => {
+        const filler = ctx.session.say('Sending that to your phone now.', { addToChatCtx: false });
+        const result = await sendTelegramMedia(db, params, telegramSender);
+        if (!filler.done()) filler.interrupt();
+        return result;
       },
     }),
 
