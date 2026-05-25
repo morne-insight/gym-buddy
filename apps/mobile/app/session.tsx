@@ -1,7 +1,13 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { useAgent } from '@livekit/components-react';
 import { useConnection } from '../hooks/useConnection';
+import { useDataMessages } from '../hooks/useDataMessages';
+import { ExerciseGifOverlay } from '../components/ExerciseGifOverlay';
+import { ExerciseDataCard } from '../components/ExerciseDataCard';
+import { RestTimer } from '../components/RestTimer';
+import { SessionFab } from '../components/SessionFab';
 
 function stateLabel(state: string | undefined): string {
   switch (state) {
@@ -36,30 +42,61 @@ export default function SessionScreen() {
   const router = useRouter();
   const { disconnect } = useConnection();
   const { state } = useAgent();
+  const { exerciseMedia, exerciseProgress, restTimer, reset } = useDataMessages();
 
-  const handleEnd = () => {
+  const [gifVisible, setGifVisible] = useState(false);
+  const [progressPinned, setProgressPinned] = useState(false);
+
+  const handleEnd = useCallback(() => {
+    reset();
+    setGifVisible(false);
+    setProgressPinned(false);
     disconnect();
     router.back();
-  };
+  }, [disconnect, router, reset]);
 
   const color = stateColor(state);
 
   return (
     <View style={styles.container}>
-      <View style={styles.statusContainer}>
-        <View style={[styles.statusDot, { backgroundColor: color }]} />
-        <Text style={[styles.statusText, { color }]}>{stateLabel(state)}</Text>
-      </View>
+      {progressPinned && (
+        <View style={styles.cardContainer}>
+          <ExerciseDataCard progress={exerciseProgress} />
+        </View>
+      )}
 
-      <View style={[styles.circle, { borderColor: color }]}>
-        <Text style={styles.circleEmoji}>
-          {state === 'speaking' ? '🗣️' : state === 'thinking' ? '🧠' : '🎧'}
-        </Text>
+      <RestTimer timerData={restTimer} />
+
+      <View style={styles.centerContent}>
+        <View style={styles.statusContainer}>
+          <View style={[styles.statusDot, { backgroundColor: color }]} />
+          <Text style={[styles.statusText, { color }]}>{stateLabel(state)}</Text>
+        </View>
+
+        <View style={[styles.circle, { borderColor: color }]}>
+          <Text style={styles.circleEmoji}>
+            {state === 'speaking' ? '🗣️' : state === 'thinking' ? '🧠' : '🎧'}
+          </Text>
+        </View>
       </View>
 
       <Pressable style={styles.endButton} onPress={handleEnd}>
         <Text style={styles.endButtonText}>End Workout</Text>
       </Pressable>
+
+      <SessionFab
+        onShowExercise={() => setGifVisible(true)}
+        onToggleProgress={() => setProgressPinned((prev) => !prev)}
+        exerciseAvailable={!!exerciseMedia}
+        progressPinned={progressPinned}
+      />
+
+      <ExerciseGifOverlay
+        visible={gifVisible}
+        gifUrl={exerciseMedia?.gifUrl ?? null}
+        exerciseName={exerciseMedia?.exerciseName ?? null}
+        onDismiss={() => setGifVisible(false)}
+      />
     </View>
   );
 }
@@ -67,15 +104,22 @@ export default function SessionScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
     backgroundColor: '#0a0a0a',
     padding: 24,
+  },
+  cardContainer: {
+    paddingTop: 48,
+    paddingHorizontal: 8,
+  },
+  centerContent: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   statusContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 64,
+    marginBottom: 40,
   },
   statusDot: {
     width: 10,
@@ -94,7 +138,6 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 64,
   },
   circleEmoji: {
     fontSize: 48,
@@ -104,6 +147,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 48,
     paddingVertical: 16,
     borderRadius: 12,
+    alignSelf: 'center',
+    marginBottom: 24,
   },
   endButtonText: {
     color: '#ffffff',

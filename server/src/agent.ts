@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 import dotenv from 'dotenv';
 
 import { startTokenServer } from './token-server.js';
-import { createDatabase, createSession, completeSession, getActiveSession } from './db/index.js';
+import { createDatabase, runMigrations, createSession, completeSession, getActiveSession, type WorkoutExercise } from './db/index.js';
 import { createAgentTools } from './tools/index.js';
 import { buildSystemPrompt } from './prompts/index.js';
 import { getCurrentWorkout } from './tools/getCurrentWorkout.js';
@@ -22,10 +22,12 @@ import { createMessageHandler } from './telegram/chat.js';
 import { sendTextMessage } from './telegram/sender.js';
 import { startCronJobs } from './cron/index.js';
 import type { TelegramSender } from './tools/sendTelegramMedia.js';
+import { publishDataMessage } from './publish-data.js';
 
 dotenv.config();
 
 const mainDb = createDatabase();
+runMigrations(mainDb);
 let telegramSender: TelegramSender = async (chatId, imageUrl, caption) => {
   console.log(`[Telegram stub] Would send to ${chatId}: ${imageUrl} — ${caption}`);
 };
@@ -74,7 +76,33 @@ const exerciseInfoFetcher: ExerciseInfoFetcher = async () => null;
 export default defineAgent({
   entry: async (ctx: JobContext) => {
     const db = createDatabase();
-    const tools = createAgentTools(db, exerciseInfoFetcher, telegramSender);
+    runMigrations(db);
+
+    await ctx.connect();
+
+    const localParticipant = ctx.room.localParticipant;
+    const dataPublisher = {
+      publishData: async (data: Uint8Array, options: { reliable: boolean }) => {
+        await localParticipant?.publishData(data, { reliable: options.reliable });
+      },
+    };
+
+    let restTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const onRestTimerStart = (_exerciseId: string, durationSeconds: number) => {
+      if (restTimer) clearTimeout(restTimer);
+      restTimer = setTimeout(async () => {
+        await publishDataMessage(dataPublisher, {
+          type: 'rest_timer',
+          payload: { action: 'end', durationSeconds },
+        });
+        session.generateReply({
+          instructions: 'Rest is over. Announce it and prompt the user for their next set.',
+        });
+      }, durationSeconds * 1000);
+    };
+
+    const tools = createAgentTools(db, exerciseInfoFetcher, telegramSender, dataPublisher, onRestTimerStart);
     const { prompt } = buildSystemPrompt(db, USER_ID);
 
     const workout = getCurrentWorkout(db, USER_ID);
@@ -102,14 +130,13 @@ export default defineAgent({
     });
 
     ctx.addShutdownCallback(async () => {
+      if (restTimer) clearTimeout(restTimer);
       const active = getActiveSession(db, USER_ID);
       if (active) {
         completeSession(db, active.id);
       }
       db.close();
     });
-
-    await ctx.connect();
 
     ctx.room.on('participantDisconnected', (participant: { identity: string }) => {
       console.log(`[Session] Participant ${participant.identity} disconnected — waiting for reconnect`);
@@ -148,6 +175,36 @@ export default defineAgent({
       : `Greet the user. Tell them today is ${workout.workoutName}. Ask if they are ready to get started.`;
 
     session.generateReply({ instructions: greeting });
+
+    if (!workout.restDay && workout.exercises.length > 0) {
+      const firstExercise = workout.exercises[0];
+      await publishDataMessage(dataPublisher, {
+        type: 'exercise_progress',
+        payload: {
+          exerciseName: firstExercise.name,
+          targetSets: firstExercise.sets,
+          targetReps: firstExercise.reps,
+          targetWeight: null,
+          completedSets: 0,
+          currentSetNumber: 1,
+          exerciseIndex: 0,
+          totalExercises: workout.exercises.length,
+        },
+      });
+
+      const firstWe = db
+        .prepare('SELECT * FROM workout_exercises WHERE id = ?')
+        .get(firstExercise.id) as WorkoutExercise | undefined;
+      if (firstWe?.exercise_db_id) {
+        await publishDataMessage(dataPublisher, {
+          type: 'exercise_media',
+          payload: {
+            gifUrl: `https://exercisedb.p.rapidapi.com/image/${firstWe.exercise_db_id}`,
+            exerciseName: firstExercise.name,
+          },
+        });
+      }
+    }
   },
 });
 

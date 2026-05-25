@@ -26,7 +26,8 @@ describe('base prompt', () => {
   it('includes workout flow instructions', () => {
     const prompt = getBasePrompt({ userName: 'Morne' });
     expect(prompt).toMatch(/getCurrentWorkout/);
-    expect(prompt).toMatch(/logExerciseCompleted/);
+    expect(prompt).toMatch(/logSetCompleted/);
+    expect(prompt).toMatch(/completeExercise/);
     expect(prompt).toMatch(/one exercise at a time/i);
   });
 
@@ -45,7 +46,6 @@ describe('base prompt', () => {
   it('includes tool usage instructions', () => {
     const prompt = getBasePrompt({ userName: 'Morne' });
     expect(prompt).toMatch(/getExerciseInfo/);
-    expect(prompt).toMatch(/sendTelegramMedia/);
   });
 
   it('personalizes with user name', () => {

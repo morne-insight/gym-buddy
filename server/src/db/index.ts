@@ -242,8 +242,11 @@ export interface ExerciseLog {
   workout_exercise_id: string;
   completed: number;
   skipped: number;
+  /** @deprecated Use set_logs table instead */
   actual_sets: number | null;
+  /** @deprecated Use set_logs table instead */
   actual_reps: string | null;
+  /** @deprecated Use set_logs table instead */
   actual_weight: number | null;
   notes: string | null;
   completed_at: string | null;
@@ -273,6 +276,47 @@ export function logExercise(
   return db.prepare('SELECT * FROM exercise_logs WHERE id = ?').get(id) as ExerciseLog;
 }
 
+export function createExerciseLog(
+  db: Database.Database,
+  sessionId: string,
+  workoutExerciseId: string,
+): ExerciseLog {
+  const id = randomUUID();
+  db.prepare(
+    `INSERT INTO exercise_logs (id, session_id, workout_exercise_id, completed, skipped)
+     VALUES (?, ?, ?, 0, 0)`,
+  ).run(id, sessionId, workoutExerciseId);
+  return db.prepare('SELECT * FROM exercise_logs WHERE id = ?').get(id) as ExerciseLog;
+}
+
+export function markExerciseLogCompleted(
+  db: Database.Database,
+  exerciseLogId: string,
+): void {
+  db.prepare(
+    'UPDATE exercise_logs SET completed = 1, completed_at = ? WHERE id = ?',
+  ).run(new Date().toISOString(), exerciseLogId);
+}
+
+export function markExerciseLogSkipped(
+  db: Database.Database,
+  exerciseLogId: string,
+): void {
+  db.prepare(
+    'UPDATE exercise_logs SET skipped = 1, completed_at = ? WHERE id = ?',
+  ).run(new Date().toISOString(), exerciseLogId);
+}
+
+export function getExerciseLogForWorkoutExercise(
+  db: Database.Database,
+  sessionId: string,
+  workoutExerciseId: string,
+): ExerciseLog | undefined {
+  return db
+    .prepare('SELECT * FROM exercise_logs WHERE session_id = ? AND workout_exercise_id = ?')
+    .get(sessionId, workoutExerciseId) as ExerciseLog | undefined;
+}
+
 export function getExerciseLogsForSession(
   db: Database.Database,
   sessionId: string,
@@ -299,6 +343,39 @@ export function getExerciseHistory(
        LIMIT ?`,
     )
     .all(userId, exerciseName, limit) as Array<ExerciseLog & { started_at: string }>;
+}
+
+// --- Set Logs ---
+
+export interface SetLog {
+  id: string;
+  exercise_log_id: string;
+  set_number: number;
+  reps: number;
+  weight: number | null;
+  completed_at: string | null;
+}
+
+export function insertSetLog(
+  db: Database.Database,
+  log: Omit<SetLog, 'id' | 'completed_at'>,
+): SetLog {
+  const id = randomUUID();
+  const completedAt = new Date().toISOString();
+  db.prepare(
+    `INSERT INTO set_logs (id, exercise_log_id, set_number, reps, weight, completed_at)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+  ).run(id, log.exercise_log_id, log.set_number, log.reps, log.weight, completedAt);
+  return db.prepare('SELECT * FROM set_logs WHERE id = ?').get(id) as SetLog;
+}
+
+export function getSetLogsForExercise(
+  db: Database.Database,
+  exerciseLogId: string,
+): SetLog[] {
+  return db
+    .prepare('SELECT * FROM set_logs WHERE exercise_log_id = ? ORDER BY set_number')
+    .all(exerciseLogId) as SetLog[];
 }
 
 // --- Scheduled Messages ---

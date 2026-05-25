@@ -64,6 +64,15 @@ CREATE TABLE IF NOT EXISTS exercise_logs (
   completed_at DATETIME
 );
 
+CREATE TABLE IF NOT EXISTS set_logs (
+  id TEXT PRIMARY KEY,
+  exercise_log_id TEXT NOT NULL REFERENCES exercise_logs(id),
+  set_number INTEGER NOT NULL,
+  reps INTEGER NOT NULL,
+  weight REAL,
+  completed_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS scheduled_messages (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL REFERENCES users(id),
