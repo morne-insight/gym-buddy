@@ -8,6 +8,7 @@
     "start": "tsx src/agent.ts start",
     "seed": "tsx src/db/seed.ts",
     "download": "tsx src/agent.ts download-files",
+    "test:telegram": "tsx src/scripts/sendTestMessage.ts",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "dependencies": {
@@ -15,6 +16,7 @@
     "@livekit/agents-plugin-livekit": "^1.4.2",
     "@livekit/agents-plugin-silero": "^1.4.2",
     "@livekit/protocol": "^1.46.0",
+    "@livekit/rtc-node": "^0.13.28",
     "better-sqlite3": "^12.10.0",
     "dotenv": "^17.4.2",
     "livekit-server-sdk": "^2.15.3",
