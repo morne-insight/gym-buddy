@@ -20,6 +20,7 @@
     "livekit-server-sdk": "^2.15.3",
     "node-cron": "^4.2.1",
     "node-telegram-bot-api": "^0.67.0",
+    "openai": "^6.39.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
