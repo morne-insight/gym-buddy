@@ -87,14 +87,14 @@ export default function SessionScreen() {
       <SessionFab
         onShowExercise={() => setGifVisible(true)}
         onToggleProgress={() => setProgressPinned((prev) => !prev)}
-        exerciseAvailable={!!exerciseMedia}
+        exerciseAvailable={!!(exerciseMedia || exerciseProgress)}
         progressPinned={progressPinned}
       />
 
       <ExerciseGifOverlay
         visible={gifVisible}
         gifUrl={exerciseMedia?.gifUrl ?? null}
-        exerciseName={exerciseMedia?.exerciseName ?? null}
+        exerciseName={exerciseMedia?.exerciseName ?? exerciseProgress?.exerciseName ?? null}
         onDismiss={() => setGifVisible(false)}
       />
     </View>

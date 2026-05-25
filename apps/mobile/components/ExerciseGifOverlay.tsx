@@ -8,14 +8,16 @@ interface ExerciseGifOverlayProps {
 }
 
 export function ExerciseGifOverlay({ visible, gifUrl, exerciseName, onDismiss }: ExerciseGifOverlayProps) {
-  if (!gifUrl || !exerciseName) return null;
+  if (!exerciseName) return null;
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onDismiss}>
       <Pressable style={styles.backdrop} onPress={onDismiss}>
         <View style={styles.container}>
-          <Image source={{ uri: gifUrl }} style={styles.gif} resizeMode="contain" />
-          <Text style={styles.label}>{exerciseName}</Text>
+          {gifUrl && (
+            <Image source={{ uri: gifUrl }} style={styles.gif} resizeMode="contain" />
+          )}
+          <Text style={[styles.label, !gifUrl && styles.labelLarge]}>{exerciseName}</Text>
         </View>
       </Pressable>
     </Modal>
@@ -46,5 +48,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     marginTop: 12,
+  },
+  labelLarge: {
+    fontSize: 24,
+    marginTop: 0,
+    paddingVertical: 24,
   },
 });

@@ -58,9 +58,6 @@ export function SessionFab({
           disabled={!exerciseAvailable}
         >
           <Text style={styles.menuIcon}>🏋️</Text>
-          <Text style={[styles.menuLabel, !exerciseAvailable && styles.menuLabelDisabled]}>
-            Show Exercise
-          </Text>
         </Pressable>
       </Animated.View>
 
@@ -75,9 +72,6 @@ export function SessionFab({
           }}
         >
           <Text style={styles.menuIcon}>📊</Text>
-          <Text style={styles.menuLabel}>
-            {progressPinned ? 'Unpin Progress' : 'Pin Progress'}
-          </Text>
         </Pressable>
       </Animated.View>
 
@@ -121,13 +115,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   menuButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: '#2a2a2a',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    gap: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   menuButtonDisabled: {
     opacity: 0.4,
@@ -136,14 +129,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#4ecdc4',
   },
   menuIcon: {
-    fontSize: 16,
-  },
-  menuLabel: {
-    color: '#ffffff',
-    fontSize: 13,
-    fontWeight: '500',
-  },
-  menuLabelDisabled: {
-    color: '#888888',
+    fontSize: 20,
   },
 });
