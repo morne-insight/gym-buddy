@@ -1,15 +1,34 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { useEffect } from 'react';
+import { View, Text, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useConnection } from '../hooks/useConnection';
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { isConnectionActive, connect } = useConnection();
+
+  useEffect(() => {
+    if (isConnectionActive) {
+      router.push('/session');
+    }
+  }, [isConnectionActive, router]);
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Gym Buddy</Text>
       <Text style={styles.subtitle}>Your AI training partner</Text>
-      <Pressable style={styles.button} onPress={() => router.push('/session')}>
-        <Text style={styles.buttonText}>Start Workout</Text>
+
+      <Pressable
+        style={styles.button}
+        onPress={connect}
+        disabled={isConnectionActive}
+      >
+        {isConnectionActive ? (
+          <ActivityIndicator size="small" color="#ffffff" style={{ marginRight: 8 }} />
+        ) : null}
+        <Text style={styles.buttonText}>
+          {isConnectionActive ? 'Connecting...' : 'Start Workout'}
+        </Text>
       </Pressable>
     </View>
   );
@@ -35,6 +54,8 @@ const styles = StyleSheet.create({
     marginBottom: 48,
   },
   button: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#e63946',
     paddingHorizontal: 48,
     paddingVertical: 16,

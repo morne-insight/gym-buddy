@@ -9,7 +9,14 @@ import {
 import { fileURLToPath } from 'node:url';
 import dotenv from 'dotenv';
 
+import { startTokenServer } from './token-server.js';
+
 dotenv.config();
+
+// Only start token server in the main process, not in forked job workers
+if (typeof process.send !== 'function') {
+  startTokenServer();
+}
 
 class GymBuddy extends voice.Agent {
   constructor() {
