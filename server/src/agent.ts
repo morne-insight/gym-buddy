@@ -7,7 +7,6 @@ import {
   voice,
 } from '@livekit/agents';
 import * as silero from '@livekit/agents-plugin-silero';
-import * as livekit from '@livekit/agents-plugin-livekit';
 import { fileURLToPath } from 'node:url';
 import dotenv from 'dotenv';
 
@@ -52,7 +51,7 @@ export default defineAgent({
     const session = new voice.AgentSession({
       vad: await silero.VAD.load(),
       turnHandling: {
-        turnDetection: new livekit.turnDetector.MultilingualModel(),
+        turnDetection: 'vad',
         endpointing: {
           minDelay: 500,
           maxDelay: 1500,
