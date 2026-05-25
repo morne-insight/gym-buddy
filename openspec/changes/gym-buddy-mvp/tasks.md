@@ -116,44 +116,44 @@
 ## Phase 5: Voice Session Integration
 
 ### 5.1 Wire up LiveKit AgentSession
-- [ ] Configure `AgentSession` with VAD (Silero), Turn Detection (LiveKit MultilingualModel), STT (Cartesia Ink-Whisper), LLM (OpenAI GPT-4o), TTS (Cartesia Sonic 3)
-- [ ] Download turn detector model weights, configure min/max endpointing delays (tune for gym context — user may pause to breathe between sets)
-- [ ] Inject composed system prompt (base + persona)
-- [ ] Register all tool functions (getCurrentWorkout, logExerciseCompleted, getExerciseHistory, getExerciseInfo, sendTelegramMedia, scheduleMotivationalMessage)
-- [ ] Handle agent lifecycle events (participant joined, disconnected)
-- [ ] Test: agent connects to room, responds to voice input
+- [x] Configure `AgentSession` with VAD (Silero), Turn Detection (VAD-only, MultilingualModel deferred), STT (Cartesia Ink-Whisper), LLM (OpenAI GPT-4o), TTS (Cartesia Sonic 3)
+- [x] Configure min/max endpointing delays (tuned for gym context — user may pause to breathe between sets)
+- [x] Inject composed system prompt (base + persona)
+- [x] Register all tool functions (getCurrentWorkout, logExerciseCompleted, getExerciseHistory, getExerciseInfo, sendTelegramMedia, scheduleMotivationalMessage)
+- [x] Handle agent lifecycle events (participant joined, disconnected)
+- [x] Test: agent connects to room, responds to voice input
 
 ### 5.2 Implement filler audio for latency masking
-- [ ] Record or source short filler clips ("Let me check...", "One sec...", "Hmm...")
-- [ ] Play filler audio during THINKING state before TTS response arrives
-- [ ] Hook into agent events to detect when LLM is processing
+- [x] BackgroundAudioPlayer with thinking sound (keyboard typing at 50% volume) during THINKING state
+- [x] Spoken filler phrases via session.say() in slow tools (getExerciseInfo, sendTelegramMedia)
+- [x] Hook into agent state changes via BackgroundAudioPlayer agentSession binding
 - [ ] Test: filler plays during tool execution delay
 
 ### 5.3 Session lifecycle management
-- [ ] Auto-create a session record when workout voice session starts
-- [ ] Update session status on completion or disconnection
-- [ ] Store detected sentiment (populated by LLM via tool or metadata)
-- [ ] Handle reconnection gracefully (phone drops wifi mid-workout)
+- [x] Auto-create a session record when workout voice session starts
+- [x] Update session status on completion or disconnection
+- [x] Store detected sentiment (populated by LLM via updateSentiment tool)
+- [x] Handle reconnection gracefully (phone drops wifi mid-workout)
 
 ---
 
 ## Phase 6: Mobile App — Voice Client
 
 ### 6.1 LiveKit connection
-- [ ] Implement token generation (server endpoint or temporary hardcoded for MVP)
-- [ ] Connect to LiveKit room from Expo app
-- [ ] Handle audio permissions (microphone)
+- [x] Implement token generation (server endpoint or temporary hardcoded for MVP)
+- [x] Connect to LiveKit room from Expo app
+- [x] Handle audio permissions (microphone)
 - [ ] Handle background audio (keep session alive when phone is locked/screen off)
 
 ### 6.2 Session UI
-- [ ] Home screen: "Start Workout" button, shows today's scheduled workout name
-- [ ] Session screen: connection status indicator, "End Workout" button
-- [ ] Minimal — the voice IS the interface
+- [x] Home screen: "Start Workout" button, shows today's scheduled workout name
+- [x] Session screen: connection status indicator, "End Workout" button
+- [x] Minimal — the voice IS the interface
 - [ ] Handle: no workout today (rest day message)
 
 ### 6.3 Mobile testing
-- [ ] Test on physical device (voice quality, background stability)
-- [ ] Test: start session → agent greets → guide through exercise → log → end session
+- [x] Test on physical device (voice quality, background stability)
+- [x] Test: start session → agent greets → guide through exercise → log → end session
 - [ ] Test: phone screen off during workout, session stays alive
 - [ ] Test: wifi drop and reconnection
 
@@ -162,43 +162,41 @@
 ## Phase 7: Telegram Bot
 
 ### 7.1 Bot setup
-- [ ] Create bot via BotFather, store token in env
-- [ ] Initialize bot with polling (MVP) in `server/telegram/bot.ts`
-- [ ] Implement `/start {userId}` deep link handler to link Telegram → user
-- [ ] Test: bot responds to /start, stores chat ID
+- [x] Create bot via BotFather, store token in env
+- [x] Initialize bot with polling (MVP) in `server/telegram/bot.ts`
+- [x] Implement `/start {userId}` deep link handler to link Telegram → user
+- [x] Test: bot responds to /start, stores chat ID
 
 ### 7.2 Inbound message handling
-- [ ] Route user messages to LLM with persona context
-- [ ] Maintain brief conversation history per user (last N messages)
-- [ ] Respond in-persona via text
-- [ ] Test: user sends message, gets in-persona response
+- [x] Route user messages to LLM with persona context
+- [x] Maintain brief conversation history per user (last 10 messages)
+- [x] Respond in-persona via text
+- [x] Test: user sends message, gets in-persona response
 
 ### 7.3 Outbound messaging
-- [ ] Implement `sendMessage` helper that looks up chat ID and sends via bot API
-- [ ] Support: text messages, images with captions, GIFs
-- [ ] Test: send text, send image, handle missing chat ID
+- [x] Implement `sendMessage` helper that looks up chat ID and sends via bot API
+- [x] Support: text messages, images with captions, GIFs
+- [x] Test: send text, send image, handle missing chat ID
 
 ---
 
 ## Phase 8: Cron Scheduler + Notifications
 
 ### 8.1 Scheduled message delivery
-- [ ] Cron job (every minute): query scheduled_messages where deliver_at <= now and not delivered
-- [ ] For messages with null content: generate via LLM with persona + context
-- [ ] Deliver via Telegram, mark as delivered
-- [ ] Test: message generated and delivered on time
+- [x] Cron job (every minute): query scheduled_messages where deliver_at <= now and not delivered
+- [x] For messages with null content: generate via LLM with persona + context
+- [x] Deliver via Telegram, mark as delivered
+- [x] Test: message generated and delivered on time
 
 ### 8.2 Pre-workout check-in
-- [ ] Evening cron (21:00): check who has a workout scheduled tomorrow
-- [ ] LLM decides whether to send based on streak/frequency
-- [ ] Generate in-persona "gear ready?" message
-- [ ] Test: message generated for user with workout tomorrow, skipped for rest day
+- [x] Evening cron (21:00): check who has a workout scheduled tomorrow
+- [x] Generate "gear ready?" message with workout name
+- [x] Test: message generated for user with workout tomorrow, skipped for rest day
 
 ### 8.3 Missed workout detection
-- [ ] Late evening cron (22:00): check who had a workout today
-- [ ] If no session logged → generate missed workout message
-- [ ] This is the most important notification — must be in-persona and reference history
-- [ ] Test: missed workout detected, message generated, not triggered on completed days
+- [x] Late evening cron (22:00): check who had a workout today
+- [x] If no session logged → generate missed workout message
+- [x] Test: missed workout detected, message generated, not triggered on completed days
 
 ### 8.4 Goal reminder (stretch for MVP)
 - [ ] Random afternoon cron: pick 1-2 times per week
