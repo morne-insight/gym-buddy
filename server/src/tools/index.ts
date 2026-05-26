@@ -142,7 +142,7 @@ export function createAgentTools(
                   await publishDataMessage(dataPublisher, {
                     type: 'exercise_media',
                     payload: {
-                      gifUrl: `https://exercisedb.p.rapidapi.com/image/${nextExercise.exercise_db_id}`,
+                      gifUrl: nextExercise.exercise_db_id,
                       exerciseName: nextExercise.exercise_name,
                     },
                   });

@@ -199,7 +199,7 @@ export default defineAgent({
         await publishDataMessage(dataPublisher, {
           type: 'exercise_media',
           payload: {
-            gifUrl: `https://exercisedb.p.rapidapi.com/image/${firstWe.exercise_db_id}`,
+            gifUrl: firstWe.exercise_db_id,
             exerciseName: firstExercise.name,
           },
         });
