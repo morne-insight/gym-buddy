@@ -2,9 +2,21 @@ node_modules/
 dist/
 .expo/
 *.db
+*.db-shm
+*.db-wal
 *.sqlite
 .env
 .env.local
 *.tsbuildinfo
 .DS_Store
 Thumbs.db
+
+# Editor / AI tooling directories
+.agents/
+.claude/
+.codex/
+.obsidian/
+.pi/
+.vscode/
+.windsurf/
+skills-lock.json
