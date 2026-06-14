@@ -2,7 +2,7 @@ import type Database from 'better-sqlite3';
 import {
   createExerciseLog,
   getExerciseLogForWorkoutExercise,
-  getExercisesForSchedule,
+  getExercisesForWorkout,
   getExerciseLogsForSession,
   insertSetLog,
   getActiveSession,
@@ -82,7 +82,7 @@ export function logSetCompleted(db: Database.Database, params: LogSetParams): Lo
 
   const exerciseComplete = params.setNumber >= exercise.sets;
 
-  const scheduleExercises = getExercisesForSchedule(db, exercise.schedule_id);
+  const scheduleExercises = getExercisesForWorkout(db, exercise.workout_id);
   const allLogs = getExerciseLogsForSession(db, sessionId);
   const completedExerciseIds = new Set(
     allLogs.filter((l) => l.completed === 1 || l.skipped === 1).map((l) => l.workout_exercise_id),

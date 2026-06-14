@@ -1,8 +1,5 @@
--- MVP Seed Data: 3-day Push/Pull/Legs split (Mon/Wed/Fri)
-
--- User (founder)
-INSERT OR REPLACE INTO users (id, name, persona_id, goal_description, training_style)
-VALUES ('user-founder', 'Morne', 'drill-sergeant', 'Build strength and consistency', 'weightlifting');
+-- MVP Seed Data: 3-day Push/Pull/Legs split (Mon/Wed/Fri) as static program
+-- Plus a rotation PPL example
 
 -- Persona: Drill Sergeant
 INSERT OR REPLACE INTO personas (id, name, description, system_prompt, tts_voice, example_greeting, example_skip_reaction, example_no_show_reaction)
@@ -41,41 +38,58 @@ WHEN THEY''RE STRUGGLING:
   'You didn''t show. I cleared my schedule for this. What happened?'
 );
 
--- Monday: Push Day
-INSERT OR REPLACE INTO schedule (id, user_id, day_of_week, workout_name, scheduled_time)
-VALUES ('sched-mon-push', 'user-founder', 1, 'Push Day', '06:00');
+-- User (founder)
+INSERT OR REPLACE INTO users (id, name, persona_id, goal_description, training_style)
+VALUES ('user-founder', 'Morne', 'drill-sergeant', 'Build strength and consistency', 'weightlifting');
 
-INSERT OR REPLACE INTO workout_exercises (id, schedule_id, exercise_name, exercise_db_id, sets, reps, rest_seconds, sort_order)
+-- =============================================================
+-- Static PPL Program (Mon/Wed/Fri)
+-- =============================================================
+
+INSERT OR REPLACE INTO programs (id, user_id, name, type, active)
+VALUES ('prog-static-ppl', 'user-founder', 'PPL 3-Day Split', 'static', 1);
+
+-- Workouts
+INSERT OR REPLACE INTO workouts (id, program_id, name) VALUES ('workout-push', 'prog-static-ppl', 'Push Day');
+INSERT OR REPLACE INTO workouts (id, program_id, name) VALUES ('workout-pull', 'prog-static-ppl', 'Pull Day');
+INSERT OR REPLACE INTO workouts (id, program_id, name) VALUES ('workout-legs', 'prog-static-ppl', 'Legs Day');
+
+-- Schedule: Mon/Wed/Fri
+INSERT OR REPLACE INTO schedule (id, user_id, program_id, workout_id, day_of_week, scheduled_time, sort_order)
+VALUES ('sched-mon-push', 'user-founder', 'prog-static-ppl', 'workout-push', 1, '06:00', 0);
+
+INSERT OR REPLACE INTO schedule (id, user_id, program_id, workout_id, day_of_week, scheduled_time, sort_order)
+VALUES ('sched-wed-pull', 'user-founder', 'prog-static-ppl', 'workout-pull', 3, '06:00', 1);
+
+INSERT OR REPLACE INTO schedule (id, user_id, program_id, workout_id, day_of_week, scheduled_time, sort_order)
+VALUES ('sched-fri-legs', 'user-founder', 'prog-static-ppl', 'workout-legs', 5, '06:00', 2);
+
+-- Push Day exercises
+INSERT OR REPLACE INTO workout_exercises (id, workout_id, exercise_name, exercise_db_id, sets, reps, rest_seconds, sort_order)
 VALUES
-  ('ex-bench-press', 'sched-mon-push', 'Barbell Bench Press', 'https://cdn.exercisedb.dev/media/w/images/A8OLBqBa26.jpg', 4, '8-10', 120, 1),
-  ('ex-ohp', 'sched-mon-push', 'Overhead Press', 'https://cdn.exercisedb.dev/media/w/images/bQUAOjC7qA.jpg', 3, '8-10', 90, 2),
-  ('ex-incline-db', 'sched-mon-push', 'Incline Dumbbell Press', NULL, 3, '10-12', 90, 3),
-  ('ex-lateral-raise', 'sched-mon-push', 'Lateral Raises', 'https://cdn.exercisedb.dev/media/w/images/qODXfaAVcz.jpg', 3, '12-15', 60, 4),
-  ('ex-tricep-pushdown', 'sched-mon-push', 'Tricep Pushdowns', 'https://cdn.exercisedb.dev/media/w/images/Ocsii6p15A.jpg', 3, '12-15', 60, 5);
+  ('ex-bench-press', 'workout-push', 'Barbell Bench Press', 'https://cdn.exercisedb.dev/media/w/images/A8OLBqBa26.jpg', 4, '8-10', 120, 1),
+  ('ex-ohp', 'workout-push', 'Overhead Press', 'https://cdn.exercisedb.dev/media/w/images/bQUAOjC7qA.jpg', 3, '8-10', 90, 2),
+  ('ex-incline-db', 'workout-push', 'Incline Dumbbell Press', NULL, 3, '10-12', 90, 3),
+  ('ex-lateral-raise', 'workout-push', 'Lateral Raises', 'https://cdn.exercisedb.dev/media/w/images/qODXfaAVcz.jpg', 3, '12-15', 60, 4),
+  ('ex-tricep-pushdown', 'workout-push', 'Tricep Pushdowns', 'https://cdn.exercisedb.dev/media/w/images/Ocsii6p15A.jpg', 3, '12-15', 60, 5);
 
--- Wednesday: Pull Day
-INSERT OR REPLACE INTO schedule (id, user_id, day_of_week, workout_name, scheduled_time)
-VALUES ('sched-wed-pull', 'user-founder', 3, 'Pull Day', '06:00');
-
-INSERT OR REPLACE INTO workout_exercises (id, schedule_id, exercise_name, exercise_db_id, sets, reps, rest_seconds, sort_order)
+-- Pull Day exercises
+INSERT OR REPLACE INTO workout_exercises (id, workout_id, exercise_name, exercise_db_id, sets, reps, rest_seconds, sort_order)
 VALUES
-  ('ex-deadlift', 'sched-wed-pull', 'Deadlift', NULL, 4, '5-6', 180, 1),
-  ('ex-barbell-row', 'sched-wed-pull', 'Barbell Row', NULL, 4, '8-10', 90, 2),
-  ('ex-lat-pulldown', 'sched-wed-pull', 'Lat Pulldown', NULL, 3, '10-12', 90, 3),
-  ('ex-face-pull', 'sched-wed-pull', 'Face Pulls', NULL, 3, '15-20', 60, 4),
-  ('ex-barbell-curl', 'sched-wed-pull', 'Barbell Curls', NULL, 3, '10-12', 60, 5);
+  ('ex-deadlift', 'workout-pull', 'Deadlift', NULL, 4, '5-6', 180, 1),
+  ('ex-barbell-row', 'workout-pull', 'Barbell Row', NULL, 4, '8-10', 90, 2),
+  ('ex-lat-pulldown', 'workout-pull', 'Lat Pulldown', NULL, 3, '10-12', 90, 3),
+  ('ex-face-pull', 'workout-pull', 'Face Pulls', NULL, 3, '15-20', 60, 4),
+  ('ex-barbell-curl', 'workout-pull', 'Barbell Curls', NULL, 3, '10-12', 60, 5);
 
--- Friday: Legs Day
-INSERT OR REPLACE INTO schedule (id, user_id, day_of_week, workout_name, scheduled_time)
-VALUES ('sched-fri-legs', 'user-founder', 5, 'Legs Day', '06:00');
-
-INSERT OR REPLACE INTO workout_exercises (id, schedule_id, exercise_name, exercise_db_id, sets, reps, rest_seconds, sort_order)
+-- Legs Day exercises
+INSERT OR REPLACE INTO workout_exercises (id, workout_id, exercise_name, exercise_db_id, sets, reps, rest_seconds, sort_order)
 VALUES
-  ('ex-squat', 'sched-fri-legs', 'Barbell Squat', 'https://cdn.exercisedb.dev/media/w/images/QBL8IYGdYK.jpg', 4, '6-8', 180, 1),
-  ('ex-rdl', 'sched-fri-legs', 'Romanian Deadlift', 'https://cdn.exercisedb.dev/media/w/images/3wgSOkOkH5.jpg', 3, '8-10', 120, 2),
-  ('ex-leg-press', 'sched-fri-legs', 'Leg Press', NULL, 3, '10-12', 90, 3),
-  ('ex-leg-curl', 'sched-fri-legs', 'Leg Curl', NULL, 3, '10-12', 60, 4),
-  ('ex-calf-raise', 'sched-fri-legs', 'Standing Calf Raises', 'https://cdn.exercisedb.dev/media/w/images/RfXMrjCG6o.jpg', 4, '12-15', 60, 5);
+  ('ex-squat', 'workout-legs', 'Barbell Squat', 'https://cdn.exercisedb.dev/media/w/images/QBL8IYGdYK.jpg', 4, '6-8', 180, 1),
+  ('ex-rdl', 'workout-legs', 'Romanian Deadlift', 'https://cdn.exercisedb.dev/media/w/images/3wgSOkOkH5.jpg', 3, '8-10', 120, 2),
+  ('ex-leg-press', 'workout-legs', 'Leg Press', NULL, 3, '10-12', 90, 3),
+  ('ex-leg-curl', 'workout-legs', 'Leg Curl', NULL, 3, '10-12', 60, 4),
+  ('ex-calf-raise', 'workout-legs', 'Standing Calf Raises', 'https://cdn.exercisedb.dev/media/w/images/RfXMrjCG6o.jpg', 4, '12-15', 60, 5);
 
 -- =============================================================
 -- Previous sessions (last week) for exercise history
@@ -175,3 +189,50 @@ VALUES
   ('sl-prev-calf-2',   'elog-prev-calf',   2, 15, 60, '2026-05-23 07:18:00'),
   ('sl-prev-calf-3',   'elog-prev-calf',   3, 12, 60, '2026-05-23 07:20:00'),
   ('sl-prev-calf-4',   'elog-prev-calf',   4, 12, 60, '2026-05-23 07:23:00');
+
+-- =============================================================
+-- Rotation PPL example (inactive — for demo/testing)
+-- =============================================================
+
+INSERT OR REPLACE INTO programs (id, user_id, name, type, active)
+VALUES ('prog-rotation-ppl', 'user-founder', 'PPL Rotation', 'rotation', 0);
+
+INSERT OR REPLACE INTO workouts (id, program_id, name) VALUES ('rworkout-push', 'prog-rotation-ppl', 'Push Day');
+INSERT OR REPLACE INTO workouts (id, program_id, name) VALUES ('rworkout-pull', 'prog-rotation-ppl', 'Pull Day');
+INSERT OR REPLACE INTO workouts (id, program_id, name) VALUES ('rworkout-legs', 'prog-rotation-ppl', 'Legs Day');
+
+INSERT OR REPLACE INTO schedule (id, user_id, program_id, workout_id, day_of_week, scheduled_time, sort_order)
+VALUES ('rsched-push', 'user-founder', 'prog-rotation-ppl', 'rworkout-push', NULL, NULL, 0);
+
+INSERT OR REPLACE INTO schedule (id, user_id, program_id, workout_id, day_of_week, scheduled_time, sort_order)
+VALUES ('rsched-pull', 'user-founder', 'prog-rotation-ppl', 'rworkout-pull', NULL, NULL, 1);
+
+INSERT OR REPLACE INTO schedule (id, user_id, program_id, workout_id, day_of_week, scheduled_time, sort_order)
+VALUES ('rsched-legs', 'user-founder', 'prog-rotation-ppl', 'rworkout-legs', NULL, NULL, 2);
+
+INSERT OR REPLACE INTO workout_exercises (id, workout_id, exercise_name, exercise_db_id, sets, reps, rest_seconds, sort_order)
+VALUES
+  ('rex-bench-press', 'rworkout-push', 'Barbell Bench Press', 'https://cdn.exercisedb.dev/media/w/images/A8OLBqBa26.jpg', 4, '8-10', 120, 1),
+  ('rex-ohp', 'rworkout-push', 'Overhead Press', 'https://cdn.exercisedb.dev/media/w/images/bQUAOjC7qA.jpg', 3, '8-10', 90, 2),
+  ('rex-incline-db', 'rworkout-push', 'Incline Dumbbell Press', NULL, 3, '10-12', 90, 3),
+  ('rex-lateral-raise', 'rworkout-push', 'Lateral Raises', NULL, 3, '12-15', 60, 4),
+  ('rex-tricep-pushdown', 'rworkout-push', 'Tricep Pushdowns', NULL, 3, '12-15', 60, 5);
+
+INSERT OR REPLACE INTO workout_exercises (id, workout_id, exercise_name, exercise_db_id, sets, reps, rest_seconds, sort_order)
+VALUES
+  ('rex-deadlift', 'rworkout-pull', 'Deadlift', NULL, 4, '5-6', 180, 1),
+  ('rex-barbell-row', 'rworkout-pull', 'Barbell Row', NULL, 4, '8-10', 90, 2),
+  ('rex-lat-pulldown', 'rworkout-pull', 'Lat Pulldown', NULL, 3, '10-12', 90, 3),
+  ('rex-face-pull', 'rworkout-pull', 'Face Pulls', NULL, 3, '15-20', 60, 4),
+  ('rex-barbell-curl', 'rworkout-pull', 'Barbell Curls', NULL, 3, '10-12', 60, 5);
+
+INSERT OR REPLACE INTO workout_exercises (id, workout_id, exercise_name, exercise_db_id, sets, reps, rest_seconds, sort_order)
+VALUES
+  ('rex-squat', 'rworkout-legs', 'Barbell Squat', 'https://cdn.exercisedb.dev/media/w/images/QBL8IYGdYK.jpg', 4, '6-8', 180, 1),
+  ('rex-rdl', 'rworkout-legs', 'Romanian Deadlift', 'https://cdn.exercisedb.dev/media/w/images/3wgSOkOkH5.jpg', 3, '8-10', 120, 2),
+  ('rex-leg-press', 'rworkout-legs', 'Leg Press', NULL, 3, '10-12', 90, 3),
+  ('rex-leg-curl', 'rworkout-legs', 'Leg Curl', NULL, 3, '10-12', 60, 4),
+  ('rex-calf-raise', 'rworkout-legs', 'Standing Calf Raises', NULL, 4, '12-15', 60, 5);
+
+INSERT OR REPLACE INTO rotation_state (id, user_id, program_id, current_index, last_completed_at)
+VALUES ('rstate-founder', 'user-founder', 'prog-rotation-ppl', 0, NULL);

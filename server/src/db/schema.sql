@@ -20,18 +20,35 @@ CREATE TABLE IF NOT EXISTS personas (
   example_no_show_reaction TEXT
 );
 
+CREATE TABLE IF NOT EXISTS programs (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id),
+  name TEXT NOT NULL,
+  type TEXT NOT NULL CHECK (type IN ('static', 'rotation')),
+  active INTEGER NOT NULL DEFAULT 1,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS workouts (
+  id TEXT PRIMARY KEY,
+  program_id TEXT NOT NULL REFERENCES programs(id),
+  name TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS schedule (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL REFERENCES users(id),
-  day_of_week INTEGER NOT NULL,
-  workout_name TEXT NOT NULL,
+  program_id TEXT NOT NULL REFERENCES programs(id),
+  workout_id TEXT NOT NULL REFERENCES workouts(id),
+  day_of_week INTEGER,
   scheduled_time TEXT,
+  sort_order INTEGER NOT NULL DEFAULT 0,
   active INTEGER NOT NULL DEFAULT 1
 );
 
 CREATE TABLE IF NOT EXISTS workout_exercises (
   id TEXT PRIMARY KEY,
-  schedule_id TEXT NOT NULL REFERENCES schedule(id),
+  workout_id TEXT NOT NULL REFERENCES workouts(id),
   exercise_name TEXT NOT NULL,
   exercise_db_id TEXT,
   sets INTEGER NOT NULL,
@@ -82,4 +99,12 @@ CREATE TABLE IF NOT EXISTS scheduled_messages (
   image_url TEXT,
   delivered INTEGER NOT NULL DEFAULT 0,
   created_by TEXT
+);
+
+CREATE TABLE IF NOT EXISTS rotation_state (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id),
+  program_id TEXT NOT NULL REFERENCES programs(id),
+  current_index INTEGER NOT NULL DEFAULT 0,
+  last_completed_at DATETIME
 );

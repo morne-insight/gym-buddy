@@ -11,7 +11,7 @@ import { scheduleMotivationalMessage } from './scheduleMotivationalMessage.js';
 import { updateSentiment } from './updateSentiment.js';
 import { type DataPublisher, publishDataMessage } from '../publish-data.js';
 import { type DataMessage } from '../data-messages.js';
-import { getExercisesForSchedule, type WorkoutExercise } from '../db/index.js';
+import { getExercisesForWorkout, type WorkoutExercise } from '../db/index.js';
 
 export interface AgentToolsOptions {
   db: Database.Database;
@@ -64,7 +64,7 @@ export function createAgentTools(
             .get(params.exerciseId) as WorkoutExercise | undefined;
 
           if (exercise) {
-            const exercises = getExercisesForSchedule(db, exercise.schedule_id);
+            const exercises = getExercisesForWorkout(db, exercise.workout_id);
             const exerciseIndex = exercises.findIndex((e) => e.id === params.exerciseId);
 
             await publishDataMessage(dataPublisher, {
@@ -119,7 +119,7 @@ export function createAgentTools(
               .get(params.exerciseId) as WorkoutExercise | undefined;
 
             if (exercise) {
-              const exercises = getExercisesForSchedule(db, exercise.schedule_id);
+              const exercises = getExercisesForWorkout(db, exercise.workout_id);
               const currentIndex = exercises.findIndex((e) => e.id === params.exerciseId);
               const nextExercise = exercises[currentIndex + 1];
 

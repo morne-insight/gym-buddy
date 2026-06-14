@@ -4,7 +4,7 @@ import {
   createExerciseLog,
   markExerciseLogCompleted,
   markExerciseLogSkipped,
-  getExercisesForSchedule,
+  getExercisesForWorkout,
   getExerciseLogsForSession,
   getActiveSession,
   createSession,
@@ -62,14 +62,14 @@ export function completeExercise(db: Database.Database, params: CompleteExercise
     markExerciseLogCompleted(db, exerciseLog.id);
   }
 
-  const scheduleExercises = getExercisesForSchedule(db, exercise.schedule_id);
+  const workoutExercises = getExercisesForWorkout(db, exercise.workout_id);
   const allLogs = getExerciseLogsForSession(db, sessionId);
   const doneIds = new Set(
     allLogs.filter((l) => l.completed === 1 || l.skipped === 1).map((l) => l.workout_exercise_id),
   );
   doneIds.add(params.exerciseId);
 
-  const remainingExercises = scheduleExercises.filter((e) => !doneIds.has(e.id)).length;
+  const remainingExercises = workoutExercises.filter((e) => !doneIds.has(e.id)).length;
 
   return {
     completed: !params.skipped,

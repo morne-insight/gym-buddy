@@ -107,7 +107,7 @@ export default defineAgent({
 
     const workout = getCurrentWorkout(db, USER_ID);
 
-    const dbSession = createSession(db, USER_ID, null);
+    const dbSession = createSession(db, USER_ID, workout.scheduleId);
 
     const sessionContext = workout.restDay
       ? `Today is a rest day. The user's active session ID is ${dbSession.id}.`

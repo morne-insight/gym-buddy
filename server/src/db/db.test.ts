@@ -1,7 +1,7 @@
 import {
   getUser,
   getScheduleForDay,
-  getExercisesForSchedule,
+  getExercisesForWorkout,
   createSession,
   logExercise,
   getExerciseLogsForSession,
@@ -35,11 +35,14 @@ describe('schema', () => {
     const tableNames = tables.map((t) => t.name);
     expect(tableNames).toContain('users');
     expect(tableNames).toContain('personas');
+    expect(tableNames).toContain('programs');
+    expect(tableNames).toContain('workouts');
     expect(tableNames).toContain('schedule');
     expect(tableNames).toContain('workout_exercises');
     expect(tableNames).toContain('sessions');
     expect(tableNames).toContain('exercise_logs');
     expect(tableNames).toContain('scheduled_messages');
+    expect(tableNames).toContain('rotation_state');
   });
 });
 
@@ -67,9 +70,9 @@ describe('schedule + exercises', () => {
 
     const schedule = getScheduleForDay(db, userId, 1);
     expect(schedule).toBeDefined();
-    expect(schedule!.workout_name).toBe('Push Day');
+    expect(schedule!.workout_id).toBe('workout-push');
 
-    const exercises = getExercisesForSchedule(db, schedule!.id);
+    const exercises = getExercisesForWorkout(db, schedule!.workout_id);
     expect(exercises).toHaveLength(3);
     expect(exercises[0].exercise_name).toBe('Bench Press');
     expect(exercises[1].exercise_name).toBe('Overhead Press');

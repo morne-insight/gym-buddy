@@ -1,8 +1,15 @@
 import type Database from 'better-sqlite3';
 import {
   getAllUsers,
+  getUser,
+  getPersona,
+  getActiveProgram,
   getScheduleForDay,
+  getSchedulesByProgram,
+  getWorkoutById,
+  getRotationState,
   getSessionsForDate,
+  peekNextRotationWorkout,
   scheduleMessage,
 } from '../db/index.js';
 
@@ -29,23 +36,74 @@ export function runEveningCheckIn(
   for (const user of users) {
     result.checked++;
 
-    const todaySchedule = getScheduleForDay(db, user.id, tDow);
-    const tomorrowSchedule = getScheduleForDay(db, user.id, tmDow);
+    const program = getActiveProgram(db, user.id);
+    if (!program) {
+      result.skipped++;
+      continue;
+    }
 
-    const missedToday =
-      todaySchedule && getSessionsForDate(db, user.id, date).length === 0;
+    const persona = getPersona(db, user.persona_id);
+    const sessionsToday = getSessionsForDate(db, user.id, date);
+    const completedToday = sessionsToday.some(s => s.status === 'completed');
+
+    let todayWorkoutName: string | null = null;
+    let nextWorkoutName: string | null = null;
+    let missedToday = false;
+
+    if (program.type === 'rotation') {
+      const state = getRotationState(db, user.id, program.id);
+      if (state) {
+        const schedules = getSchedulesByProgram(db, program.id);
+        const currentSchedule = schedules.find(s => s.sort_order === state.current_index);
+        if (currentSchedule) {
+          const currentWorkout = getWorkoutById(db, currentSchedule.workout_id);
+          if (!completedToday && sessionsToday.length === 0) {
+            todayWorkoutName = currentWorkout?.name ?? null;
+            missedToday = true;
+          }
+        }
+        const nextWorkout = peekNextRotationWorkout(db, user.id, program.id);
+        nextWorkoutName = nextWorkout?.name ?? null;
+      }
+    } else {
+      const todaySchedule = getScheduleForDay(db, user.id, tDow);
+      if (todaySchedule) {
+        const workout = getWorkoutById(db, todaySchedule.workout_id);
+        todayWorkoutName = workout?.name ?? null;
+        if (sessionsToday.length === 0) {
+          missedToday = true;
+        }
+      }
+
+      const tomorrowSchedule = getScheduleForDay(db, user.id, tmDow);
+      if (tomorrowSchedule) {
+        const workout = getWorkoutById(db, tomorrowSchedule.workout_id);
+        nextWorkoutName = workout?.name ?? null;
+      }
+    }
 
     let content: string | null = null;
     let messageType: string;
 
-    if (missedToday && tomorrowSchedule) {
-      content = `You had ${todaySchedule.workout_name} today and didn't show. Tomorrow is ${tomorrowSchedule.workout_name} — don't miss that too. Get your gear ready.`;
+    const isRotation = program.type === 'rotation';
+    const nextLabel = isRotation ? 'Next up is' : 'Tomorrow is';
+
+    if (missedToday && nextWorkoutName) {
+      if (persona?.example_no_show_reaction) {
+        content = `${persona.example_no_show_reaction} You had ${todayWorkoutName} today. ${nextLabel} ${nextWorkoutName} — don't miss that too.`;
+      } else {
+        content = `You had ${todayWorkoutName} today and didn't show. ${nextLabel} ${nextWorkoutName} — don't miss that too. Get your gear ready.`;
+      }
       messageType = 'missed_and_preview';
     } else if (missedToday) {
-      content = `You had ${todaySchedule!.workout_name} scheduled today and didn't show up. What happened?`;
+      if (persona?.example_no_show_reaction) {
+        content = `${persona.example_no_show_reaction} You had ${todayWorkoutName} scheduled today.`;
+      } else {
+        content = `You had ${todayWorkoutName} scheduled today and didn't show up. What happened?`;
+      }
       messageType = 'missed_workout';
-    } else if (tomorrowSchedule) {
-      content = `Tomorrow is ${tomorrowSchedule.workout_name}. Get your gear ready and rest up tonight.`;
+    } else if (nextWorkoutName) {
+      content = `${nextLabel} ${nextWorkoutName}. Get your gear ready and rest up tonight.`;
       messageType = 'pre_workout';
     } else {
       result.skipped++;
