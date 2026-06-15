@@ -1,8 +1,13 @@
 import { TokenSource } from 'livekit-client';
 import { createContext, useContext, useMemo, useState } from 'react';
 import { SessionProvider, useSession } from '@livekit/components-react';
+import { AudioSession, AndroidAudioTypePresets } from '@livekit/react-native';
 
-const TOKEN_ENDPOINT = 'http://192.168.1.206:3001/getToken';
+// Override per-machine in apps/mobile/.env (EXPO_PUBLIC_TOKEN_ENDPOINT).
+// Default targets the dev machine's LAN IP on the token-server port (3001).
+// Android emulator: use http://10.0.2.2:3001/getToken instead.
+const TOKEN_ENDPOINT =
+  process.env.EXPO_PUBLIC_TOKEN_ENDPOINT ?? 'http://192.168.1.202:3001/getToken';
 
 const AGENT_NAME = 'gym-buddy';
 
@@ -36,13 +41,21 @@ export function ConnectionProvider({ children }: { children: React.ReactNode }) 
   const value = useMemo(
     () => ({
       isConnectionActive,
-      connect: () => {
+      connect: async () => {
+        // The native audio session must be configured before the room connects
+        // and started so remote (agent) audio actually routes to the speaker.
+        // Without this, the agent joins but is inaudible on device.
+        await AudioSession.configureAudio({
+          android: { audioTypeOptions: AndroidAudioTypePresets.communication },
+        });
+        await AudioSession.startAudioSession();
         setIsConnectionActive(true);
-        session.start();
+        await session.start();
       },
-      disconnect: () => {
+      disconnect: async () => {
         setIsConnectionActive(false);
-        session.end();
+        await session.end();
+        await AudioSession.stopAudioSession();
       },
     }),
     [session, isConnectionActive],

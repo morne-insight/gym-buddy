@@ -2,6 +2,7 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useState, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { useAgent } from '@livekit/components-react';
+import type { UseAgentReturn } from '@livekit/components-react';
 import { useConnection } from '../hooks/useConnection';
 import { useDataMessages } from '../hooks/useDataMessages';
 import { ExerciseGifOverlay } from '../components/ExerciseGifOverlay';
@@ -9,39 +10,40 @@ import { ExerciseDataCard } from '../components/ExerciseDataCard';
 import { RestTimer } from '../components/RestTimer';
 import { SessionFab } from '../components/SessionFab';
 
-function stateLabel(state: string | undefined): string {
-  switch (state) {
-    case 'connecting':
-    case 'initializing':
-      return 'Connecting...';
-    case 'listening':
-      return 'Listening';
-    case 'thinking':
-      return 'Thinking...';
+// Derive the status from the agent's semantic flags rather than the raw state
+// string. The AgentState union includes states the UI used to miss
+// (pre-connect-buffering, idle, disconnected, failed), all of which previously
+// fell through to "Connecting..." — leaving the label stuck on "Connecting..."
+// even after the agent was connected and listening.
+function agentStatus(agent: UseAgentReturn): { label: string; color: string } {
+  switch (agent.state) {
     case 'speaking':
-      return 'Speaking';
-    default:
-      return 'Connecting...';
+      return { label: 'Speaking', color: '#e63946' };
+    case 'thinking':
+      return { label: 'Thinking...', color: '#f4a261' };
+    case 'listening':
+      return { label: 'Listening', color: '#4ecdc4' };
+    case 'failed':
+      return { label: 'Connection failed', color: '#e63946' };
+    case 'disconnected':
+      return { label: 'Disconnected', color: '#888888' };
   }
-}
 
-function stateColor(state: string | undefined): string {
-  switch (state) {
-    case 'listening':
-      return '#4ecdc4';
-    case 'thinking':
-      return '#f4a261';
-    case 'speaking':
-      return '#e63946';
-    default:
-      return '#888888';
+  // pre-connect-buffering: the client can already hear the user while the
+  // preconnect audio buffer is active, so treat it as listening.
+  if (agent.canListen) {
+    return { label: 'Listening', color: '#4ecdc4' };
   }
+
+  // connecting / initializing / idle (isPending) — genuinely not ready yet.
+  return { label: 'Connecting...', color: '#888888' };
 }
 
 export default function SessionScreen() {
   const router = useRouter();
   const { disconnect } = useConnection();
-  const { state } = useAgent();
+  const agent = useAgent();
+  const { state } = agent;
   const { exerciseMedia, exerciseProgress, restTimer, reset } = useDataMessages();
 
   const [gifVisible, setGifVisible] = useState(false);
@@ -55,7 +57,7 @@ export default function SessionScreen() {
     router.back();
   }, [disconnect, router, reset]);
 
-  const color = stateColor(state);
+  const { label, color } = agentStatus(agent);
 
   return (
     <View style={styles.container}>
@@ -70,7 +72,7 @@ export default function SessionScreen() {
       <View style={styles.centerContent}>
         <View style={styles.statusContainer}>
           <View style={[styles.statusDot, { backgroundColor: color }]} />
-          <Text style={[styles.statusText, { color }]}>{stateLabel(state)}</Text>
+          <Text style={[styles.statusText, { color }]}>{label}</Text>
         </View>
 
         <View style={[styles.circle, { borderColor: color }]}>

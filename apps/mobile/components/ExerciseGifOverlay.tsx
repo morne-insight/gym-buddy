@@ -1,4 +1,5 @@
-import { View, Text, Image, Pressable, StyleSheet, Modal } from 'react-native';
+import { View, Text, Image, Pressable, StyleSheet, Modal, ActivityIndicator } from 'react-native';
+import { useEffect, useState } from 'react';
 
 interface ExerciseGifOverlayProps {
   visible: boolean;
@@ -7,17 +8,53 @@ interface ExerciseGifOverlayProps {
   onDismiss: () => void;
 }
 
+type LoadStatus = 'loading' | 'loaded' | 'error';
+
 export function ExerciseGifOverlay({ visible, gifUrl, exerciseName, onDismiss }: ExerciseGifOverlayProps) {
+  const [status, setStatus] = useState<LoadStatus>('loading');
+
+  // Restart the load cycle whenever the source changes or the modal reopens,
+  // so a previously-failed image is retried and the spinner shows again.
+  useEffect(() => {
+    setStatus('loading');
+  }, [gifUrl, visible]);
+
   if (!exerciseName) return null;
+
+  const showPlaceholder = !gifUrl || status === 'error';
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onDismiss}>
       <Pressable style={styles.backdrop} onPress={onDismiss}>
         <View style={styles.container}>
-          {gifUrl && (
-            <Image source={{ uri: gifUrl }} style={styles.gif} resizeMode="contain" />
-          )}
-          <Text style={[styles.label, !gifUrl && styles.labelLarge]}>{exerciseName}</Text>
+          <View style={styles.media}>
+            {gifUrl && status !== 'error' && (
+              <Image
+                source={{ uri: gifUrl }}
+                style={styles.gif}
+                resizeMode="contain"
+                onLoad={() => setStatus('loaded')}
+                onError={() => setStatus('error')}
+              />
+            )}
+
+            {gifUrl && status === 'loading' && (
+              <View style={styles.mediaOverlay}>
+                <ActivityIndicator color="#4ecdc4" />
+              </View>
+            )}
+
+            {showPlaceholder && (
+              <View style={styles.mediaOverlay}>
+                <Text style={styles.placeholderIcon}>🏋️</Text>
+                <Text style={styles.placeholderText}>
+                  {gifUrl ? 'Image unavailable' : 'No demo image for this exercise'}
+                </Text>
+              </View>
+            )}
+          </View>
+
+          <Text style={styles.label}>{exerciseName}</Text>
         </View>
       </Pressable>
     </Modal>
@@ -38,20 +75,36 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: 'center',
   },
-  gif: {
+  media: {
     width: '100%',
     height: 280,
     borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: '#0f0f0f',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  gif: {
+    width: '100%',
+    height: '100%',
+  },
+  mediaOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  placeholderIcon: {
+    fontSize: 48,
+    marginBottom: 8,
+  },
+  placeholderText: {
+    color: '#888888',
+    fontSize: 14,
   },
   label: {
     color: '#ffffff',
     fontSize: 18,
     fontWeight: '600',
     marginTop: 12,
-  },
-  labelLarge: {
-    fontSize: 24,
-    marginTop: 0,
-    paddingVertical: 24,
   },
 });
