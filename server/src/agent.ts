@@ -1,5 +1,6 @@
 import {
   type JobContext,
+  type JobProcess,
   ServerOptions,
   cli,
   defineAgent,
@@ -82,8 +83,16 @@ const USER_ID = 'user-founder';
 
 const exerciseInfoFetcher: ExerciseInfoFetcher = async () => null;
 
-export default defineAgent({
-  entry: async (ctx: JobContext) => {
+// Loaded once per worker process in `prewarm` and reused across jobs, so the
+// silero VAD model isn't reloaded on every (cold) connection — that reload was
+// the bulk of the ~20s cold start that tripped the client connect timeout.
+type AgentUserData = { vad: silero.VAD };
+
+export default defineAgent<AgentUserData>({
+  prewarm: async (proc: JobProcess<AgentUserData>) => {
+    proc.userData.vad = await silero.VAD.load();
+  },
+  entry: async (ctx: JobContext<AgentUserData>) => {
     const db = createDatabase();
 
     await ctx.connect();
@@ -124,7 +133,7 @@ export default defineAgent({
     const fullPrompt = `${prompt}\n\nSESSION CONTEXT:\n${sessionContext}`;
 
     const session = new voice.AgentSession({
-      vad: await silero.VAD.load(),
+      vad: ctx.proc.userData.vad,
       turnHandling: {
         turnDetection: 'vad',
         endpointing: {

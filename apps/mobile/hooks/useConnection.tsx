@@ -36,7 +36,14 @@ export function ConnectionProvider({ children }: { children: React.ReactNode }) 
 
   const tokenSource = useMemo(() => TokenSource.endpoint(TOKEN_ENDPOINT), []);
 
-  const session = useSession(tokenSource, { agentName: AGENT_NAME });
+  const session = useSession(tokenSource, {
+    agentName: AGENT_NAME,
+    // A cold worker start (job-runner spin-up + silero VAD load) took ~20s in
+    // testing. The default connect timeout is much shorter, so the client would
+    // prematurely flip to "failed" even though the agent connects moments later.
+    // Give the agent generous headroom; warm connects are still near-instant.
+    agentConnectTimeoutMilliseconds: 30000,
+  });
 
   const value = useMemo(
     () => ({
