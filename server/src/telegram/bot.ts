@@ -1,10 +1,9 @@
 import TelegramBot from 'node-telegram-bot-api';
-import type Database from 'better-sqlite3';
-import { updateUserTelegram, getUser } from '../db/index.js';
+import { updateUserTelegram, getUser, getUserByTelegramChatId, type DB } from '../db/index.js';
 
 export interface TelegramBotOptions {
   token: string;
-  db: Database.Database;
+  db: DB;
   onUserMessage?: (userId: string, text: string, chatId: string) => Promise<string>;
 }
 
@@ -12,7 +11,7 @@ export function createTelegramBot(options: TelegramBotOptions): TelegramBot {
   const { token, db, onUserMessage } = options;
   const bot = new TelegramBot(token, { polling: true });
 
-  bot.onText(/\/start\s+(.+)/, (msg, match) => {
+  bot.onText(/\/start\s+(.+)/, async (msg, match) => {
     const chatId = msg.chat.id.toString();
     const userId = match?.[1]?.trim();
 
@@ -21,13 +20,13 @@ export function createTelegramBot(options: TelegramBotOptions): TelegramBot {
       return;
     }
 
-    const user = getUser(db, userId);
+    const user = await getUser(db, userId);
     if (!user) {
       bot.sendMessage(chatId, `No account found for user ID: ${userId}`);
       return;
     }
 
-    updateUserTelegram(db, userId, chatId);
+    await updateUserTelegram(db, userId, chatId);
     bot.sendMessage(chatId, `Linked! You're connected as ${user.name}. I'll send you updates here.`);
   });
 
@@ -36,14 +35,12 @@ export function createTelegramBot(options: TelegramBotOptions): TelegramBot {
     bot.sendMessage(chatId, 'Send /start followed by your user ID to link your account.');
   });
 
-  bot.on('message', (msg) => {
+  bot.on('message', async (msg) => {
     if (!msg.text || msg.text.startsWith('/')) return;
     if (!onUserMessage) return;
 
     const chatId = msg.chat.id.toString();
-    const userRow = db
-      .prepare('SELECT id FROM users WHERE telegram_chat_id = ?')
-      .get(chatId) as { id: string } | undefined;
+    const userRow = await getUserByTelegramChatId(db, chatId);
 
     if (!userRow) {
       bot.sendMessage(chatId, 'Your Telegram is not linked to an account. Send /start <userId> first.');

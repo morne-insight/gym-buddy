@@ -1,5 +1,5 @@
-import type Database from 'better-sqlite3';
 import { buildSystemPrompt } from '../prompts/index.js';
+import type { DB } from '../db/index.js';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -15,11 +15,11 @@ export type ChatCompletionFn = (
 ) => Promise<string>;
 
 export function createMessageHandler(
-  db: Database.Database,
+  db: DB,
   chatCompletion: ChatCompletionFn,
 ) {
   return async (userId: string, text: string): Promise<string> => {
-    const { prompt } = buildSystemPrompt(db, userId);
+    const { prompt } = await buildSystemPrompt(db, userId);
     const systemPrompt = `${prompt}\n\nYou are responding via Telegram text chat, not voice. Keep responses concise. Use short paragraphs. No voice-specific instructions apply here.`;
 
     const history = chatHistories.get(userId) ?? [];

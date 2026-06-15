@@ -1,5 +1,4 @@
-import type Database from 'better-sqlite3';
-import { getUser } from '../db/index.js';
+import { getUser, type DB } from '../db/index.js';
 
 export type TelegramSender = (chatId: string, imageUrl: string, caption?: string) => Promise<void>;
 
@@ -15,11 +14,11 @@ export interface SendTelegramMediaResult {
 }
 
 export async function sendTelegramMedia(
-  db: Database.Database,
+  db: DB,
   params: SendTelegramMediaParams,
   sender: TelegramSender,
 ): Promise<SendTelegramMediaResult> {
-  const user = getUser(db, params.userId);
+  const user = await getUser(db, params.userId);
 
   if (!user?.telegram_chat_id) {
     return { sent: false, error: 'User has no Telegram account linked' };

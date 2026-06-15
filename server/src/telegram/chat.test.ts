@@ -1,25 +1,37 @@
 import { createMessageHandler, clearChatHistory, getChatHistory, type ChatCompletionFn } from './chat.js';
-import { createTestDatabase, seedTestUser, seedTestPersona } from '../db/test-helpers.js';
-import type Database from 'better-sqlite3';
-import { beforeEach, afterEach, describe, it, expect } from '@jest/globals';
+import {
+  createTestDatabase,
+  setupTestSchema,
+  resetTestData,
+  closeTestPool,
+  seedTestUser,
+  seedTestPersona,
+} from '../db/test-helpers.js';
+import { beforeAll, beforeEach, afterAll, describe, it, expect } from '@jest/globals';
+import type { DB } from '../db/index.js';
 
-let db: Database.Database;
+let db: DB;
 
-beforeEach(() => {
+beforeAll(async () => {
   db = createTestDatabase();
-  seedTestPersona(db);
+  await setupTestSchema();
+});
+
+beforeEach(async () => {
+  await resetTestData();
+  await seedTestPersona(db);
   clearChatHistory('test-user-1');
   clearChatHistory('test-user-a');
   clearChatHistory('test-user-b');
 });
 
-afterEach(() => {
-  db.close();
+afterAll(async () => {
+  await closeTestPool();
 });
 
 describe('createMessageHandler', () => {
   it('sends user message to LLM with system prompt and returns reply', async () => {
-    const userId = seedTestUser(db);
+    const userId = await seedTestUser(db);
     let capturedSystem = '';
     let capturedMessages: Array<{ role: string; content: string }> = [];
 
@@ -40,7 +52,7 @@ describe('createMessageHandler', () => {
   });
 
   it('maintains conversation history across calls', async () => {
-    const userId = seedTestUser(db);
+    const userId = await seedTestUser(db);
     let lastMessages: Array<{ role: string; content: string }> = [];
 
     const mockCompletion: ChatCompletionFn = async (_system, messages) => {
@@ -61,7 +73,7 @@ describe('createMessageHandler', () => {
   });
 
   it('limits history to 10 messages', async () => {
-    const userId = seedTestUser(db);
+    const userId = await seedTestUser(db);
 
     const mockCompletion: ChatCompletionFn = async () => 'ok';
     const handler = createMessageHandler(db, mockCompletion);
@@ -75,7 +87,7 @@ describe('createMessageHandler', () => {
   });
 
   it('clears history when requested', async () => {
-    const userId = seedTestUser(db);
+    const userId = await seedTestUser(db);
 
     const mockCompletion: ChatCompletionFn = async () => 'ok';
     const handler = createMessageHandler(db, mockCompletion);
@@ -88,8 +100,8 @@ describe('createMessageHandler', () => {
   });
 
   it('keeps separate history per user', async () => {
-    const user1 = seedTestUser(db, { id: 'test-user-a', name: 'User A' });
-    const user2 = seedTestUser(db, { id: 'test-user-b', name: 'User B' });
+    const user1 = await seedTestUser(db, { id: 'test-user-a', name: 'User A' });
+    const user2 = await seedTestUser(db, { id: 'test-user-b', name: 'User B' });
 
     const mockCompletion: ChatCompletionFn = async () => 'ok';
     const handler = createMessageHandler(db, mockCompletion);

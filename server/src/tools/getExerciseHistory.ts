@@ -1,5 +1,4 @@
-import type Database from 'better-sqlite3';
-import { getExerciseHistory } from '../db/index.js';
+import { getExerciseHistory, type DB } from '../db/index.js';
 
 interface HistoryEntry {
   date: string;
@@ -41,12 +40,12 @@ function computeWeightTrend(entries: HistoryEntry[]): WeightTrend {
   return 'stable';
 }
 
-export function getExerciseHistoryTool(
-  db: Database.Database,
+export async function getExerciseHistoryTool(
+  db: DB,
   userId: string,
   exerciseName: string,
-): ExerciseHistoryResult {
-  const rawHistory = getExerciseHistory(db, userId, exerciseName);
+): Promise<ExerciseHistoryResult> {
+  const rawHistory = await getExerciseHistory(db, userId, exerciseName);
 
   const entries: HistoryEntry[] = rawHistory.map((h) => ({
     date: h.started_at,

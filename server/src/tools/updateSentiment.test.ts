@@ -1,56 +1,68 @@
 import { updateSentiment } from './updateSentiment.js';
-import { createTestDatabase, seedTestUser, seedTestPersona, seedTestSchedule } from '../db/test-helpers.js';
-import { createSession, getActiveSession } from '../db/index.js';
-import type Database from 'better-sqlite3';
-import { beforeEach, afterEach, describe, it, expect } from '@jest/globals';
+import {
+  createTestDatabase,
+  setupTestSchema,
+  resetTestData,
+  closeTestPool,
+  seedTestUser,
+  seedTestPersona,
+  seedTestSchedule,
+} from '../db/test-helpers.js';
+import { createSession, getActiveSession, type DB } from '../db/index.js';
+import { beforeAll, beforeEach, afterAll, describe, it, expect } from '@jest/globals';
 
-let db: Database.Database;
+let db: DB;
 
-beforeEach(() => {
+beforeAll(async () => {
   db = createTestDatabase();
-  seedTestPersona(db);
+  await setupTestSchema();
 });
 
-afterEach(() => {
-  db.close();
+beforeEach(async () => {
+  await resetTestData();
+  await seedTestPersona(db);
+});
+
+afterAll(async () => {
+  await closeTestPool();
 });
 
 describe('updateSentiment', () => {
-  it('updates sentiment on an active session by sessionId', () => {
-    const userId = seedTestUser(db);
-    seedTestSchedule(db, userId);
-    const session = createSession(db, userId, 'sched-monday-push');
+  it('updates sentiment on an active session by sessionId', async () => {
+    const userId = await seedTestUser(db);
+    await seedTestSchedule(db, userId);
+    const session = await createSession(db, userId, 'sched-monday-push');
 
-    const result = updateSentiment(db, {
+    const result = await updateSentiment(db, {
       sessionId: session.id,
       sentiment: 'frustrated',
     });
 
     expect(result.updated).toBe(true);
 
-    const active = getActiveSession(db, userId);
+    const active = await getActiveSession(db, userId);
     expect(active!.sentiment).toBe('frustrated');
   });
 
-  it('finds active session by userId when sessionId is not provided', () => {
-    const userId = seedTestUser(db);
-    createSession(db, userId, null);
+  it('finds active session by userId when sessionId is not provided', async () => {
+    const userId = await seedTestUser(db);
+    await createSession(db, userId, null);
 
-    const result = updateSentiment(db, {
+    const result = await updateSentiment(db, {
       userId,
       sentiment: 'motivated',
     });
 
     expect(result.updated).toBe(true);
 
-    const active = getActiveSession(db, userId);
+    const active = await getActiveSession(db, userId);
     expect(active!.sentiment).toBe('motivated');
   });
 
-  it('fails when no session exists', () => {
-    const userId = seedTestUser(db);
+  it('fails when no session exists', async () => {
+    const userId = await seedTestUser(db);
 
-    const result = updateSentiment(db, {
+    const result = await updateSentiment(db, {
       userId,
       sentiment: 'tired',
     });
@@ -59,14 +71,14 @@ describe('updateSentiment', () => {
     expect(result.error).toMatch(/no active session/i);
   });
 
-  it('overwrites previous sentiment', () => {
-    const userId = seedTestUser(db);
-    const session = createSession(db, userId, null);
+  it('overwrites previous sentiment', async () => {
+    const userId = await seedTestUser(db);
+    const session = await createSession(db, userId, null);
 
-    updateSentiment(db, { sessionId: session.id, sentiment: 'frustrated' });
-    updateSentiment(db, { sessionId: session.id, sentiment: 'energized' });
+    await updateSentiment(db, { sessionId: session.id, sentiment: 'frustrated' });
+    await updateSentiment(db, { sessionId: session.id, sentiment: 'energized' });
 
-    const active = getActiveSession(db, userId);
+    const active = await getActiveSession(db, userId);
     expect(active!.sentiment).toBe('energized');
   });
 });

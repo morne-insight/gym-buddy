@@ -1,27 +1,39 @@
 import { logExerciseCompleted } from './logExerciseCompleted.js';
-import { createTestDatabase, seedTestUser, seedTestPersona, seedTestSchedule } from '../db/test-helpers.js';
-import { createSession, getExerciseLogsForSession, getActiveSession } from '../db/index.js';
-import type Database from 'better-sqlite3';
-import { beforeEach, afterEach, describe, it, expect } from '@jest/globals';
+import {
+  createTestDatabase,
+  setupTestSchema,
+  resetTestData,
+  closeTestPool,
+  seedTestUser,
+  seedTestPersona,
+  seedTestSchedule,
+} from '../db/test-helpers.js';
+import { createSession, getExerciseLogsForSession, getActiveSession, type DB } from '../db/index.js';
+import { beforeAll, beforeEach, afterAll, describe, it, expect } from '@jest/globals';
 
-let db: Database.Database;
+let db: DB;
 
-beforeEach(() => {
+beforeAll(async () => {
   db = createTestDatabase();
-  seedTestPersona(db);
+  await setupTestSchema();
 });
 
-afterEach(() => {
-  db.close();
+beforeEach(async () => {
+  await resetTestData();
+  await seedTestPersona(db);
+});
+
+afterAll(async () => {
+  await closeTestPool();
 });
 
 describe('logExerciseCompleted', () => {
-  it('logs a completed exercise with weight and reps', () => {
-    const userId = seedTestUser(db);
-    seedTestSchedule(db, userId);
-    const session = createSession(db, userId, 'sched-monday-push');
+  it('logs a completed exercise with weight and reps', async () => {
+    const userId = await seedTestUser(db);
+    await seedTestSchedule(db, userId);
+    const session = await createSession(db, userId, 'sched-monday-push');
 
-    const result = logExerciseCompleted(db, {
+    const result = await logExerciseCompleted(db, {
       sessionId: session.id,
       exerciseId: 'ex-bench',
       actualSets: 4,
@@ -35,12 +47,12 @@ describe('logExerciseCompleted', () => {
     expect(result.remaining).toBe(2);
   });
 
-  it('logs a skipped exercise with a note', () => {
-    const userId = seedTestUser(db);
-    seedTestSchedule(db, userId);
-    const session = createSession(db, userId, 'sched-monday-push');
+  it('logs a skipped exercise with a note', async () => {
+    const userId = await seedTestUser(db);
+    await seedTestSchedule(db, userId);
+    const session = await createSession(db, userId, 'sched-monday-push');
 
-    const result = logExerciseCompleted(db, {
+    const result = await logExerciseCompleted(db, {
       sessionId: session.id,
       exerciseId: 'ex-dips',
       skipped: true,
@@ -51,18 +63,18 @@ describe('logExerciseCompleted', () => {
     expect(result.skipped).toBe(true);
     expect(result.remaining).toBe(2);
 
-    const logs = getExerciseLogsForSession(db, session.id);
+    const logs = await getExerciseLogsForSession(db, session.id);
     expect(logs).toHaveLength(1);
     expect(logs[0].skipped).toBe(1);
     expect(logs[0].notes).toBe('Shoulder pain');
   });
 
-  it('tracks remaining exercise count correctly', () => {
-    const userId = seedTestUser(db);
-    seedTestSchedule(db, userId);
-    const session = createSession(db, userId, 'sched-monday-push');
+  it('tracks remaining exercise count correctly', async () => {
+    const userId = await seedTestUser(db);
+    await seedTestSchedule(db, userId);
+    const session = await createSession(db, userId, 'sched-monday-push');
 
-    const r1 = logExerciseCompleted(db, {
+    const r1 = await logExerciseCompleted(db, {
       sessionId: session.id,
       exerciseId: 'ex-bench',
       actualSets: 4,
@@ -72,7 +84,7 @@ describe('logExerciseCompleted', () => {
     });
     expect(r1.remaining).toBe(2);
 
-    const r2 = logExerciseCompleted(db, {
+    const r2 = await logExerciseCompleted(db, {
       sessionId: session.id,
       exerciseId: 'ex-ohp',
       actualSets: 3,
@@ -82,7 +94,7 @@ describe('logExerciseCompleted', () => {
     });
     expect(r2.remaining).toBe(1);
 
-    const r3 = logExerciseCompleted(db, {
+    const r3 = await logExerciseCompleted(db, {
       sessionId: session.id,
       exerciseId: 'ex-dips',
       skipped: true,
@@ -90,11 +102,11 @@ describe('logExerciseCompleted', () => {
     expect(r3.remaining).toBe(0);
   });
 
-  it('auto-creates a session if none exists', () => {
-    const userId = seedTestUser(db);
-    seedTestSchedule(db, userId);
+  it('auto-creates a session if none exists', async () => {
+    const userId = await seedTestUser(db);
+    await seedTestSchedule(db, userId);
 
-    const result = logExerciseCompleted(db, {
+    const result = await logExerciseCompleted(db, {
       userId,
       exerciseId: 'ex-bench',
       actualSets: 4,
@@ -106,16 +118,16 @@ describe('logExerciseCompleted', () => {
     expect(result.logged).toBe(true);
     expect(result.sessionId).toBeDefined();
 
-    const active = getActiveSession(db, userId);
+    const active = await getActiveSession(db, userId);
     expect(active).toBeDefined();
   });
 
-  it('prevents duplicate logging of the same exercise in a session', () => {
-    const userId = seedTestUser(db);
-    seedTestSchedule(db, userId);
-    const session = createSession(db, userId, 'sched-monday-push');
+  it('prevents duplicate logging of the same exercise in a session', async () => {
+    const userId = await seedTestUser(db);
+    await seedTestSchedule(db, userId);
+    const session = await createSession(db, userId, 'sched-monday-push');
 
-    logExerciseCompleted(db, {
+    await logExerciseCompleted(db, {
       sessionId: session.id,
       exerciseId: 'ex-bench',
       actualSets: 4,
@@ -124,7 +136,7 @@ describe('logExerciseCompleted', () => {
       skipped: false,
     });
 
-    const result = logExerciseCompleted(db, {
+    const result = await logExerciseCompleted(db, {
       sessionId: session.id,
       exerciseId: 'ex-bench',
       actualSets: 4,
@@ -134,7 +146,7 @@ describe('logExerciseCompleted', () => {
     });
 
     expect(result.alreadyLogged).toBe(true);
-    const logs = getExerciseLogsForSession(db, session.id);
+    const logs = await getExerciseLogsForSession(db, session.id);
     expect(logs).toHaveLength(1);
     expect(logs[0].actual_weight).toBe(80);
   });

@@ -70,8 +70,12 @@ Each exported function keeps its name and return shape but becomes `async` and r
 
 **Rollback**: The change is isolated to the data layer behind preserved function names. If Supabase proves problematic before cutover, revert the branch (SQLite files and `better-sqlite3` remain until the final cleanup step, so pre-cleanup the old path is still intact).
 
+## Resolved Decisions (during apply)
+
+- **Postgres client**: `postgres` (porsager) — confirmed. Tagged-template parameterization + `sql.begin()` map cleanly onto the hand-written SQL and the `completeSession` transaction.
+- **Connection string**: Supabase **session pooler** (port 5432, Supavisor session mode). Session mode supports prepared statements, so no `prepare: false` is required (unlike the transaction pooler on 6543).
+- **Test database**: local **Docker Postgres** container (non-destructive; isolated from the Supabase project). Runtime points at the Supabase session-pooler string via `DATABASE_URL`.
+
 ## Open Questions
 
-- Which Postgres client — `postgres` (preferred) vs `pg`? Confirm during task 1; either satisfies the design.
-- CI Postgres provisioning: Supabase CLI local stack vs a plain Postgres service container vs `pglite`? Resolve in the test-infra task based on CI speed.
 - Should the shared pool live in a new `db/pool.ts` module, or stay in `db/index.ts`? Minor; decide during implementation.

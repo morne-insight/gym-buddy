@@ -1,26 +1,37 @@
 import { deliverPendingMessages } from './deliverMessages.js';
-import { createTestDatabase, seedTestUser, seedTestPersona } from '../db/test-helpers.js';
-import { updateUserTelegram, scheduleMessage, getPendingMessages } from '../db/index.js';
-import type Database from 'better-sqlite3';
-import { beforeEach, afterEach, describe, it, expect } from '@jest/globals';
+import {
+  createTestDatabase,
+  setupTestSchema,
+  resetTestData,
+  closeTestPool,
+  seedTestUser,
+  seedTestPersona,
+} from '../db/test-helpers.js';
+import { updateUserTelegram, scheduleMessage, getPendingMessages, type DB } from '../db/index.js';
+import { beforeAll, beforeEach, afterAll, describe, it, expect } from '@jest/globals';
 
-let db: Database.Database;
+let db: DB;
 
-beforeEach(() => {
+beforeAll(async () => {
   db = createTestDatabase();
-  seedTestPersona(db);
+  await setupTestSchema();
 });
 
-afterEach(() => {
-  db.close();
+beforeEach(async () => {
+  await resetTestData();
+  await seedTestPersona(db);
+});
+
+afterAll(async () => {
+  await closeTestPool();
 });
 
 describe('deliverPendingMessages', () => {
   it('delivers a text message and marks it delivered', async () => {
-    const userId = seedTestUser(db);
-    updateUserTelegram(db, userId, '12345');
+    const userId = await seedTestUser(db);
+    await updateUserTelegram(db, userId, '12345');
 
-    scheduleMessage(db, {
+    await scheduleMessage(db, {
       user_id: userId,
       deliver_at: new Date(Date.now() - 60000).toISOString(),
       message_type: 'motivation',
@@ -43,15 +54,15 @@ describe('deliverPendingMessages', () => {
     expect(sent[0].chatId).toBe('12345');
     expect(sent[0].text).toBe('Keep pushing!');
 
-    const pending = getPendingMessages(db);
+    const pending = await getPendingMessages(db);
     expect(pending).toHaveLength(0);
   });
 
   it('delivers a media message with caption', async () => {
-    const userId = seedTestUser(db);
-    updateUserTelegram(db, userId, '12345');
+    const userId = await seedTestUser(db);
+    await updateUserTelegram(db, userId, '12345');
 
-    scheduleMessage(db, {
+    await scheduleMessage(db, {
       user_id: userId,
       deliver_at: new Date(Date.now() - 60000).toISOString(),
       message_type: 'goal_reminder',
@@ -75,9 +86,9 @@ describe('deliverPendingMessages', () => {
   });
 
   it('skips users without Telegram linked', async () => {
-    const userId = seedTestUser(db);
+    const userId = await seedTestUser(db);
 
-    scheduleMessage(db, {
+    await scheduleMessage(db, {
       user_id: userId,
       deliver_at: new Date(Date.now() - 60000).toISOString(),
       message_type: 'motivation',
@@ -97,10 +108,10 @@ describe('deliverPendingMessages', () => {
   });
 
   it('does not deliver future messages', async () => {
-    const userId = seedTestUser(db);
-    updateUserTelegram(db, userId, '12345');
+    const userId = await seedTestUser(db);
+    await updateUserTelegram(db, userId, '12345');
 
-    scheduleMessage(db, {
+    await scheduleMessage(db, {
       user_id: userId,
       deliver_at: new Date(Date.now() + 3600000).toISOString(),
       message_type: 'motivation',
@@ -119,10 +130,10 @@ describe('deliverPendingMessages', () => {
   });
 
   it('uses content generator when content is null', async () => {
-    const userId = seedTestUser(db);
-    updateUserTelegram(db, userId, '12345');
+    const userId = await seedTestUser(db);
+    await updateUserTelegram(db, userId, '12345');
 
-    scheduleMessage(db, {
+    await scheduleMessage(db, {
       user_id: userId,
       deliver_at: new Date(Date.now() - 60000).toISOString(),
       message_type: 'motivation',

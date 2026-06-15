@@ -1,4 +1,3 @@
-import type Database from 'better-sqlite3';
 import {
   getActiveProgram,
   getScheduleForDay,
@@ -8,6 +7,7 @@ import {
   getWorkoutById,
   getRotationState,
   getCompletedWorkoutsThisWeek,
+  type DB,
   type Schedule,
 } from '../db/index.js';
 
@@ -26,15 +26,15 @@ export interface CurrentWorkoutResult {
   exercises: WorkoutExerciseInfo[];
 }
 
-export function getCurrentWorkout(
-  db: Database.Database,
+export async function getCurrentWorkout(
+  db: DB,
   userId: string,
   dayOfWeek?: number,
   referenceDate?: string,
-): CurrentWorkoutResult {
+): Promise<CurrentWorkoutResult> {
   const restDay: CurrentWorkoutResult = { restDay: true, workoutName: null, scheduleId: null, exercises: [] };
 
-  const program = getActiveProgram(db, userId);
+  const program = await getActiveProgram(db, userId);
   if (!program) return restDay;
 
   if (program.type === 'rotation') {
@@ -44,24 +44,24 @@ export function getCurrentWorkout(
   return resolveStatic(db, userId, program.id, dayOfWeek, referenceDate);
 }
 
-function resolveStatic(
-  db: Database.Database,
+async function resolveStatic(
+  db: DB,
   userId: string,
   programId: string,
   dayOfWeek?: number,
   referenceDate?: string,
-): CurrentWorkoutResult {
+): Promise<CurrentWorkoutResult> {
   const restDay: CurrentWorkoutResult = { restDay: true, workoutName: null, scheduleId: null, exercises: [] };
   const day = dayOfWeek ?? new Date().getDay();
-  const completedWorkoutIds = getCompletedWorkoutsThisWeek(db, userId, referenceDate);
+  const completedWorkoutIds = await getCompletedWorkoutsThisWeek(db, userId, referenceDate);
 
-  const todaySchedule = getScheduleForDay(db, userId, day);
+  const todaySchedule = await getScheduleForDay(db, userId, day);
 
   if (todaySchedule && !completedWorkoutIds.includes(todaySchedule.workout_id)) {
     return buildResult(db, todaySchedule);
   }
 
-  const allSchedules = getSchedulesByProgram(db, programId);
+  const allSchedules = await getSchedulesByProgram(db, programId);
   for (const sched of allSchedules) {
     if (!completedWorkoutIds.includes(sched.workout_id)) {
       return buildResult(db, sched);
@@ -71,27 +71,23 @@ function resolveStatic(
   return restDay;
 }
 
-function resolveRotation(
-  db: Database.Database,
-  userId: string,
-  programId: string,
-): CurrentWorkoutResult {
+async function resolveRotation(db: DB, userId: string, programId: string): Promise<CurrentWorkoutResult> {
   const restDay: CurrentWorkoutResult = { restDay: true, workoutName: null, scheduleId: null, exercises: [] };
 
-  const state = getRotationState(db, userId, programId);
+  const state = await getRotationState(db, userId, programId);
   if (!state) return restDay;
 
-  const schedule = getScheduleAtIndex(db, programId, state.current_index);
+  const schedule = await getScheduleAtIndex(db, programId, state.current_index);
   if (!schedule) return restDay;
 
   return buildResult(db, schedule);
 }
 
-function buildResult(db: Database.Database, schedule: Schedule): CurrentWorkoutResult {
-  const workout = getWorkoutById(db, schedule.workout_id);
+async function buildResult(db: DB, schedule: Schedule): Promise<CurrentWorkoutResult> {
+  const workout = await getWorkoutById(db, schedule.workout_id);
   if (!workout) return { restDay: true, workoutName: null, scheduleId: null, exercises: [] };
 
-  const exercises = getExercisesForWorkout(db, workout.id);
+  const exercises = await getExercisesForWorkout(db, workout.id);
 
   return {
     restDay: false,

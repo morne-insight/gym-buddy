@@ -1,5 +1,4 @@
-import type Database from 'better-sqlite3';
-import { getPendingMessages, markMessageDelivered, getUser } from '../db/index.js';
+import { getPendingMessages, markMessageDelivered, getUser, type DB } from '../db/index.js';
 import type { TelegramSender } from '../tools/sendTelegramMedia.js';
 
 export type MessageContentGenerator = (
@@ -15,16 +14,16 @@ export interface DeliveryResult {
 }
 
 export async function deliverPendingMessages(
-  db: Database.Database,
+  db: DB,
   sendText: (chatId: string, text: string) => Promise<void>,
   sendMedia: TelegramSender,
   generateContent?: MessageContentGenerator,
 ): Promise<DeliveryResult> {
-  const pending = getPendingMessages(db);
+  const pending = await getPendingMessages(db);
   const result: DeliveryResult = { delivered: 0, failed: 0, errors: [] };
 
   for (const msg of pending) {
-    const user = getUser(db, msg.user_id);
+    const user = await getUser(db, msg.user_id);
     if (!user?.telegram_chat_id) {
       result.failed++;
       result.errors.push(`User ${msg.user_id} has no Telegram linked`);
@@ -50,7 +49,7 @@ export async function deliverPendingMessages(
         await sendText(user.telegram_chat_id, content);
       }
 
-      markMessageDelivered(db, msg.id);
+      await markMessageDelivered(db, msg.id);
       result.delivered++;
     } catch (err) {
       result.failed++;

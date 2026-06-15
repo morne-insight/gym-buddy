@@ -1,19 +1,31 @@
 import { buildSystemPrompt } from './index.js';
 import { getBasePrompt } from './base.js';
 import { drillSergeant } from './personas/drill-sergeant.js';
-import { beforeEach, afterEach, describe, it, expect } from '@jest/globals';
-import { createTestDatabase, seedTestUser, seedTestPersona } from '../db/test-helpers.js';
-import type Database from 'better-sqlite3';
+import { beforeAll, beforeEach, afterAll, describe, it, expect } from '@jest/globals';
+import {
+  createTestDatabase,
+  setupTestSchema,
+  resetTestData,
+  closeTestPool,
+  seedTestUser,
+  seedTestPersona,
+} from '../db/test-helpers.js';
+import { insertUser, type DB } from '../db/index.js';
 
-let db: Database.Database;
+let db: DB;
 
-beforeEach(() => {
+beforeAll(async () => {
   db = createTestDatabase();
-  seedTestPersona(db);
+  await setupTestSchema();
 });
 
-afterEach(() => {
-  db.close();
+beforeEach(async () => {
+  await resetTestData();
+  await seedTestPersona(db);
+});
+
+afterAll(async () => {
+  await closeTestPool();
 });
 
 describe('base prompt', () => {
@@ -83,29 +95,35 @@ describe('drill sergeant persona', () => {
 });
 
 describe('prompt composition', () => {
-  it('combines base + persona into final prompt', () => {
-    const userId = seedTestUser(db, { name: 'Morne' });
-    const result = buildSystemPrompt(db, userId);
+  it('combines base + persona into final prompt', async () => {
+    const userId = await seedTestUser(db, { name: 'Morne' });
+    const result = await buildSystemPrompt(db, userId);
 
     expect(result.prompt).toMatch(/conversational/i);
     expect(result.prompt).toMatch(/direct/i);
     expect(result.prompt).toContain('Morne');
   });
 
-  it('returns the persona TTS voice', () => {
-    const userId = seedTestUser(db, { name: 'Morne' });
-    const result = buildSystemPrompt(db, userId);
+  it('returns the persona TTS voice', async () => {
+    const userId = await seedTestUser(db, { name: 'Morne' });
+    const result = await buildSystemPrompt(db, userId);
 
     expect(result.ttsVoice).toBe(drillSergeant.ttsVoice);
   });
 
-  it('falls back gracefully for unknown persona', () => {
+  it('falls back gracefully for unknown persona', async () => {
     const userId = 'unknown-persona-user';
-    db.prepare(
-      `INSERT INTO users (id, name, persona_id, training_style) VALUES (?, ?, ?, ?)`,
-    ).run(userId, 'Test', 'nonexistent', 'weightlifting');
+    await insertUser(db, {
+      id: userId,
+      name: 'Test',
+      telegram_chat_id: null,
+      persona_id: 'nonexistent',
+      goal_description: null,
+      goal_image_url: null,
+      training_style: 'weightlifting',
+    });
 
-    const result = buildSystemPrompt(db, userId);
+    const result = await buildSystemPrompt(db, userId);
     expect(result.prompt).toMatch(/conversational/i);
     expect(result.ttsVoice).toBeDefined();
   });

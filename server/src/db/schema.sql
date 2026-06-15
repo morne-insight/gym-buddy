@@ -1,3 +1,12 @@
+-- Postgres schema (ported from the original SQLite schema).
+-- Table and column names are preserved verbatim so the data-access layer and
+-- all domain logic are unchanged. Type mapping:
+--   DATETIME -> TIMESTAMPTZ
+--   REAL     -> DOUBLE PRECISION
+-- Boolean-style flag columns (active, completed, skipped, delivered) stay
+-- INTEGER 0/1 to preserve the existing result shapes that TypeScript
+-- interfaces and call sites depend on.
+
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
@@ -6,7 +15,7 @@ CREATE TABLE IF NOT EXISTS users (
   goal_description TEXT,
   goal_image_url TEXT,
   training_style TEXT NOT NULL DEFAULT 'weightlifting',
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS personas (
@@ -26,7 +35,7 @@ CREATE TABLE IF NOT EXISTS programs (
   name TEXT NOT NULL,
   type TEXT NOT NULL CHECK (type IN ('static', 'rotation')),
   active INTEGER NOT NULL DEFAULT 1,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS workouts (
@@ -61,24 +70,29 @@ CREATE TABLE IF NOT EXISTS sessions (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL REFERENCES users(id),
   schedule_id TEXT REFERENCES schedule(id),
-  started_at DATETIME NOT NULL,
-  completed_at DATETIME,
+  started_at TIMESTAMPTZ NOT NULL,
+  completed_at TIMESTAMPTZ,
   status TEXT NOT NULL DEFAULT 'in_progress',
   notes TEXT,
   sentiment TEXT
 );
 
+-- `seq` is an internal insertion-order column that replaces the SQLite `rowid`
+-- used as a tiebreaker in getExerciseHistory. It is not part of the
+-- ExerciseLog contract; queries that return ExerciseLog rows select columns
+-- explicitly where shape matters.
 CREATE TABLE IF NOT EXISTS exercise_logs (
   id TEXT PRIMARY KEY,
+  seq BIGINT GENERATED ALWAYS AS IDENTITY,
   session_id TEXT NOT NULL REFERENCES sessions(id),
   workout_exercise_id TEXT NOT NULL REFERENCES workout_exercises(id),
   completed INTEGER NOT NULL DEFAULT 0,
   skipped INTEGER NOT NULL DEFAULT 0,
   actual_sets INTEGER,
   actual_reps TEXT,
-  actual_weight REAL,
+  actual_weight DOUBLE PRECISION,
   notes TEXT,
-  completed_at DATETIME
+  completed_at TIMESTAMPTZ
 );
 
 CREATE TABLE IF NOT EXISTS set_logs (
@@ -86,14 +100,14 @@ CREATE TABLE IF NOT EXISTS set_logs (
   exercise_log_id TEXT NOT NULL REFERENCES exercise_logs(id),
   set_number INTEGER NOT NULL,
   reps INTEGER NOT NULL,
-  weight REAL,
-  completed_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  weight DOUBLE PRECISION,
+  completed_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS scheduled_messages (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL REFERENCES users(id),
-  deliver_at DATETIME NOT NULL,
+  deliver_at TIMESTAMPTZ NOT NULL,
   message_type TEXT NOT NULL,
   content TEXT,
   image_url TEXT,
@@ -106,5 +120,5 @@ CREATE TABLE IF NOT EXISTS rotation_state (
   user_id TEXT NOT NULL REFERENCES users(id),
   program_id TEXT NOT NULL REFERENCES programs(id),
   current_index INTEGER NOT NULL DEFAULT 0,
-  last_completed_at DATETIME
+  last_completed_at TIMESTAMPTZ
 );

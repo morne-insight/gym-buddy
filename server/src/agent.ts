@@ -11,7 +11,15 @@ import { fileURLToPath } from 'node:url';
 import dotenv from 'dotenv';
 
 import { startTokenServer } from './token-server.js';
-import { createDatabase, runMigrations, createSession, completeSession, getActiveSession, type WorkoutExercise } from './db/index.js';
+import {
+  createDatabase,
+  runMigrations,
+  createSession,
+  completeSession,
+  getActiveSession,
+  getWorkoutExerciseById,
+  closePool,
+} from './db/index.js';
 import { createAgentTools } from './tools/index.js';
 import { buildSystemPrompt } from './prompts/index.js';
 import { getCurrentWorkout } from './tools/getCurrentWorkout.js';
@@ -27,12 +35,13 @@ import { publishDataMessage } from './publish-data.js';
 dotenv.config();
 
 const mainDb = createDatabase();
-runMigrations(mainDb);
 let telegramSender: TelegramSender = async (chatId, imageUrl, caption) => {
   console.log(`[Telegram stub] Would send to ${chatId}: ${imageUrl} — ${caption}`);
 };
 
 if (typeof process.send !== 'function') {
+  // Main (non-job) process: ensure the schema exists, then start the bot/cron.
+  await runMigrations(mainDb);
   startTokenServer();
 
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
@@ -76,7 +85,6 @@ const exerciseInfoFetcher: ExerciseInfoFetcher = async () => null;
 export default defineAgent({
   entry: async (ctx: JobContext) => {
     const db = createDatabase();
-    runMigrations(db);
 
     await ctx.connect();
 
@@ -103,11 +111,11 @@ export default defineAgent({
     };
 
     const tools = createAgentTools(db, exerciseInfoFetcher, telegramSender, dataPublisher, onRestTimerStart);
-    const { prompt } = buildSystemPrompt(db, USER_ID);
+    const { prompt } = await buildSystemPrompt(db, USER_ID);
 
-    const workout = getCurrentWorkout(db, USER_ID);
+    const workout = await getCurrentWorkout(db, USER_ID);
 
-    const dbSession = createSession(db, USER_ID, workout.scheduleId);
+    const dbSession = await createSession(db, USER_ID, workout.scheduleId);
 
     const sessionContext = workout.restDay
       ? `Today is a rest day. The user's active session ID is ${dbSession.id}.`
@@ -131,11 +139,11 @@ export default defineAgent({
 
     ctx.addShutdownCallback(async () => {
       if (restTimer) clearTimeout(restTimer);
-      const active = getActiveSession(db, USER_ID);
+      const active = await getActiveSession(db, USER_ID);
       if (active) {
-        completeSession(db, active.id);
+        await completeSession(db, active.id);
       }
-      db.close();
+      await closePool();
     });
 
     ctx.room.on('participantDisconnected', (participant: { identity: string }) => {
@@ -192,9 +200,7 @@ export default defineAgent({
         },
       });
 
-      const firstWe = db
-        .prepare('SELECT * FROM workout_exercises WHERE id = ?')
-        .get(firstExercise.id) as WorkoutExercise | undefined;
+      const firstWe = await getWorkoutExerciseById(db, firstExercise.id);
       if (firstWe?.exercise_db_id) {
         await publishDataMessage(dataPublisher, {
           type: 'exercise_media',

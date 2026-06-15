@@ -1,13 +1,13 @@
-import type Database from 'better-sqlite3';
 import {
   createExerciseLog,
   getExerciseLogForWorkoutExercise,
   getExercisesForWorkout,
   getExerciseLogsForSession,
+  getWorkoutExerciseById,
   insertSetLog,
   getActiveSession,
   createSession,
-  type WorkoutExercise,
+  type DB,
 } from '../db/index.js';
 
 export interface LogSetParams {
@@ -29,13 +29,13 @@ export interface LogSetResult {
   sessionId: string;
 }
 
-export function logSetCompleted(db: Database.Database, params: LogSetParams): LogSetResult {
+export async function logSetCompleted(db: DB, params: LogSetParams): Promise<LogSetResult> {
   let sessionId = params.sessionId;
 
   if (!sessionId && params.userId) {
-    let session = getActiveSession(db, params.userId);
+    let session = await getActiveSession(db, params.userId);
     if (!session) {
-      session = createSession(db, params.userId, null);
+      session = await createSession(db, params.userId, null);
     }
     sessionId = session.id;
   }
@@ -52,9 +52,7 @@ export function logSetCompleted(db: Database.Database, params: LogSetParams): Lo
     };
   }
 
-  const exercise = db
-    .prepare('SELECT * FROM workout_exercises WHERE id = ?')
-    .get(params.exerciseId) as WorkoutExercise | undefined;
+  const exercise = await getWorkoutExerciseById(db, params.exerciseId);
 
   if (!exercise) {
     return {
@@ -68,12 +66,12 @@ export function logSetCompleted(db: Database.Database, params: LogSetParams): Lo
     };
   }
 
-  let exerciseLog = getExerciseLogForWorkoutExercise(db, sessionId, params.exerciseId);
+  let exerciseLog = await getExerciseLogForWorkoutExercise(db, sessionId, params.exerciseId);
   if (!exerciseLog) {
-    exerciseLog = createExerciseLog(db, sessionId, params.exerciseId);
+    exerciseLog = await createExerciseLog(db, sessionId, params.exerciseId);
   }
 
-  insertSetLog(db, {
+  await insertSetLog(db, {
     exercise_log_id: exerciseLog.id,
     set_number: params.setNumber,
     reps: params.reps,
@@ -82,8 +80,8 @@ export function logSetCompleted(db: Database.Database, params: LogSetParams): Lo
 
   const exerciseComplete = params.setNumber >= exercise.sets;
 
-  const scheduleExercises = getExercisesForWorkout(db, exercise.workout_id);
-  const allLogs = getExerciseLogsForSession(db, sessionId);
+  const scheduleExercises = await getExercisesForWorkout(db, exercise.workout_id);
+  const allLogs = await getExerciseLogsForSession(db, sessionId);
   const completedExerciseIds = new Set(
     allLogs.filter((l) => l.completed === 1 || l.skipped === 1).map((l) => l.workout_exercise_id),
   );

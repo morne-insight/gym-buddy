@@ -1,7 +1,5 @@
-import type Database from 'better-sqlite3';
 import {
   getAllUsers,
-  getUser,
   getPersona,
   getActiveProgram,
   getScheduleForDay,
@@ -11,6 +9,7 @@ import {
   getSessionsForDate,
   peekNextRotationWorkout,
   scheduleMessage,
+  type DB,
 } from '../db/index.js';
 
 export interface EveningCheckInResult {
@@ -19,31 +18,31 @@ export interface EveningCheckInResult {
   skipped: number;
 }
 
-export function runEveningCheckIn(
-  db: Database.Database,
+export async function runEveningCheckIn(
+  db: DB,
   todayDate?: string,
   todayDow?: number,
   tomorrowDow?: number,
-): EveningCheckInResult {
+): Promise<EveningCheckInResult> {
   const now = new Date();
   const date = todayDate ?? now.toISOString().split('T')[0];
   const tDow = todayDow ?? now.getDay();
   const tmDow = tomorrowDow ?? ((tDow + 1) % 7);
 
-  const users = getAllUsers(db);
+  const users = await getAllUsers(db);
   const result: EveningCheckInResult = { checked: 0, messaged: 0, skipped: 0 };
 
   for (const user of users) {
     result.checked++;
 
-    const program = getActiveProgram(db, user.id);
+    const program = await getActiveProgram(db, user.id);
     if (!program) {
       result.skipped++;
       continue;
     }
 
-    const persona = getPersona(db, user.persona_id);
-    const sessionsToday = getSessionsForDate(db, user.id, date);
+    const persona = await getPersona(db, user.persona_id);
+    const sessionsToday = await getSessionsForDate(db, user.id, date);
     const completedToday = sessionsToday.some(s => s.status === 'completed');
 
     let todayWorkoutName: string | null = null;
@@ -51,33 +50,33 @@ export function runEveningCheckIn(
     let missedToday = false;
 
     if (program.type === 'rotation') {
-      const state = getRotationState(db, user.id, program.id);
+      const state = await getRotationState(db, user.id, program.id);
       if (state) {
-        const schedules = getSchedulesByProgram(db, program.id);
+        const schedules = await getSchedulesByProgram(db, program.id);
         const currentSchedule = schedules.find(s => s.sort_order === state.current_index);
         if (currentSchedule) {
-          const currentWorkout = getWorkoutById(db, currentSchedule.workout_id);
+          const currentWorkout = await getWorkoutById(db, currentSchedule.workout_id);
           if (!completedToday && sessionsToday.length === 0) {
             todayWorkoutName = currentWorkout?.name ?? null;
             missedToday = true;
           }
         }
-        const nextWorkout = peekNextRotationWorkout(db, user.id, program.id);
+        const nextWorkout = await peekNextRotationWorkout(db, user.id, program.id);
         nextWorkoutName = nextWorkout?.name ?? null;
       }
     } else {
-      const todaySchedule = getScheduleForDay(db, user.id, tDow);
+      const todaySchedule = await getScheduleForDay(db, user.id, tDow);
       if (todaySchedule) {
-        const workout = getWorkoutById(db, todaySchedule.workout_id);
+        const workout = await getWorkoutById(db, todaySchedule.workout_id);
         todayWorkoutName = workout?.name ?? null;
         if (sessionsToday.length === 0) {
           missedToday = true;
         }
       }
 
-      const tomorrowSchedule = getScheduleForDay(db, user.id, tmDow);
+      const tomorrowSchedule = await getScheduleForDay(db, user.id, tmDow);
       if (tomorrowSchedule) {
-        const workout = getWorkoutById(db, tomorrowSchedule.workout_id);
+        const workout = await getWorkoutById(db, tomorrowSchedule.workout_id);
         nextWorkoutName = workout?.name ?? null;
       }
     }
@@ -116,7 +115,7 @@ export function runEveningCheckIn(
       deliverAt.setDate(deliverAt.getDate() + 1);
     }
 
-    scheduleMessage(db, {
+    await scheduleMessage(db, {
       user_id: user.id,
       deliver_at: deliverAt.toISOString(),
       message_type: messageType,

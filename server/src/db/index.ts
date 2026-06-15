@@ -1,28 +1,49 @@
-import Database from 'better-sqlite3';
 import { readFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { randomUUID } from 'crypto';
+import { getPool, closePool, type DB } from './pool.js';
+
+export { closePool, type DB } from './pool.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-export function createDatabase(dbPath?: string): Database.Database {
-  const db = new Database(dbPath ?? join(__dirname, '../../gym-buddy.db'));
-  db.pragma('journal_mode = WAL');
-  db.pragma('foreign_keys = ON');
-  return db;
+/**
+ * Returns the shared Postgres connection pool. The pool is created once from
+ * `DATABASE_URL` and reused across the agent, cron jobs, and tools.
+ */
+export function createDatabase(): DB {
+  return getPool();
 }
 
-export function runMigrations(db: Database.Database): void {
+/** Applies the Postgres schema (idempotent — all DDL uses IF NOT EXISTS). */
+export async function runMigrations(db: DB): Promise<void> {
   const schema = readFileSync(join(__dirname, 'schema.sql'), 'utf-8');
-  db.exec(schema);
+  await db.unsafe(schema);
 }
 
-export function createInMemoryDatabase(): Database.Database {
-  const db = new Database(':memory:');
-  db.pragma('foreign_keys = ON');
-  runMigrations(db);
-  return db;
+/**
+ * All domain tables in dependency order (children before parents) — used by the
+ * re-seed script and the test harness to clear state. `CASCADE` handles FK
+ * ordering regardless, but the explicit list keeps the set authoritative.
+ */
+export const ALL_TABLES = [
+  'set_logs',
+  'exercise_logs',
+  'sessions',
+  'scheduled_messages',
+  'rotation_state',
+  'schedule',
+  'workout_exercises',
+  'workouts',
+  'programs',
+  'users',
+  'personas',
+] as const;
+
+/** Truncates every domain table and resets identity sequences. */
+export async function truncateAll(db: DB): Promise<void> {
+  await db.unsafe(`TRUNCATE TABLE ${ALL_TABLES.join(', ')} RESTART IDENTITY CASCADE`);
 }
 
 // --- Users ---
@@ -38,38 +59,28 @@ export interface User {
   created_at: string;
 }
 
-export function getUser(db: Database.Database, userId: string): User | undefined {
-  return db.prepare('SELECT * FROM users WHERE id = ?').get(userId) as User | undefined;
+export async function getUser(db: DB, userId: string): Promise<User | undefined> {
+  const [row] = await db`SELECT * FROM users WHERE id = ${userId}`;
+  return row as User | undefined;
 }
 
-export function getAllUsers(db: Database.Database): User[] {
-  return db.prepare('SELECT * FROM users').all() as User[];
+export async function getAllUsers(db: DB): Promise<User[]> {
+  return (await db`SELECT * FROM users`) as unknown as User[];
 }
 
-export function insertUser(
-  db: Database.Database,
-  user: Omit<User, 'created_at'>,
-): void {
-  db.prepare(
-    `INSERT INTO users (id, name, telegram_chat_id, persona_id, goal_description, goal_image_url, training_style)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-  ).run(
-    user.id,
-    user.name,
-    user.telegram_chat_id,
-    user.persona_id,
-    user.goal_description,
-    user.goal_image_url,
-    user.training_style,
-  );
+export async function getUserByTelegramChatId(db: DB, telegramChatId: string): Promise<User | undefined> {
+  const [row] = await db`SELECT * FROM users WHERE telegram_chat_id = ${telegramChatId}`;
+  return row as User | undefined;
 }
 
-export function updateUserTelegram(
-  db: Database.Database,
-  userId: string,
-  telegramChatId: string,
-): void {
-  db.prepare('UPDATE users SET telegram_chat_id = ? WHERE id = ?').run(telegramChatId, userId);
+export async function insertUser(db: DB, user: Omit<User, 'created_at'>): Promise<void> {
+  await db`
+    INSERT INTO users (id, name, telegram_chat_id, persona_id, goal_description, goal_image_url, training_style)
+    VALUES (${user.id}, ${user.name}, ${user.telegram_chat_id}, ${user.persona_id}, ${user.goal_description}, ${user.goal_image_url}, ${user.training_style})`;
+}
+
+export async function updateUserTelegram(db: DB, userId: string, telegramChatId: string): Promise<void> {
+  await db`UPDATE users SET telegram_chat_id = ${telegramChatId} WHERE id = ${userId}`;
 }
 
 // --- Personas ---
@@ -85,24 +96,15 @@ export interface Persona {
   example_no_show_reaction: string | null;
 }
 
-export function getPersona(db: Database.Database, personaId: string): Persona | undefined {
-  return db.prepare('SELECT * FROM personas WHERE id = ?').get(personaId) as Persona | undefined;
+export async function getPersona(db: DB, personaId: string): Promise<Persona | undefined> {
+  const [row] = await db`SELECT * FROM personas WHERE id = ${personaId}`;
+  return row as Persona | undefined;
 }
 
-export function insertPersona(db: Database.Database, persona: Persona): void {
-  db.prepare(
-    `INSERT INTO personas (id, name, description, system_prompt, tts_voice, example_greeting, example_skip_reaction, example_no_show_reaction)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-  ).run(
-    persona.id,
-    persona.name,
-    persona.description,
-    persona.system_prompt,
-    persona.tts_voice,
-    persona.example_greeting,
-    persona.example_skip_reaction,
-    persona.example_no_show_reaction,
-  );
+export async function insertPersona(db: DB, persona: Persona): Promise<void> {
+  await db`
+    INSERT INTO personas (id, name, description, system_prompt, tts_voice, example_greeting, example_skip_reaction, example_no_show_reaction)
+    VALUES (${persona.id}, ${persona.name}, ${persona.description}, ${persona.system_prompt}, ${persona.tts_voice}, ${persona.example_greeting}, ${persona.example_skip_reaction}, ${persona.example_no_show_reaction})`;
 }
 
 // --- Programs ---
@@ -116,20 +118,17 @@ export interface Program {
   created_at: string;
 }
 
-export function insertProgram(db: Database.Database, program: Omit<Program, 'active' | 'created_at'>): void {
-  db.prepare(
-    `INSERT INTO programs (id, user_id, name, type) VALUES (?, ?, ?, ?)`,
-  ).run(program.id, program.user_id, program.name, program.type);
+export async function insertProgram(db: DB, program: Omit<Program, 'active' | 'created_at'>): Promise<void> {
+  await db`INSERT INTO programs (id, user_id, name, type) VALUES (${program.id}, ${program.user_id}, ${program.name}, ${program.type})`;
 }
 
-export function getActiveProgram(db: Database.Database, userId: string): Program | undefined {
-  return db
-    .prepare('SELECT * FROM programs WHERE user_id = ? AND active = 1')
-    .get(userId) as Program | undefined;
+export async function getActiveProgram(db: DB, userId: string): Promise<Program | undefined> {
+  const [row] = await db`SELECT * FROM programs WHERE user_id = ${userId} AND active = 1`;
+  return row as Program | undefined;
 }
 
-export function deactivateUserPrograms(db: Database.Database, userId: string): void {
-  db.prepare('UPDATE programs SET active = 0 WHERE user_id = ?').run(userId);
+export async function deactivateUserPrograms(db: DB, userId: string): Promise<void> {
+  await db`UPDATE programs SET active = 0 WHERE user_id = ${userId}`;
 }
 
 // --- Workouts ---
@@ -140,18 +139,17 @@ export interface Workout {
   name: string;
 }
 
-export function insertWorkout(db: Database.Database, workout: Workout): void {
-  db.prepare(
-    `INSERT INTO workouts (id, program_id, name) VALUES (?, ?, ?)`,
-  ).run(workout.id, workout.program_id, workout.name);
+export async function insertWorkout(db: DB, workout: Workout): Promise<void> {
+  await db`INSERT INTO workouts (id, program_id, name) VALUES (${workout.id}, ${workout.program_id}, ${workout.name})`;
 }
 
-export function getWorkoutById(db: Database.Database, workoutId: string): Workout | undefined {
-  return db.prepare('SELECT * FROM workouts WHERE id = ?').get(workoutId) as Workout | undefined;
+export async function getWorkoutById(db: DB, workoutId: string): Promise<Workout | undefined> {
+  const [row] = await db`SELECT * FROM workouts WHERE id = ${workoutId}`;
+  return row as Workout | undefined;
 }
 
-export function getWorkoutsByProgram(db: Database.Database, programId: string): Workout[] {
-  return db.prepare('SELECT * FROM workouts WHERE program_id = ?').all(programId) as Workout[];
+export async function getWorkoutsByProgram(db: DB, programId: string): Promise<Workout[]> {
+  return (await db`SELECT * FROM workouts WHERE program_id = ${programId}`) as unknown as Workout[];
 }
 
 // --- Schedule ---
@@ -167,50 +165,28 @@ export interface Schedule {
   active: number;
 }
 
-export function getScheduleForDay(
-  db: Database.Database,
-  userId: string,
-  dayOfWeek: number,
-): Schedule | undefined {
-  return db
-    .prepare('SELECT * FROM schedule WHERE user_id = ? AND day_of_week = ? AND active = 1')
-    .get(userId, dayOfWeek) as Schedule | undefined;
+export async function getScheduleForDay(db: DB, userId: string, dayOfWeek: number): Promise<Schedule | undefined> {
+  const [row] = await db`SELECT * FROM schedule WHERE user_id = ${userId} AND day_of_week = ${dayOfWeek} AND active = 1`;
+  return row as Schedule | undefined;
 }
 
-export function getUserSchedules(db: Database.Database, userId: string): Schedule[] {
-  return db
-    .prepare('SELECT * FROM schedule WHERE user_id = ? AND active = 1 ORDER BY day_of_week')
-    .all(userId) as Schedule[];
+export async function getUserSchedules(db: DB, userId: string): Promise<Schedule[]> {
+  return (await db`SELECT * FROM schedule WHERE user_id = ${userId} AND active = 1 ORDER BY day_of_week`) as unknown as Schedule[];
 }
 
-export function insertSchedule(
-  db: Database.Database,
-  schedule: Omit<Schedule, 'active'>,
-): void {
-  db.prepare(
-    `INSERT INTO schedule (id, user_id, program_id, workout_id, day_of_week, scheduled_time, sort_order)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-  ).run(
-    schedule.id,
-    schedule.user_id,
-    schedule.program_id,
-    schedule.workout_id,
-    schedule.day_of_week,
-    schedule.scheduled_time,
-    schedule.sort_order,
-  );
+export async function insertSchedule(db: DB, schedule: Omit<Schedule, 'active'>): Promise<void> {
+  await db`
+    INSERT INTO schedule (id, user_id, program_id, workout_id, day_of_week, scheduled_time, sort_order)
+    VALUES (${schedule.id}, ${schedule.user_id}, ${schedule.program_id}, ${schedule.workout_id}, ${schedule.day_of_week}, ${schedule.scheduled_time}, ${schedule.sort_order})`;
 }
 
-export function getSchedulesByProgram(db: Database.Database, programId: string): Schedule[] {
-  return db
-    .prepare('SELECT * FROM schedule WHERE program_id = ? AND active = 1 ORDER BY sort_order')
-    .all(programId) as Schedule[];
+export async function getSchedulesByProgram(db: DB, programId: string): Promise<Schedule[]> {
+  return (await db`SELECT * FROM schedule WHERE program_id = ${programId} AND active = 1 ORDER BY sort_order`) as unknown as Schedule[];
 }
 
-export function getScheduleAtIndex(db: Database.Database, programId: string, sortOrder: number): Schedule | undefined {
-  return db
-    .prepare('SELECT * FROM schedule WHERE program_id = ? AND sort_order = ? AND active = 1')
-    .get(programId, sortOrder) as Schedule | undefined;
+export async function getScheduleAtIndex(db: DB, programId: string, sortOrder: number): Promise<Schedule | undefined> {
+  const [row] = await db`SELECT * FROM schedule WHERE program_id = ${programId} AND sort_order = ${sortOrder} AND active = 1`;
+  return row as Schedule | undefined;
 }
 
 // --- Workout Exercises ---
@@ -226,29 +202,19 @@ export interface WorkoutExercise {
   sort_order: number;
 }
 
-export function getExercisesForWorkout(
-  db: Database.Database,
-  workoutId: string,
-): WorkoutExercise[] {
-  return db
-    .prepare('SELECT * FROM workout_exercises WHERE workout_id = ? ORDER BY sort_order')
-    .all(workoutId) as WorkoutExercise[];
+export async function getWorkoutExerciseById(db: DB, exerciseId: string): Promise<WorkoutExercise | undefined> {
+  const [row] = await db`SELECT * FROM workout_exercises WHERE id = ${exerciseId}`;
+  return row as WorkoutExercise | undefined;
 }
 
-export function insertWorkoutExercise(db: Database.Database, exercise: WorkoutExercise): void {
-  db.prepare(
-    `INSERT INTO workout_exercises (id, workout_id, exercise_name, exercise_db_id, sets, reps, rest_seconds, sort_order)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-  ).run(
-    exercise.id,
-    exercise.workout_id,
-    exercise.exercise_name,
-    exercise.exercise_db_id,
-    exercise.sets,
-    exercise.reps,
-    exercise.rest_seconds,
-    exercise.sort_order,
-  );
+export async function getExercisesForWorkout(db: DB, workoutId: string): Promise<WorkoutExercise[]> {
+  return (await db`SELECT * FROM workout_exercises WHERE workout_id = ${workoutId} ORDER BY sort_order`) as unknown as WorkoutExercise[];
+}
+
+export async function insertWorkoutExercise(db: DB, exercise: WorkoutExercise): Promise<void> {
+  await db`
+    INSERT INTO workout_exercises (id, workout_id, exercise_name, exercise_db_id, sets, reps, rest_seconds, sort_order)
+    VALUES (${exercise.id}, ${exercise.workout_id}, ${exercise.exercise_name}, ${exercise.exercise_db_id}, ${exercise.sets}, ${exercise.reps}, ${exercise.rest_seconds}, ${exercise.sort_order})`;
 }
 
 // --- Rotation State ---
@@ -261,56 +227,67 @@ export interface RotationState {
   last_completed_at: string | null;
 }
 
-export function insertRotationState(db: Database.Database, state: Omit<RotationState, 'last_completed_at'>): void {
-  db.prepare(
-    `INSERT INTO rotation_state (id, user_id, program_id, current_index) VALUES (?, ?, ?, ?)`,
-  ).run(state.id, state.user_id, state.program_id, state.current_index);
+export async function insertRotationState(db: DB, state: Omit<RotationState, 'last_completed_at'>): Promise<void> {
+  await db`INSERT INTO rotation_state (id, user_id, program_id, current_index) VALUES (${state.id}, ${state.user_id}, ${state.program_id}, ${state.current_index})`;
 }
 
-export function getRotationState(db: Database.Database, userId: string, programId: string): RotationState | undefined {
-  return db
-    .prepare('SELECT * FROM rotation_state WHERE user_id = ? AND program_id = ?')
-    .get(userId, programId) as RotationState | undefined;
+export async function getRotationState(db: DB, userId: string, programId: string): Promise<RotationState | undefined> {
+  const [row] = await db`SELECT * FROM rotation_state WHERE user_id = ${userId} AND program_id = ${programId}`;
+  return row as RotationState | undefined;
 }
 
-export function advanceRotation(db: Database.Database, userId: string, programId: string, rotationLength: number): void {
+export async function advanceRotation(db: DB, userId: string, programId: string, rotationLength: number): Promise<void> {
   const now = new Date().toISOString();
-  db.prepare(
-    `UPDATE rotation_state SET current_index = (current_index + 1) % ?, last_completed_at = ? WHERE user_id = ? AND program_id = ?`,
-  ).run(rotationLength, now, userId, programId);
+  await db`
+    UPDATE rotation_state
+    SET current_index = (current_index + 1) % ${rotationLength}, last_completed_at = ${now}
+    WHERE user_id = ${userId} AND program_id = ${programId}`;
 }
 
 // --- Smart Resolution helpers ---
 
-export function peekNextRotationWorkout(db: Database.Database, userId: string, programId: string): Workout | undefined {
-  const state = getRotationState(db, userId, programId);
+export async function peekNextRotationWorkout(db: DB, userId: string, programId: string): Promise<Workout | undefined> {
+  const state = await getRotationState(db, userId, programId);
   if (!state) return undefined;
 
-  const schedules = getSchedulesByProgram(db, programId);
+  const schedules = await getSchedulesByProgram(db, programId);
   if (schedules.length === 0) return undefined;
 
   const nextIndex = (state.current_index + 1) % schedules.length;
-  const nextSchedule = schedules.find(s => s.sort_order === nextIndex);
+  const nextSchedule = schedules.find((s) => s.sort_order === nextIndex);
   if (!nextSchedule) return undefined;
 
   return getWorkoutById(db, nextSchedule.workout_id);
 }
 
-export function getCompletedWorkoutsThisWeek(
-  db: Database.Database,
+export async function getCompletedWorkoutsThisWeek(
+  db: DB,
   userId: string,
   referenceDate?: string,
-): string[] {
+): Promise<string[]> {
   const ref = referenceDate ?? new Date().toISOString().split('T')[0];
-  return (db
-    .prepare(
-      `SELECT DISTINCT s.workout_id FROM schedule s
-       JOIN sessions ses ON ses.schedule_id = s.id
-       WHERE ses.user_id = ? AND ses.status = 'completed'
-       AND ses.started_at >= DATE(?, 'weekday 1', '-7 days')
-       AND ses.started_at < DATE(?, 'weekday 1')`,
+  // Re-express the prior SQLite `DATE(?, 'weekday 1', '-7 days')` window in
+  // Postgres. SQLite's `weekday 1` yields the smallest Monday >= ref; the
+  // window is [that Monday - 7 days, that Monday). For a Monday reference this
+  // resolves to the *previous* ISO week, exactly as SQLite did — parity is
+  // preserved including that edge.
+  const rows = await db`
+    WITH bounds AS (
+      SELECT (
+        CASE WHEN extract(isodow FROM ${ref}::date) = 1
+             THEN ${ref}::date
+             ELSE date_trunc('week', ${ref}::date)::date + 7
+        END
+      ) AS week_end
     )
-    .all(userId, ref, ref) as Array<{ workout_id: string }>).map(r => r.workout_id);
+    SELECT DISTINCT s.workout_id
+    FROM schedule s
+    JOIN sessions ses ON ses.schedule_id = s.id
+    CROSS JOIN bounds b
+    WHERE ses.user_id = ${userId} AND ses.status = 'completed'
+      AND ses.started_at >= (b.week_end - 7)::timestamptz
+      AND ses.started_at <  b.week_end::timestamptz`;
+  return (rows as unknown as Array<{ workout_id: string }>).map((r) => r.workout_id);
 }
 
 // --- Sessions ---
@@ -326,65 +303,51 @@ export interface Session {
   sentiment: string | null;
 }
 
-export function createSession(
-  db: Database.Database,
-  userId: string,
-  scheduleId: string | null,
-): Session {
+export async function createSession(db: DB, userId: string, scheduleId: string | null): Promise<Session> {
   const id = randomUUID();
   const now = new Date().toISOString();
-  db.prepare(
-    `INSERT INTO sessions (id, user_id, schedule_id, started_at, status)
-     VALUES (?, ?, ?, ?, 'in_progress')`,
-  ).run(id, userId, scheduleId, now);
-  return db.prepare('SELECT * FROM sessions WHERE id = ?').get(id) as Session;
+  const [row] = await db`
+    INSERT INTO sessions (id, user_id, schedule_id, started_at, status)
+    VALUES (${id}, ${userId}, ${scheduleId}, ${now}, 'in_progress')
+    RETURNING *`;
+  return row as Session;
 }
 
-export function completeSession(db: Database.Database, sessionId: string): void {
-  const session = db.prepare('SELECT * FROM sessions WHERE id = ?').get(sessionId) as Session | undefined;
-  if (!session || session.status !== 'in_progress') return;
+export async function completeSession(db: DB, sessionId: string): Promise<void> {
+  await db.begin(async (sql) => {
+    const [session] = await sql`SELECT * FROM sessions WHERE id = ${sessionId}`;
+    if (!session || session.status !== 'in_progress') return;
 
-  const now = new Date().toISOString();
-  db.prepare(
-    `UPDATE sessions SET status = 'completed', completed_at = ? WHERE id = ?`,
-  ).run(now, sessionId);
+    const now = new Date().toISOString();
+    await sql`UPDATE sessions SET status = 'completed', completed_at = ${now} WHERE id = ${sessionId}`;
 
-  if (session.schedule_id) {
-    const schedule = db.prepare('SELECT * FROM schedule WHERE id = ?').get(session.schedule_id) as Schedule | undefined;
-    if (schedule) {
-      const program = db.prepare('SELECT * FROM programs WHERE id = ?').get(schedule.program_id) as Program | undefined;
-      if (program?.type === 'rotation') {
-        const scheduleCount = (db.prepare(
-          'SELECT COUNT(*) as cnt FROM schedule WHERE program_id = ? AND active = 1',
-        ).get(program.id) as { cnt: number }).cnt;
-        advanceRotation(db, session.user_id, program.id, scheduleCount);
+    if (session.schedule_id) {
+      const [schedule] = await sql`SELECT * FROM schedule WHERE id = ${session.schedule_id}`;
+      if (schedule) {
+        const [program] = await sql`SELECT * FROM programs WHERE id = ${schedule.program_id}`;
+        if (program?.type === 'rotation') {
+          const [{ cnt }] = await sql`SELECT COUNT(*)::int AS cnt FROM schedule WHERE program_id = ${program.id} AND active = 1`;
+          await sql`
+            UPDATE rotation_state
+            SET current_index = (current_index + 1) % ${cnt}, last_completed_at = ${now}
+            WHERE user_id = ${session.user_id} AND program_id = ${program.id}`;
+        }
       }
     }
-  }
+  });
 }
 
-export function getActiveSession(db: Database.Database, userId: string): Session | undefined {
-  return db
-    .prepare("SELECT * FROM sessions WHERE user_id = ? AND status = 'in_progress' ORDER BY started_at DESC LIMIT 1")
-    .get(userId) as Session | undefined;
+export async function getActiveSession(db: DB, userId: string): Promise<Session | undefined> {
+  const [row] = await db`SELECT * FROM sessions WHERE user_id = ${userId} AND status = 'in_progress' ORDER BY started_at DESC LIMIT 1`;
+  return row as Session | undefined;
 }
 
-export function updateSessionSentiment(
-  db: Database.Database,
-  sessionId: string,
-  sentiment: string,
-): void {
-  db.prepare('UPDATE sessions SET sentiment = ? WHERE id = ?').run(sentiment, sessionId);
+export async function updateSessionSentiment(db: DB, sessionId: string, sentiment: string): Promise<void> {
+  await db`UPDATE sessions SET sentiment = ${sentiment} WHERE id = ${sessionId}`;
 }
 
-export function getSessionsForDate(
-  db: Database.Database,
-  userId: string,
-  date: string,
-): Session[] {
-  return db
-    .prepare("SELECT * FROM sessions WHERE user_id = ? AND DATE(started_at) = DATE(?)")
-    .all(userId, date) as Session[];
+export async function getSessionsForDate(db: DB, userId: string, date: string): Promise<Session[]> {
+  return (await db`SELECT * FROM sessions WHERE user_id = ${userId} AND started_at::date = ${date}::date`) as unknown as Session[];
 }
 
 // --- Exercise Logs ---
@@ -405,97 +368,64 @@ export interface ExerciseLog {
   completed_at: string | null;
 }
 
-export function logExercise(
-  db: Database.Database,
+export async function logExercise(
+  db: DB,
   log: Omit<ExerciseLog, 'id' | 'completed_at'> & { completed_at?: string },
-): ExerciseLog {
+): Promise<ExerciseLog> {
   const id = randomUUID();
   const completedAt = log.completed_at ?? (log.completed ? new Date().toISOString() : null);
-  db.prepare(
-    `INSERT INTO exercise_logs (id, session_id, workout_exercise_id, completed, skipped, actual_sets, actual_reps, actual_weight, notes, completed_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-  ).run(
-    id,
-    log.session_id,
-    log.workout_exercise_id,
-    log.completed,
-    log.skipped,
-    log.actual_sets,
-    log.actual_reps,
-    log.actual_weight,
-    log.notes,
-    completedAt,
-  );
-  return db.prepare('SELECT * FROM exercise_logs WHERE id = ?').get(id) as ExerciseLog;
+  const [row] = await db`
+    INSERT INTO exercise_logs (id, session_id, workout_exercise_id, completed, skipped, actual_sets, actual_reps, actual_weight, notes, completed_at)
+    VALUES (${id}, ${log.session_id}, ${log.workout_exercise_id}, ${log.completed}, ${log.skipped}, ${log.actual_sets}, ${log.actual_reps}, ${log.actual_weight}, ${log.notes}, ${completedAt})
+    RETURNING *`;
+  return row as ExerciseLog;
 }
 
-export function createExerciseLog(
-  db: Database.Database,
-  sessionId: string,
-  workoutExerciseId: string,
-): ExerciseLog {
+export async function createExerciseLog(db: DB, sessionId: string, workoutExerciseId: string): Promise<ExerciseLog> {
   const id = randomUUID();
-  db.prepare(
-    `INSERT INTO exercise_logs (id, session_id, workout_exercise_id, completed, skipped)
-     VALUES (?, ?, ?, 0, 0)`,
-  ).run(id, sessionId, workoutExerciseId);
-  return db.prepare('SELECT * FROM exercise_logs WHERE id = ?').get(id) as ExerciseLog;
+  const [row] = await db`
+    INSERT INTO exercise_logs (id, session_id, workout_exercise_id, completed, skipped)
+    VALUES (${id}, ${sessionId}, ${workoutExerciseId}, 0, 0)
+    RETURNING *`;
+  return row as ExerciseLog;
 }
 
-export function markExerciseLogCompleted(
-  db: Database.Database,
-  exerciseLogId: string,
-): void {
-  db.prepare(
-    'UPDATE exercise_logs SET completed = 1, completed_at = ? WHERE id = ?',
-  ).run(new Date().toISOString(), exerciseLogId);
+export async function markExerciseLogCompleted(db: DB, exerciseLogId: string): Promise<void> {
+  await db`UPDATE exercise_logs SET completed = 1, completed_at = ${new Date().toISOString()} WHERE id = ${exerciseLogId}`;
 }
 
-export function markExerciseLogSkipped(
-  db: Database.Database,
-  exerciseLogId: string,
-): void {
-  db.prepare(
-    'UPDATE exercise_logs SET skipped = 1, completed_at = ? WHERE id = ?',
-  ).run(new Date().toISOString(), exerciseLogId);
+export async function markExerciseLogSkipped(db: DB, exerciseLogId: string): Promise<void> {
+  await db`UPDATE exercise_logs SET skipped = 1, completed_at = ${new Date().toISOString()} WHERE id = ${exerciseLogId}`;
 }
 
-export function getExerciseLogForWorkoutExercise(
-  db: Database.Database,
+export async function getExerciseLogForWorkoutExercise(
+  db: DB,
   sessionId: string,
   workoutExerciseId: string,
-): ExerciseLog | undefined {
-  return db
-    .prepare('SELECT * FROM exercise_logs WHERE session_id = ? AND workout_exercise_id = ?')
-    .get(sessionId, workoutExerciseId) as ExerciseLog | undefined;
+): Promise<ExerciseLog | undefined> {
+  const [row] = await db`SELECT * FROM exercise_logs WHERE session_id = ${sessionId} AND workout_exercise_id = ${workoutExerciseId}`;
+  return row as ExerciseLog | undefined;
 }
 
-export function getExerciseLogsForSession(
-  db: Database.Database,
-  sessionId: string,
-): ExerciseLog[] {
-  return db
-    .prepare('SELECT * FROM exercise_logs WHERE session_id = ?')
-    .all(sessionId) as ExerciseLog[];
+export async function getExerciseLogsForSession(db: DB, sessionId: string): Promise<ExerciseLog[]> {
+  return (await db`SELECT * FROM exercise_logs WHERE session_id = ${sessionId}`) as unknown as ExerciseLog[];
 }
 
-export function getExerciseHistory(
-  db: Database.Database,
+export async function getExerciseHistory(
+  db: DB,
   userId: string,
   exerciseName: string,
   limit: number = 10,
-): Array<ExerciseLog & { started_at: string }> {
-  return db
-    .prepare(
-      `SELECT el.*, s.started_at
-       FROM exercise_logs el
-       JOIN sessions s ON el.session_id = s.id
-       JOIN workout_exercises we ON el.workout_exercise_id = we.id
-       WHERE s.user_id = ? AND we.exercise_name = ?
-       ORDER BY s.started_at DESC, el.rowid DESC
-       LIMIT ?`,
-    )
-    .all(userId, exerciseName, limit) as Array<ExerciseLog & { started_at: string }>;
+): Promise<Array<ExerciseLog & { started_at: string }>> {
+  // `el.seq` (insertion order) replaces the SQLite `el.rowid` tiebreaker.
+  return (await db`
+    SELECT el.*, s.started_at
+    FROM exercise_logs el
+    JOIN sessions s ON el.session_id = s.id
+    JOIN workout_exercises we ON el.workout_exercise_id = we.id
+    WHERE s.user_id = ${userId} AND we.exercise_name = ${exerciseName}
+    ORDER BY s.started_at DESC, el.seq DESC
+    LIMIT ${limit}`) as unknown as Array<ExerciseLog & { started_at: string }>;
 }
 
 // --- Set Logs ---
@@ -509,26 +439,18 @@ export interface SetLog {
   completed_at: string | null;
 }
 
-export function insertSetLog(
-  db: Database.Database,
-  log: Omit<SetLog, 'id' | 'completed_at'>,
-): SetLog {
+export async function insertSetLog(db: DB, log: Omit<SetLog, 'id' | 'completed_at'>): Promise<SetLog> {
   const id = randomUUID();
   const completedAt = new Date().toISOString();
-  db.prepare(
-    `INSERT INTO set_logs (id, exercise_log_id, set_number, reps, weight, completed_at)
-     VALUES (?, ?, ?, ?, ?, ?)`,
-  ).run(id, log.exercise_log_id, log.set_number, log.reps, log.weight, completedAt);
-  return db.prepare('SELECT * FROM set_logs WHERE id = ?').get(id) as SetLog;
+  const [row] = await db`
+    INSERT INTO set_logs (id, exercise_log_id, set_number, reps, weight, completed_at)
+    VALUES (${id}, ${log.exercise_log_id}, ${log.set_number}, ${log.reps}, ${log.weight}, ${completedAt})
+    RETURNING *`;
+  return row as SetLog;
 }
 
-export function getSetLogsForExercise(
-  db: Database.Database,
-  exerciseLogId: string,
-): SetLog[] {
-  return db
-    .prepare('SELECT * FROM set_logs WHERE exercise_log_id = ? ORDER BY set_number')
-    .all(exerciseLogId) as SetLog[];
+export async function getSetLogsForExercise(db: DB, exerciseLogId: string): Promise<SetLog[]> {
+  return (await db`SELECT * FROM set_logs WHERE exercise_log_id = ${exerciseLogId} ORDER BY set_number`) as unknown as SetLog[];
 }
 
 // --- Scheduled Messages ---
@@ -544,27 +466,23 @@ export interface ScheduledMessage {
   created_by: string | null;
 }
 
-export function scheduleMessage(
-  db: Database.Database,
+export async function scheduleMessage(
+  db: DB,
   msg: Omit<ScheduledMessage, 'id' | 'delivered'>,
-): ScheduledMessage {
+): Promise<ScheduledMessage> {
   const id = randomUUID();
-  db.prepare(
-    `INSERT INTO scheduled_messages (id, user_id, deliver_at, message_type, content, image_url, created_by)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-  ).run(id, msg.user_id, msg.deliver_at, msg.message_type, msg.content, msg.image_url, msg.created_by);
-  return db.prepare('SELECT * FROM scheduled_messages WHERE id = ?').get(id) as ScheduledMessage;
+  const [row] = await db`
+    INSERT INTO scheduled_messages (id, user_id, deliver_at, message_type, content, image_url, created_by)
+    VALUES (${id}, ${msg.user_id}, ${msg.deliver_at}, ${msg.message_type}, ${msg.content}, ${msg.image_url}, ${msg.created_by})
+    RETURNING *`;
+  return row as ScheduledMessage;
 }
 
-export function getPendingMessages(db: Database.Database, now?: string): ScheduledMessage[] {
+export async function getPendingMessages(db: DB, now?: string): Promise<ScheduledMessage[]> {
   const currentTime = now ?? new Date().toISOString();
-  return db
-    .prepare(
-      'SELECT * FROM scheduled_messages WHERE delivered = 0 AND deliver_at <= ? ORDER BY deliver_at',
-    )
-    .all(currentTime) as ScheduledMessage[];
+  return (await db`SELECT * FROM scheduled_messages WHERE delivered = 0 AND deliver_at <= ${currentTime} ORDER BY deliver_at`) as unknown as ScheduledMessage[];
 }
 
-export function markMessageDelivered(db: Database.Database, messageId: string): void {
-  db.prepare('UPDATE scheduled_messages SET delivered = 1 WHERE id = ?').run(messageId);
+export async function markMessageDelivered(db: DB, messageId: string): Promise<void> {
+  await db`UPDATE scheduled_messages SET delivered = 1 WHERE id = ${messageId}`;
 }

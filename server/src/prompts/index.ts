@@ -1,5 +1,4 @@
-import type Database from 'better-sqlite3';
-import { getUser } from '../db/index.js';
+import { getUser, type DB } from '../db/index.js';
 import { getBasePrompt } from './base.js';
 import { drillSergeant, type PersonaConfig } from './personas/drill-sergeant.js';
 
@@ -14,8 +13,8 @@ interface SystemPromptResult {
   ttsVoice: string;
 }
 
-export function buildSystemPrompt(db: Database.Database, userId: string): SystemPromptResult {
-  const user = getUser(db, userId);
+export async function buildSystemPrompt(db: DB, userId: string): Promise<SystemPromptResult> {
+  const user = await getUser(db, userId);
   const userName = user?.name ?? 'Athlete';
   const persona = (user ? personas[user.persona_id] : null) ?? defaultPersona;
 

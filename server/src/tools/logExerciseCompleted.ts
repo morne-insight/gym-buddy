@@ -1,11 +1,11 @@
-import type Database from 'better-sqlite3';
 import {
   logExercise,
   getExerciseLogsForSession,
   getExercisesForWorkout,
+  getWorkoutExerciseById,
   createSession,
   getActiveSession,
-  type WorkoutExercise,
+  type DB,
 } from '../db/index.js';
 
 interface LogExerciseParams {
@@ -28,13 +28,13 @@ export interface LogExerciseResult {
   sessionId?: string;
 }
 
-export function logExerciseCompleted(db: Database.Database, params: LogExerciseParams): LogExerciseResult {
+export async function logExerciseCompleted(db: DB, params: LogExerciseParams): Promise<LogExerciseResult> {
   let sessionId = params.sessionId;
 
   if (!sessionId && params.userId) {
-    let session = getActiveSession(db, params.userId);
+    let session = await getActiveSession(db, params.userId);
     if (!session) {
-      session = createSession(db, params.userId, null);
+      session = await createSession(db, params.userId, null);
     }
     sessionId = session.id;
   }
@@ -43,17 +43,15 @@ export function logExerciseCompleted(db: Database.Database, params: LogExerciseP
     return { logged: false, remaining: 0 };
   }
 
-  const existingLogs = getExerciseLogsForSession(db, sessionId);
+  const existingLogs = await getExerciseLogsForSession(db, sessionId);
   const alreadyLogged = existingLogs.some((l) => l.workout_exercise_id === params.exerciseId);
   if (alreadyLogged) {
     return { logged: false, alreadyLogged: true, remaining: 0 };
   }
 
-  const exercise = db
-    .prepare('SELECT * FROM workout_exercises WHERE id = ?')
-    .get(params.exerciseId) as WorkoutExercise | undefined;
+  const exercise = await getWorkoutExerciseById(db, params.exerciseId);
 
-  logExercise(db, {
+  await logExercise(db, {
     session_id: sessionId,
     workout_exercise_id: params.exerciseId,
     completed: params.skipped ? 0 : 1,
@@ -66,8 +64,8 @@ export function logExerciseCompleted(db: Database.Database, params: LogExerciseP
 
   let remaining = 0;
   if (exercise) {
-    const scheduleExercises = getExercisesForWorkout(db, exercise.workout_id);
-    const logsAfter = getExerciseLogsForSession(db, sessionId);
+    const scheduleExercises = await getExercisesForWorkout(db, exercise.workout_id);
+    const logsAfter = await getExerciseLogsForSession(db, sessionId);
     const loggedIds = new Set(logsAfter.map((l) => l.workout_exercise_id));
     remaining = scheduleExercises.filter((e) => !loggedIds.has(e.id)).length;
   }

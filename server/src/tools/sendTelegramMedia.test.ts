@@ -1,24 +1,35 @@
 import { sendTelegramMedia, type TelegramSender } from './sendTelegramMedia.js';
-import { createTestDatabase, seedTestUser, seedTestPersona } from '../db/test-helpers.js';
-import { updateUserTelegram } from '../db/index.js';
-import type Database from 'better-sqlite3';
-import { beforeEach, afterEach, describe, it, expect } from '@jest/globals';
+import {
+  createTestDatabase,
+  setupTestSchema,
+  resetTestData,
+  closeTestPool,
+  seedTestUser,
+  seedTestPersona,
+} from '../db/test-helpers.js';
+import { updateUserTelegram, type DB } from '../db/index.js';
+import { beforeAll, beforeEach, afterAll, describe, it, expect } from '@jest/globals';
 
-let db: Database.Database;
+let db: DB;
 
-beforeEach(() => {
+beforeAll(async () => {
   db = createTestDatabase();
-  seedTestPersona(db);
+  await setupTestSchema();
 });
 
-afterEach(() => {
-  db.close();
+beforeEach(async () => {
+  await resetTestData();
+  await seedTestPersona(db);
+});
+
+afterAll(async () => {
+  await closeTestPool();
 });
 
 describe('sendTelegramMedia', () => {
   it('sends media to a user with linked telegram', async () => {
-    const userId = seedTestUser(db);
-    updateUserTelegram(db, userId, '12345');
+    const userId = await seedTestUser(db);
+    await updateUserTelegram(db, userId, '12345');
 
     const sent: Array<{ chatId: string; imageUrl: string; caption?: string }> = [];
     const mockSender: TelegramSender = async (chatId, imageUrl, caption) => {
@@ -39,7 +50,7 @@ describe('sendTelegramMedia', () => {
   });
 
   it('fails when user has no telegram linked', async () => {
-    const userId = seedTestUser(db);
+    const userId = await seedTestUser(db);
 
     const mockSender: TelegramSender = async () => {};
 
@@ -53,8 +64,8 @@ describe('sendTelegramMedia', () => {
   });
 
   it('handles send failures gracefully', async () => {
-    const userId = seedTestUser(db);
-    updateUserTelegram(db, userId, '12345');
+    const userId = await seedTestUser(db);
+    await updateUserTelegram(db, userId, '12345');
 
     const failingSender: TelegramSender = async () => {
       throw new Error('Telegram API error');

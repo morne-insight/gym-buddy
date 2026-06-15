@@ -1,27 +1,39 @@
 import { logSetCompleted } from './logSetCompleted.js';
-import { createTestDatabase, seedTestUser, seedTestPersona, seedTestSchedule } from '../db/test-helpers.js';
-import { createSession, getSetLogsForExercise, getExerciseLogForWorkoutExercise } from '../db/index.js';
-import type Database from 'better-sqlite3';
-import { beforeEach, afterEach, describe, it, expect } from '@jest/globals';
+import {
+  createTestDatabase,
+  setupTestSchema,
+  resetTestData,
+  closeTestPool,
+  seedTestUser,
+  seedTestPersona,
+  seedTestSchedule,
+} from '../db/test-helpers.js';
+import { createSession, getSetLogsForExercise, getExerciseLogForWorkoutExercise, type DB } from '../db/index.js';
+import { beforeAll, beforeEach, afterAll, describe, it, expect } from '@jest/globals';
 
-let db: Database.Database;
+let db: DB;
 
-beforeEach(() => {
+beforeAll(async () => {
   db = createTestDatabase();
-  seedTestPersona(db);
+  await setupTestSchema();
 });
 
-afterEach(() => {
-  db.close();
+beforeEach(async () => {
+  await resetTestData();
+  await seedTestPersona(db);
+});
+
+afterAll(async () => {
+  await closeTestPool();
 });
 
 describe('logSetCompleted', () => {
-  it('creates parent exercise_log on first set', () => {
-    const userId = seedTestUser(db);
-    seedTestSchedule(db, userId);
-    const session = createSession(db, userId, 'sched-monday-push');
+  it('creates parent exercise_log on first set', async () => {
+    const userId = await seedTestUser(db);
+    await seedTestSchedule(db, userId);
+    const session = await createSession(db, userId, 'sched-monday-push');
 
-    const result = logSetCompleted(db, {
+    const result = await logSetCompleted(db, {
       sessionId: session.id,
       exerciseId: 'ex-bench',
       setNumber: 1,
@@ -34,16 +46,16 @@ describe('logSetCompleted', () => {
     expect(result.totalSets).toBe(4);
     expect(result.exerciseComplete).toBe(false);
 
-    const exerciseLog = getExerciseLogForWorkoutExercise(db, session.id, 'ex-bench');
+    const exerciseLog = await getExerciseLogForWorkoutExercise(db, session.id, 'ex-bench');
     expect(exerciseLog).toBeDefined();
   });
 
-  it('appends subsequent sets to existing exercise_log', () => {
-    const userId = seedTestUser(db);
-    seedTestSchedule(db, userId);
-    const session = createSession(db, userId, 'sched-monday-push');
+  it('appends subsequent sets to existing exercise_log', async () => {
+    const userId = await seedTestUser(db);
+    await seedTestSchedule(db, userId);
+    const session = await createSession(db, userId, 'sched-monday-push');
 
-    logSetCompleted(db, {
+    await logSetCompleted(db, {
       sessionId: session.id,
       exerciseId: 'ex-bench',
       setNumber: 1,
@@ -51,7 +63,7 @@ describe('logSetCompleted', () => {
       weight: 80,
     });
 
-    const result = logSetCompleted(db, {
+    const result = await logSetCompleted(db, {
       sessionId: session.id,
       exerciseId: 'ex-bench',
       setNumber: 2,
@@ -63,20 +75,20 @@ describe('logSetCompleted', () => {
     expect(result.setNumber).toBe(2);
     expect(result.exerciseComplete).toBe(false);
 
-    const exerciseLog = getExerciseLogForWorkoutExercise(db, session.id, 'ex-bench');
-    const setLogs = getSetLogsForExercise(db, exerciseLog!.id);
+    const exerciseLog = await getExerciseLogForWorkoutExercise(db, session.id, 'ex-bench');
+    const setLogs = await getSetLogsForExercise(db, exerciseLog!.id);
     expect(setLogs).toHaveLength(2);
     expect(setLogs[0].reps).toBe(10);
     expect(setLogs[1].reps).toBe(8);
   });
 
-  it('marks exercise complete on final set', () => {
-    const userId = seedTestUser(db);
-    seedTestSchedule(db, userId);
-    const session = createSession(db, userId, 'sched-monday-push');
+  it('marks exercise complete on final set', async () => {
+    const userId = await seedTestUser(db);
+    await seedTestSchedule(db, userId);
+    const session = await createSession(db, userId, 'sched-monday-push');
 
     for (let i = 1; i <= 3; i++) {
-      logSetCompleted(db, {
+      await logSetCompleted(db, {
         sessionId: session.id,
         exerciseId: 'ex-bench',
         setNumber: i,
@@ -85,7 +97,7 @@ describe('logSetCompleted', () => {
       });
     }
 
-    const result = logSetCompleted(db, {
+    const result = await logSetCompleted(db, {
       sessionId: session.id,
       exerciseId: 'ex-bench',
       setNumber: 4,
@@ -97,12 +109,12 @@ describe('logSetCompleted', () => {
     expect(result.totalSets).toBe(4);
   });
 
-  it('tracks remaining exercises correctly', () => {
-    const userId = seedTestUser(db);
-    seedTestSchedule(db, userId);
-    const session = createSession(db, userId, 'sched-monday-push');
+  it('tracks remaining exercises correctly', async () => {
+    const userId = await seedTestUser(db);
+    await seedTestSchedule(db, userId);
+    const session = await createSession(db, userId, 'sched-monday-push');
 
-    const result = logSetCompleted(db, {
+    const result = await logSetCompleted(db, {
       sessionId: session.id,
       exerciseId: 'ex-bench',
       setNumber: 1,
@@ -114,11 +126,11 @@ describe('logSetCompleted', () => {
     expect(result.remainingExercises).toBe(3);
   });
 
-  it('auto-creates session if none exists', () => {
-    const userId = seedTestUser(db);
-    seedTestSchedule(db, userId);
+  it('auto-creates session if none exists', async () => {
+    const userId = await seedTestUser(db);
+    await seedTestSchedule(db, userId);
 
-    const result = logSetCompleted(db, {
+    const result = await logSetCompleted(db, {
       userId,
       exerciseId: 'ex-bench',
       setNumber: 1,

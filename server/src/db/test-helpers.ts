@@ -1,6 +1,7 @@
-import Database from 'better-sqlite3';
+import { createPool } from './pool.js';
 import {
-  createInMemoryDatabase,
+  runMigrations,
+  truncateAll,
   insertUser,
   insertPersona,
   insertProgram,
@@ -8,15 +9,54 @@ import {
   insertSchedule,
   insertWorkoutExercise,
   insertRotationState,
+  type DB,
 } from './index.js';
 
-export function createTestDatabase(): Database.Database {
-  return createInMemoryDatabase();
+/**
+ * Connection string for the ephemeral Postgres used by the test suite. Defaults
+ * to the disposable Docker container started by `jest.global-setup.cjs`; override
+ * with `TEST_DATABASE_URL` to point at a different test database. This is never
+ * the runtime Supabase database.
+ */
+export const TEST_DATABASE_URL =
+  process.env.TEST_DATABASE_URL ?? 'postgresql://postgres:postgres@localhost:5433/postgres';
+
+let testPool: DB | null = null;
+
+/** Returns the shared test pool, creating it once per worker. */
+export function getTestPool(): DB {
+  if (!testPool) {
+    testPool = createPool(TEST_DATABASE_URL, 5);
+  }
+  return testPool;
 }
 
-export function seedTestUser(db: Database.Database, overrides?: Partial<{ id: string; name: string }>) {
+/** Applies the schema to the test database (idempotent). Call once in `beforeAll`. */
+export async function setupTestSchema(): Promise<void> {
+  await runMigrations(getTestPool());
+}
+
+/** Clears all data between tests for isolation. Call in `beforeEach`. */
+export async function resetTestData(): Promise<void> {
+  await truncateAll(getTestPool());
+}
+
+/** Closes the test pool. Call once in `afterAll`. */
+export async function closeTestPool(): Promise<void> {
+  if (testPool) {
+    await testPool.end();
+    testPool = null;
+  }
+}
+
+/** Returns the shared test pool handle to pass into data-access functions. */
+export function createTestDatabase(): DB {
+  return getTestPool();
+}
+
+export async function seedTestUser(db: DB, overrides?: Partial<{ id: string; name: string }>): Promise<string> {
   const userId = overrides?.id ?? 'test-user-1';
-  insertUser(db, {
+  await insertUser(db, {
     id: userId,
     name: overrides?.name ?? 'Test User',
     telegram_chat_id: null,
@@ -28,8 +68,8 @@ export function seedTestUser(db: Database.Database, overrides?: Partial<{ id: st
   return userId;
 }
 
-export function seedTestPersona(db: Database.Database) {
-  insertPersona(db, {
+export async function seedTestPersona(db: DB): Promise<void> {
+  await insertPersona(db, {
     id: 'drill-sergeant',
     name: 'The Drill Sergeant',
     description: 'Tough love, no excuses',
@@ -41,25 +81,25 @@ export function seedTestPersona(db: Database.Database) {
   });
 }
 
-export function seedTestSchedule(db: Database.Database, userId: string) {
+export async function seedTestSchedule(db: DB, userId: string): Promise<string> {
   const programId = 'prog-static-test';
   const workoutId = 'workout-push';
   const scheduleId = 'sched-monday-push';
 
-  insertProgram(db, {
+  await insertProgram(db, {
     id: programId,
     user_id: userId,
     name: 'Test PPL',
     type: 'static',
   });
 
-  insertWorkout(db, {
+  await insertWorkout(db, {
     id: workoutId,
     program_id: programId,
     name: 'Push Day',
   });
 
-  insertSchedule(db, {
+  await insertSchedule(db, {
     id: scheduleId,
     user_id: userId,
     program_id: programId,
@@ -69,7 +109,7 @@ export function seedTestSchedule(db: Database.Database, userId: string) {
     sort_order: 0,
   });
 
-  insertWorkoutExercise(db, {
+  await insertWorkoutExercise(db, {
     id: 'ex-bench',
     workout_id: workoutId,
     exercise_name: 'Bench Press',
@@ -80,7 +120,7 @@ export function seedTestSchedule(db: Database.Database, userId: string) {
     sort_order: 1,
   });
 
-  insertWorkoutExercise(db, {
+  await insertWorkoutExercise(db, {
     id: 'ex-ohp',
     workout_id: workoutId,
     exercise_name: 'Overhead Press',
@@ -91,7 +131,7 @@ export function seedTestSchedule(db: Database.Database, userId: string) {
     sort_order: 2,
   });
 
-  insertWorkoutExercise(db, {
+  await insertWorkoutExercise(db, {
     id: 'ex-dips',
     workout_id: workoutId,
     exercise_name: 'Dips',
@@ -105,10 +145,10 @@ export function seedTestSchedule(db: Database.Database, userId: string) {
   return scheduleId;
 }
 
-export function seedTestPPL(db: Database.Database, userId: string) {
+export async function seedTestPPL(db: DB, userId: string): Promise<string> {
   const programId = 'prog-static-ppl';
 
-  insertProgram(db, {
+  await insertProgram(db, {
     id: programId,
     user_id: userId,
     name: 'PPL Static',
@@ -122,10 +162,10 @@ export function seedTestPPL(db: Database.Database, userId: string) {
   ];
 
   for (const w of workouts) {
-    insertWorkout(db, { id: w.id, program_id: programId, name: w.name });
+    await insertWorkout(db, { id: w.id, program_id: programId, name: w.name });
   }
 
-  insertSchedule(db, {
+  await insertSchedule(db, {
     id: 'sched-mon-push',
     user_id: userId,
     program_id: programId,
@@ -135,7 +175,7 @@ export function seedTestPPL(db: Database.Database, userId: string) {
     sort_order: 0,
   });
 
-  insertSchedule(db, {
+  await insertSchedule(db, {
     id: 'sched-wed-pull',
     user_id: userId,
     program_id: programId,
@@ -145,7 +185,7 @@ export function seedTestPPL(db: Database.Database, userId: string) {
     sort_order: 1,
   });
 
-  insertSchedule(db, {
+  await insertSchedule(db, {
     id: 'sched-fri-legs',
     user_id: userId,
     program_id: programId,
@@ -155,22 +195,22 @@ export function seedTestPPL(db: Database.Database, userId: string) {
     sort_order: 2,
   });
 
-  insertWorkoutExercise(db, { id: 'ex-bench', workout_id: 'workout-push', exercise_name: 'Bench Press', exercise_db_id: null, sets: 4, reps: '8-10', rest_seconds: 90, sort_order: 1 });
-  insertWorkoutExercise(db, { id: 'ex-ohp', workout_id: 'workout-push', exercise_name: 'Overhead Press', exercise_db_id: null, sets: 3, reps: '10-12', rest_seconds: 90, sort_order: 2 });
+  await insertWorkoutExercise(db, { id: 'ex-bench', workout_id: 'workout-push', exercise_name: 'Bench Press', exercise_db_id: null, sets: 4, reps: '8-10', rest_seconds: 90, sort_order: 1 });
+  await insertWorkoutExercise(db, { id: 'ex-ohp', workout_id: 'workout-push', exercise_name: 'Overhead Press', exercise_db_id: null, sets: 3, reps: '10-12', rest_seconds: 90, sort_order: 2 });
 
-  insertWorkoutExercise(db, { id: 'ex-deadlift', workout_id: 'workout-pull', exercise_name: 'Deadlift', exercise_db_id: null, sets: 4, reps: '5-6', rest_seconds: 180, sort_order: 1 });
-  insertWorkoutExercise(db, { id: 'ex-row', workout_id: 'workout-pull', exercise_name: 'Barbell Row', exercise_db_id: null, sets: 4, reps: '8-10', rest_seconds: 90, sort_order: 2 });
+  await insertWorkoutExercise(db, { id: 'ex-deadlift', workout_id: 'workout-pull', exercise_name: 'Deadlift', exercise_db_id: null, sets: 4, reps: '5-6', rest_seconds: 180, sort_order: 1 });
+  await insertWorkoutExercise(db, { id: 'ex-row', workout_id: 'workout-pull', exercise_name: 'Barbell Row', exercise_db_id: null, sets: 4, reps: '8-10', rest_seconds: 90, sort_order: 2 });
 
-  insertWorkoutExercise(db, { id: 'ex-squat', workout_id: 'workout-legs', exercise_name: 'Barbell Squat', exercise_db_id: null, sets: 4, reps: '6-8', rest_seconds: 180, sort_order: 1 });
-  insertWorkoutExercise(db, { id: 'ex-rdl', workout_id: 'workout-legs', exercise_name: 'Romanian Deadlift', exercise_db_id: null, sets: 3, reps: '8-10', rest_seconds: 120, sort_order: 2 });
+  await insertWorkoutExercise(db, { id: 'ex-squat', workout_id: 'workout-legs', exercise_name: 'Barbell Squat', exercise_db_id: null, sets: 4, reps: '6-8', rest_seconds: 180, sort_order: 1 });
+  await insertWorkoutExercise(db, { id: 'ex-rdl', workout_id: 'workout-legs', exercise_name: 'Romanian Deadlift', exercise_db_id: null, sets: 3, reps: '8-10', rest_seconds: 120, sort_order: 2 });
 
   return programId;
 }
 
-export function seedTestRotationPPL(db: Database.Database, userId: string) {
+export async function seedTestRotationPPL(db: DB, userId: string): Promise<string> {
   const programId = 'prog-rotation-ppl';
 
-  insertProgram(db, {
+  await insertProgram(db, {
     id: programId,
     user_id: userId,
     name: 'PPL Rotation',
@@ -184,10 +224,10 @@ export function seedTestRotationPPL(db: Database.Database, userId: string) {
   ];
 
   for (const w of workouts) {
-    insertWorkout(db, { id: w.id, program_id: programId, name: w.name });
+    await insertWorkout(db, { id: w.id, program_id: programId, name: w.name });
   }
 
-  insertSchedule(db, {
+  await insertSchedule(db, {
     id: 'rsched-push',
     user_id: userId,
     program_id: programId,
@@ -197,7 +237,7 @@ export function seedTestRotationPPL(db: Database.Database, userId: string) {
     sort_order: 0,
   });
 
-  insertSchedule(db, {
+  await insertSchedule(db, {
     id: 'rsched-pull',
     user_id: userId,
     program_id: programId,
@@ -207,7 +247,7 @@ export function seedTestRotationPPL(db: Database.Database, userId: string) {
     sort_order: 1,
   });
 
-  insertSchedule(db, {
+  await insertSchedule(db, {
     id: 'rsched-legs',
     user_id: userId,
     program_id: programId,
@@ -217,11 +257,11 @@ export function seedTestRotationPPL(db: Database.Database, userId: string) {
     sort_order: 2,
   });
 
-  insertWorkoutExercise(db, { id: 'rex-bench', workout_id: 'rworkout-push', exercise_name: 'Bench Press', exercise_db_id: null, sets: 4, reps: '8-10', rest_seconds: 90, sort_order: 1 });
-  insertWorkoutExercise(db, { id: 'rex-deadlift', workout_id: 'rworkout-pull', exercise_name: 'Deadlift', exercise_db_id: null, sets: 4, reps: '5-6', rest_seconds: 180, sort_order: 1 });
-  insertWorkoutExercise(db, { id: 'rex-squat', workout_id: 'rworkout-legs', exercise_name: 'Barbell Squat', exercise_db_id: null, sets: 4, reps: '6-8', rest_seconds: 180, sort_order: 1 });
+  await insertWorkoutExercise(db, { id: 'rex-bench', workout_id: 'rworkout-push', exercise_name: 'Bench Press', exercise_db_id: null, sets: 4, reps: '8-10', rest_seconds: 90, sort_order: 1 });
+  await insertWorkoutExercise(db, { id: 'rex-deadlift', workout_id: 'rworkout-pull', exercise_name: 'Deadlift', exercise_db_id: null, sets: 4, reps: '5-6', rest_seconds: 180, sort_order: 1 });
+  await insertWorkoutExercise(db, { id: 'rex-squat', workout_id: 'rworkout-legs', exercise_name: 'Barbell Squat', exercise_db_id: null, sets: 4, reps: '6-8', rest_seconds: 180, sort_order: 1 });
 
-  insertRotationState(db, {
+  await insertRotationState(db, {
     id: 'rstate-1',
     user_id: userId,
     program_id: programId,

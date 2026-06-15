@@ -1,4 +1,3 @@
-import type Database from 'better-sqlite3';
 import { llm } from '@livekit/agents';
 import { z } from 'zod';
 import { getCurrentWorkout } from './getCurrentWorkout.js';
@@ -11,10 +10,10 @@ import { scheduleMotivationalMessage } from './scheduleMotivationalMessage.js';
 import { updateSentiment } from './updateSentiment.js';
 import { type DataPublisher, publishDataMessage } from '../publish-data.js';
 import { type DataMessage } from '../data-messages.js';
-import { getExercisesForWorkout, type WorkoutExercise } from '../db/index.js';
+import { getExercisesForWorkout, getWorkoutExerciseById, type DB } from '../db/index.js';
 
 export interface AgentToolsOptions {
-  db: Database.Database;
+  db: DB;
   exerciseInfoFetcher: ExerciseInfoFetcher;
   telegramSender: TelegramSender;
   dataPublisher?: DataPublisher;
@@ -22,7 +21,7 @@ export interface AgentToolsOptions {
 }
 
 export function createAgentTools(
-  db: Database.Database,
+  db: DB,
   exerciseInfoFetcher: ExerciseInfoFetcher,
   telegramSender: TelegramSender,
   dataPublisher?: DataPublisher,
@@ -50,7 +49,7 @@ export function createAgentTools(
         weight: z.number().optional().describe('Weight used in kg'),
       }),
       execute: async (params) => {
-        const result = logSetCompleted(db, params);
+        const result = await logSetCompleted(db, params);
 
         if (result.logged && dataPublisher) {
           // Clear any active rest timer first (user started next set early)
@@ -59,12 +58,10 @@ export function createAgentTools(
             payload: { action: 'end', durationSeconds: 0 },
           });
 
-          const exercise = db
-            .prepare('SELECT * FROM workout_exercises WHERE id = ?')
-            .get(params.exerciseId) as WorkoutExercise | undefined;
+          const exercise = await getWorkoutExerciseById(db, params.exerciseId);
 
           if (exercise) {
-            const exercises = getExercisesForWorkout(db, exercise.workout_id);
+            const exercises = await getExercisesForWorkout(db, exercise.workout_id);
             const exerciseIndex = exercises.findIndex((e) => e.id === params.exerciseId);
 
             await publishDataMessage(dataPublisher, {
@@ -110,16 +107,14 @@ export function createAgentTools(
         skipped: z.boolean().optional().describe('Whether the exercise was skipped entirely'),
       }),
       execute: async (params) => {
-        const result = completeExercise(db, params);
+        const result = await completeExercise(db, params);
 
         if (result.completed || result.skipped) {
           if (dataPublisher && !result.workoutComplete) {
-            const exercise = db
-              .prepare('SELECT * FROM workout_exercises WHERE id = ?')
-              .get(params.exerciseId) as WorkoutExercise | undefined;
+            const exercise = await getWorkoutExerciseById(db, params.exerciseId);
 
             if (exercise) {
-              const exercises = getExercisesForWorkout(db, exercise.workout_id);
+              const exercises = await getExercisesForWorkout(db, exercise.workout_id);
               const currentIndex = exercises.findIndex((e) => e.id === params.exerciseId);
               const nextExercise = exercises[currentIndex + 1];
 

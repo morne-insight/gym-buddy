@@ -12,6 +12,28 @@ All app-level code is in the `src/` directory. In general, simple agents can be 
 
 Be sure to maintain code formatting. You can use the prettier formatter and eslint to format and lint the code. Scripts are available in `package.json`, including `npm format` and `npm lint`.
 
+## Database (Supabase / Postgres)
+
+All domain data lives in a **Supabase-hosted Postgres** database. The LiveKit server is the **sole** database client — web and mobile reach data through the server, never directly. There is no Auth/RLS/Realtime yet.
+
+- **Data-access layer:** `src/db/index.ts`. Every function is **async** (returns a `Promise`) and takes the shared pool handle (`DB`) as its first argument. It uses the [`postgres`](https://github.com/porsager/postgres) (porsager) client with tagged-template parameterization; `completeSession` runs its multi-write logic in a `sql.begin(...)` transaction.
+- **Connection pool:** `src/db/pool.ts`. `getPool()` builds one shared pool from `DATABASE_URL` and **fails fast** if it is missing; `closePool()` shuts it down. `TIMESTAMPTZ` columns are parsed back to ISO-8601 strings so result shapes match the TypeScript interfaces.
+- **Schema & seed:** `src/db/schema.sql` (Postgres DDL, idempotent) and `src/db/seed.sql` (`ON CONFLICT DO NOTHING`). Flag columns (`active`, `completed`, `skipped`, `delivered`) stay `INTEGER` 0/1.
+
+### Required environment variables
+
+- `DATABASE_URL` — Supabase **session pooler** connection string (port 5432). See `.env.example` for the format. Never commit the real value (`.env` is gitignored).
+
+### Scripts
+
+- `npm run provision` — apply the schema, truncate, and re-seed a fresh database (greenfield).
+- `npm run seed` — apply schema + seed without truncating.
+- `npm run smoke` — end-to-end smoke test against the live `DATABASE_URL` (creates a throwaway session, asserts rotation advancement, cleans up).
+
+### Tests
+
+Tests run against an **ephemeral Docker Postgres** container (not the cloud DB), started automatically by `jest.global-setup.cjs` on `localhost:5433`. **Docker must be running.** Override with `TEST_DATABASE_URL` to target a different test database. The suite runs serially (`maxWorkers: 1`) and truncates between tests for isolation.
+
 ## LiveKit Documentation
 
 LiveKit is a fast-evolving project. Always refer to the latest documentation. Run `lk docs --help` to see available commands. Key commands: `lk docs overview`, `lk docs search`, `lk docs get-page`, `lk docs code-search`, `lk docs changelog`, `lk docs pricing-info`. Run `lk docs <command> --help` before using a command for the first time. Prefer browsing (`overview`, `get-page`) over search, and `search` over `code-search`, as docs pages provide better context than raw code.

@@ -1,5 +1,4 @@
-import type Database from 'better-sqlite3';
-import { updateSessionSentiment, getActiveSession } from '../db/index.js';
+import { updateSessionSentiment, getActiveSession, type DB } from '../db/index.js';
 
 interface UpdateSentimentParams {
   sessionId?: string;
@@ -12,14 +11,14 @@ export interface UpdateSentimentResult {
   error?: string;
 }
 
-export function updateSentiment(
-  db: Database.Database,
+export async function updateSentiment(
+  db: DB,
   params: UpdateSentimentParams,
-): UpdateSentimentResult {
+): Promise<UpdateSentimentResult> {
   let sessionId = params.sessionId;
 
   if (!sessionId && params.userId) {
-    const session = getActiveSession(db, params.userId);
+    const session = await getActiveSession(db, params.userId);
     sessionId = session?.id;
   }
 
@@ -27,6 +26,6 @@ export function updateSentiment(
     return { updated: false, error: 'No active session found' };
   }
 
-  updateSessionSentiment(db, sessionId, params.sentiment);
+  await updateSessionSentiment(db, sessionId, params.sentiment);
   return { updated: true };
 }

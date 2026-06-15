@@ -1,5 +1,4 @@
-import type Database from 'better-sqlite3';
-import { scheduleMessage } from '../db/index.js';
+import { scheduleMessage, type DB } from '../db/index.js';
 
 interface ScheduleMotivationalParams {
   userId: string;
@@ -14,17 +13,17 @@ export interface ScheduleMotivationalResult {
   error?: string;
 }
 
-export function scheduleMotivationalMessage(
-  db: Database.Database,
+export async function scheduleMotivationalMessage(
+  db: DB,
   params: ScheduleMotivationalParams,
-): ScheduleMotivationalResult {
+): Promise<ScheduleMotivationalResult> {
   if (params.deliverInHours < 1 || params.deliverInHours > 24) {
     return { scheduled: false, error: 'deliverInHours must be between 1 and 24' };
   }
 
   const deliverAt = new Date(Date.now() + params.deliverInHours * 60 * 60 * 1000).toISOString();
 
-  const msg = scheduleMessage(db, {
+  const msg = await scheduleMessage(db, {
     user_id: params.userId,
     deliver_at: deliverAt,
     message_type: 'motivation',
