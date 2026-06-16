@@ -41,6 +41,17 @@ let telegramSender: TelegramSender = async (chatId, imageUrl, caption) => {
 
 if (typeof process.send !== 'function') {
   // Main (non-job) process: ensure the schema exists, then start the bot/cron.
+  // Safety net: a transient network error (e.g. a Telegram ECONNRESET in the
+  // bot polling loop or a cron tick) must not take down the agent server. Log
+  // and keep running. Scoped to the main process so LiveKit's per-job runners
+  // keep their own error handling.
+  process.on('unhandledRejection', (reason) => {
+    console.error('[unhandledRejection]', reason);
+  });
+  process.on('uncaughtException', (err) => {
+    console.error('[uncaughtException]', err);
+  });
+
   await runMigrations(mainDb);
   startTokenServer();
 

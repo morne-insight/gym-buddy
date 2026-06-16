@@ -11,6 +11,16 @@ export function createTelegramBot(options: TelegramBotOptions): TelegramBot {
   const { token, db, onUserMessage } = options;
   const bot = new TelegramBot(token, { polling: true });
 
+  // Long-polling hits transient network errors (e.g. ECONNRESET). Without
+  // listeners these surface as unhandled rejections and can crash the whole
+  // server. Log and keep polling instead.
+  bot.on('polling_error', (err) => {
+    console.error('[Telegram] polling error:', err.message);
+  });
+  bot.on('error', (err) => {
+    console.error('[Telegram] bot error:', err.message);
+  });
+
   bot.onText(/\/start\s+(.+)/, async (msg, match) => {
     const chatId = msg.chat.id.toString();
     const userId = match?.[1]?.trim();
