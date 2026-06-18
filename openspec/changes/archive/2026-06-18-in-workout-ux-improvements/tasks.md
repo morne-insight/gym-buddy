@@ -70,4 +70,4 @@
 - [x] 8.4 Default session screen remains minimal: agent state indicator + end button + FAB
 - [x] 8.5 Rest timer overlays when active (independent of FAB/pin state)
 - [x] 8.6 End session clears all visual state and resets pin
-- [ ] 8.7 Manual integration test: full workout flow on physical device (start → sets → rest → FAB interactions → complete)
+- [x] 8.7 Manual integration test: full workout flow on physical device (start → sets → rest → FAB interactions → complete)
