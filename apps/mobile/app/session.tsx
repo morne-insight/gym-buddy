@@ -9,6 +9,7 @@ import { ExerciseGifOverlay } from '../components/ExerciseGifOverlay';
 import { ExerciseDataCard } from '../components/ExerciseDataCard';
 import { RestTimer } from '../components/RestTimer';
 import { SessionFab } from '../components/SessionFab';
+import { AuraVisualizer } from '../components/AuraVisualizer';
 
 // Derive the status from the agent's semantic flags rather than the raw state
 // string. The AgentState union includes states the UI used to miss
@@ -75,11 +76,7 @@ export default function SessionScreen() {
           <Text style={[styles.statusText, { color }]}>{label}</Text>
         </View>
 
-        <View style={[styles.circle, { borderColor: color }]}>
-          <Text style={styles.circleEmoji}>
-            {state === 'speaking' ? '🗣️' : state === 'thinking' ? '🧠' : '🎧'}
-          </Text>
-        </View>
+        <AuraVisualizer state={state} audioTrack={agent.microphoneTrack} />
       </View>
 
       <Pressable style={styles.endButton} onPress={handleEnd}>
@@ -132,17 +129,6 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 16,
     fontWeight: '500',
-  },
-  circle: {
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    borderWidth: 3,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  circleEmoji: {
-    fontSize: 48,
   },
   endButton: {
     backgroundColor: '#333333',
