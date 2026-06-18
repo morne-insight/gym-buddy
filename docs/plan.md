@@ -1,5 +1,32 @@
 # Design: AI Personal Trainer Accountability Engine (React Native + LiveKit)
 
+> ## ⚠️ Status update (2026-06-15) — architecture has evolved since this doc
+>
+> This is the **original MVP design** and is kept as a historical record. Several
+> foundational decisions below have since changed. For how the project works **today**,
+> read [`README.md`](../README.md), [`CONTEXT.md`](../CONTEXT.md) (domain glossary),
+> [`docs/adr/0001-web-onboarding-mobile-session.md`](adr/0001-web-onboarding-mobile-session.md),
+> and [`server/AGENTS.md`](../server/AGENTS.md).
+>
+> What changed:
+>
+> - **Persistence: device-side SQLite → server-side Supabase (Postgres).** The
+>   "Local SQLite Database" / "Device-Side Tool Calls … without a backend server sync"
+>   constraints below no longer hold. The **LiveKit Agents server is the sole database
+>   client**; the mobile app talks to the server (LiveKit + a token endpoint), never to
+>   the database directly. The data-access layer (`server/src/db/`) is async Postgres via
+>   the `postgres` (porsager) client. Rationale and task history:
+>   `openspec/changes/migrate-to-supabase/`.
+> - **No SQLite on the mobile client.** The mobile app holds no domain database; the
+>   architecture diagram below (SQLite in both boxes) is superseded.
+> - **Client surfaces split (ADR-0001):** a **Web Client** owns onboarding/payment/plan
+>   management; the **Mobile App** is session-execution-only.
+> - **Terminology:** the AI persona is the **Buddy** (a knowledgeable friend), not a
+>   "Personal Trainer" — accountability comes from the relationship, not professional
+>   authority. See `CONTEXT.md`.
+>
+> The state-machine, latency-masking, voice-loop, and TDD guidance below remain accurate.
+
 ## Problem Statement
 People training alone lose motivation and accountability when they don't have a human PT waiting for them. The core problem is finding a way to successfully enforce gym attendance and routine adherence through social friction, guilt, and loss aversion—not just providing another database of exercises.
 

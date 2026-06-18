@@ -10,7 +10,7 @@ This Node.js project uses the `npm` package manager. You should always use `npm`
 
 All app-level code is in the `src/` directory. In general, simple agents can be constructed with a single `main.ts` file. Additional files can be added, but you must retain `main.ts` as the entrypoint (see the associated Dockerfile for how this is deployed).
 
-Be sure to maintain code formatting. You can use the prettier formatter and eslint to format and lint the code. Scripts are available in `package.json`, including `npm format` and `npm lint`.
+Be sure to maintain consistent code formatting. (No eslint/prettier config is committed yet — match the style of the surrounding files.)
 
 ## Database (Supabase / Postgres)
 
