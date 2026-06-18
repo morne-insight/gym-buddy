@@ -1,0 +1,5172 @@
+{
+  "version": "2.13",
+  "children": [
+    {
+      "type": "frame",
+      "id": "BAaIO",
+      "x": -469,
+      "y": -3,
+      "name": "Home Screen",
+      "clip": true,
+      "width": 390,
+      "fill": "$bg-primary",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "hP1C1",
+          "name": "Status Bar",
+          "width": "fill_container",
+          "height": 62,
+          "padding": [
+            0,
+            20
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "KmHzo",
+              "name": "Time",
+              "fill": "$text-primary",
+              "content": "9:41",
+              "fontFamily": "$font-primary",
+              "fontSize": 15,
+              "fontWeight": "600"
+            },
+            {
+              "type": "frame",
+              "id": "n4J8N",
+              "name": "Status Icons",
+              "gap": 6,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "cGW4H",
+                  "name": "Signal",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "signal",
+                  "library": "lucide",
+                  "fill": "$text-primary"
+                },
+                {
+                  "type": "icon",
+                  "id": "JzY8j",
+                  "name": "Wifi",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "wifi",
+                  "library": "lucide",
+                  "fill": "$text-primary"
+                },
+                {
+                  "type": "icon",
+                  "id": "U5Wlgn",
+                  "name": "Battery",
+                  "width": 22,
+                  "height": 16,
+                  "icon": "battery-full",
+                  "library": "lucide",
+                  "fill": "$text-primary"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "xtIIJ",
+          "name": "Content",
+          "width": "fill_container",
+          "height": 622,
+          "layout": "vertical",
+          "gap": 28,
+          "padding": [
+            12,
+            20,
+            48,
+            20
+          ],
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "f0cuC",
+              "name": "Greeting Block",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "I08uu3",
+                  "name": "App Tag",
+                  "fill": "$danger",
+                  "content": "GYM BUDDY",
+                  "fontFamily": "$font-primary",
+                  "fontSize": 11,
+                  "fontWeight": "600",
+                  "letterSpacing": 2
+                },
+                {
+                  "type": "text",
+                  "id": "iwHa8",
+                  "name": "Date",
+                  "fill": "$text-muted",
+                  "content": "Monday, May 26",
+                  "fontFamily": "$font-primary",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "XE3rE",
+              "name": "Workout Card",
+              "width": "fill_container",
+              "fill": "$bg-elevated",
+              "cornerRadius": 16,
+              "stroke": "$border-subtle",
+              "strokeWidth": 1,
+              "strokeAlignment": "inner",
+              "layout": "vertical",
+              "gap": 18,
+              "padding": 20,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "OLHHz",
+                  "name": "Card Top",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "mYiqh",
+                      "name": "Card Titles",
+                      "layout": "vertical",
+                      "gap": 4,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "rb3S6",
+                          "name": "Day Label",
+                          "fill": "$text-muted",
+                          "content": "TODAY",
+                          "fontFamily": "$font-primary",
+                          "fontSize": 11,
+                          "fontWeight": "600",
+                          "letterSpacing": 2
+                        },
+                        {
+                          "type": "text",
+                          "id": "tvR5U",
+                          "name": "Workout Name",
+                          "fill": "$text-primary",
+                          "content": "Push Day",
+                          "fontFamily": "$font-display",
+                          "fontSize": 28,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "m8brnI",
+                      "name": "Count Badge",
+                      "fill": "$bg-surface",
+                      "cornerRadius": 8,
+                      "padding": [
+                        6,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "j45fp",
+                          "name": "Count",
+                          "fill": "$text-secondary",
+                          "content": "5 exercises",
+                          "fontFamily": "$font-primary",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "rectangle",
+                  "id": "r7JYvM",
+                  "name": "Divider",
+                  "fill": "$border-subtle",
+                  "width": "fill_container",
+                  "height": 1
+                },
+                {
+                  "type": "frame",
+                  "id": "jz4lY",
+                  "name": "Exercise List",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 14,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "BlAaq",
+                      "name": "Bench Press",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Oydjq",
+                          "name": "Exercise Name",
+                          "fill": "$text-primary",
+                          "content": "Bench Press",
+                          "fontFamily": "$font-primary",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "efZuH",
+                          "name": "Reps",
+                          "fill": "$text-secondary",
+                          "content": "4 × 8",
+                          "fontFamily": "$font-primary",
+                          "fontSize": 15,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "loCVR",
+                      "name": "Overhead Press",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "jgnHM",
+                          "name": "Exercise Name",
+                          "fill": "$text-primary",
+                          "content": "Overhead Press",
+                          "fontFamily": "$font-primary",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "jtpUf",
+                          "name": "Reps",
+                          "fill": "$text-secondary",
+                          "content": "3 × 10",
+                          "fontFamily": "$font-primary",
+                          "fontSize": 15,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "P8viPU",
+                      "name": "Incline DB Press",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "X8umX",
+                          "name": "Exercise Name",
+                          "fill": "$text-primary",
+                          "content": "Incline DB Press",
+                          "fontFamily": "$font-primary",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "HNLHx",
+                          "name": "Reps",
+                          "fill": "$text-secondary",
+                          "content": "3 × 12",
+                          "fontFamily": "$font-primary",
+                          "fontSize": 15,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "PTO3t",
+                      "name": "Cable Flyes",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "vnYdI",
+                          "name": "Exercise Name",
+                          "fill": "$text-primary",
+                          "content": "Cable Flyes",
+                          "fontFamily": "$font-primary",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "HNXFm",
+                          "name": "Reps",
+                          "fill": "$text-secondary",
+                          "content": "3 × 15",
+                          "fontFamily": "$font-primary",
+                          "fontSize": 15,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Euekk",
+                      "name": "Tricep Pushdowns",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "g2tVY",
+                          "name": "Exercise Name",
+                          "fill": "$text-primary",
+                          "content": "Tricep Pushdowns",
+                          "fontFamily": "$font-primary",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "esgDI",
+                          "name": "Reps",
+                          "fill": "$text-secondary",
+                          "content": "3 × 15",
+                          "fontFamily": "$font-primary",
+                          "fontSize": 15,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Dof9h",
+              "name": "Start Button",
+              "width": "fill_container",
+              "height": 62,
+              "fill": "$danger",
+              "cornerRadius": 14,
+              "gap": 10,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "dOWwF",
+                  "name": "Play Icon",
+                  "width": 22,
+                  "height": 22,
+                  "icon": "play",
+                  "library": "lucide",
+                  "fill": "$text-primary"
+                },
+                {
+                  "type": "text",
+                  "id": "ZQmxh",
+                  "name": "Start Label",
+                  "fill": "$text-primary",
+                  "content": "Start Workout",
+                  "fontFamily": "$font-display",
+                  "fontSize": 19,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "PLzoL",
+              "name": "Rest Day Note",
+              "fill": "$text-muted",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Not feeling it today? Take a rest day — your buddy won't judge.",
+              "textAlign": "center",
+              "fontFamily": "$font-primary",
+              "fontSize": 13,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "PRtGH",
+      "x": 2,
+      "y": -3,
+      "name": "Session Screen",
+      "clip": true,
+      "width": 390,
+      "fill": "$bg-primary",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "CGR5d",
+          "name": "Status Bar",
+          "width": "fill_container",
+          "height": 62,
+          "padding": [
+            22,
+            24,
+            0,
+            24
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "b4PXv",
+              "name": "Time",
+              "fill": "$text-primary",
+              "content": "9:41",
+              "fontFamily": "Inter",
+              "fontSize": 15,
+              "fontWeight": "600"
+            },
+            {
+              "type": "frame",
+              "id": "B81CQ",
+              "name": "Right Icons",
+              "gap": 6,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "JwvW1",
+                  "name": "Signal",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "signal",
+                  "library": "lucide",
+                  "fill": "$text-primary"
+                },
+                {
+                  "type": "icon",
+                  "id": "O349U7",
+                  "name": "Wifi",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "wifi",
+                  "library": "lucide",
+                  "fill": "$text-primary"
+                },
+                {
+                  "type": "icon",
+                  "id": "jAG0U",
+                  "name": "Battery",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "battery-full",
+                  "library": "lucide",
+                  "fill": "$text-primary"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "iK9J3",
+          "name": "Session Header",
+          "width": "fill_container",
+          "padding": [
+            8,
+            20,
+            0,
+            20
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "WDH2Q",
+              "name": "Voice Indicator",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "zfm8r",
+                  "name": "Live Dot",
+                  "fill": "$accent-red",
+                  "width": 8,
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "id": "IAwjk",
+                  "name": "Listening Label",
+                  "fill": "$accent-red",
+                  "content": "LISTENING",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "500",
+                  "letterSpacing": 1.5
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "h1QxY7",
+              "name": "Session Timer",
+              "fill": "$bg-elevated",
+              "cornerRadius": 20,
+              "gap": 6,
+              "padding": [
+                6,
+                12
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "DZFXH",
+                  "name": "Clock Icon",
+                  "width": 14,
+                  "height": 14,
+                  "icon": "timer",
+                  "library": "lucide",
+                  "fill": "$text-secondary"
+                },
+                {
+                  "type": "text",
+                  "id": "ZRcrm",
+                  "name": "Elapsed Time",
+                  "fill": "$text-secondary",
+                  "content": "12:34",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "m3LXKx",
+          "name": "Rest Timer",
+          "width": "fill_container",
+          "height": 178,
+          "layout": "vertical",
+          "gap": 12,
+          "padding": [
+            40,
+            20
+          ],
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "T8VJS2",
+              "name": "Rest Label",
+              "fill": "$accent-orange",
+              "content": "REST",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "600",
+              "letterSpacing": 2
+            },
+            {
+              "type": "text",
+              "id": "AaMEQ",
+              "name": "Timer Countdown",
+              "fill": "$text-primary",
+              "textGrowth": "fixed-width-height",
+              "width": 141,
+              "height": 81,
+              "content": "1:32",
+              "fontFamily": "Space Grotesk",
+              "fontSize": 72,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "Y9jnv",
+              "name": "Timer Bar Track",
+              "width": 200,
+              "height": 4,
+              "fill": "$bg-surface",
+              "cornerRadius": 2,
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 2,
+                  "id": "odIJS",
+                  "layoutPosition": "absolute",
+                  "x": 0,
+                  "y": 0,
+                  "name": "Timer Bar Fill",
+                  "fill": "$accent-orange",
+                  "width": 120,
+                  "height": 4
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "oXmhA",
+              "name": "Timer Subtitle",
+              "fill": "$text-muted",
+              "content": "out of 2:00",
+              "fontFamily": "Inter",
+              "fontSize": 13,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "vwXwh",
+          "name": "Exercise Card",
+          "width": "fill_container",
+          "height": 309,
+          "layout": "vertical",
+          "gap": 20,
+          "padding": [
+            20,
+            20,
+            24,
+            20
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "vtaSX",
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "voice-aura.png",
+                "mode": "fill"
+              },
+              "width": 350,
+              "height": 265
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "A7cFA",
+          "name": "FAB Row",
+          "width": "fill_container",
+          "gap": 12,
+          "padding": [
+            16,
+            20,
+            24,
+            20
+          ],
+          "justifyContent": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "xC2CY",
+              "name": "Show Exercise FAB",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "i6CISv",
+                  "name": "Show Exercise Circle",
+                  "width": 52,
+                  "height": 52,
+                  "fill": "$bg-elevated",
+                  "cornerRadius": 26,
+                  "stroke": "$border-subtle",
+                  "strokeWidth": 1,
+                  "strokeAlignment": "inner",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "EyXjp",
+                      "name": "Show Exercise Icon",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "image",
+                      "library": "lucide",
+                      "fill": "$text-secondary"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "j6HkC",
+                  "name": "Show Exercise Label",
+                  "fill": "$text-muted",
+                  "content": "Form",
+                  "fontFamily": "Inter",
+                  "fontSize": 10,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "cJv3I",
+              "name": "Progress Toggle FAB",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "BGfsX",
+                  "name": "Progress Toggle Circle",
+                  "width": 52,
+                  "height": 52,
+                  "fill": "$bg-elevated",
+                  "cornerRadius": 26,
+                  "stroke": "$border-subtle",
+                  "strokeWidth": 1,
+                  "strokeAlignment": "inner",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "Y2UbLc",
+                      "name": "Progress Toggle Icon",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "activity",
+                      "library": "lucide",
+                      "fill": "$text-secondary"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "l776g7",
+                  "name": "Progress Toggle Label",
+                  "fill": "$text-muted",
+                  "content": "Stats",
+                  "fontFamily": "Inter",
+                  "fontSize": 10,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "FDy0y",
+              "name": "Mic Standby FAB",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "FYeeN",
+                  "name": "Mic Standby Circle",
+                  "width": 52,
+                  "height": 52,
+                  "fill": "$bg-elevated",
+                  "cornerRadius": 26,
+                  "stroke": "$border-subtle",
+                  "strokeWidth": 1,
+                  "strokeAlignment": "inner",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "GxNKU",
+                      "name": "Mic Standby Icon",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "mic-off",
+                      "library": "lucide",
+                      "fill": "$text-secondary"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "zwpCA",
+                  "name": "Mic Standby Label",
+                  "fill": "$text-muted",
+                  "content": "Mute",
+                  "fontFamily": "Inter",
+                  "fontSize": 10,
+                  "fontWeight": "500"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ISjvR",
+      "x": 470,
+      "y": 0,
+      "name": "Session Screen",
+      "clip": true,
+      "width": 390,
+      "height": 699,
+      "fill": "$bg-primary",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "PZKCz",
+          "name": "Status Bar",
+          "width": "fill_container",
+          "height": 62,
+          "padding": [
+            22,
+            24,
+            0,
+            24
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "vnf2v",
+              "name": "Time",
+              "fill": "$text-primary",
+              "content": "9:41",
+              "fontFamily": "Inter",
+              "fontSize": 15,
+              "fontWeight": "600"
+            },
+            {
+              "type": "frame",
+              "id": "PFzJj",
+              "name": "Right Icons",
+              "gap": 6,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "Uz6rI",
+                  "name": "Signal",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "signal",
+                  "library": "lucide",
+                  "fill": "$text-primary"
+                },
+                {
+                  "type": "icon",
+                  "id": "e1ff6",
+                  "name": "Wifi",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "wifi",
+                  "library": "lucide",
+                  "fill": "$text-primary"
+                },
+                {
+                  "type": "icon",
+                  "id": "hgvjU",
+                  "name": "Battery",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "battery-full",
+                  "library": "lucide",
+                  "fill": "$text-primary"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "EUcvC",
+          "name": "Session Header",
+          "width": "fill_container",
+          "padding": [
+            8,
+            20,
+            0,
+            20
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "zhjP3",
+              "name": "Voice Indicator",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "aSd5d",
+                  "name": "Live Dot",
+                  "fill": "$accent-red",
+                  "width": 8,
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "id": "OFUdM",
+                  "name": "Listening Label",
+                  "fill": "$accent-red",
+                  "content": "LISTENING",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "500",
+                  "letterSpacing": 1.5
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "q4C7J",
+              "name": "Session Timer",
+              "fill": "$bg-elevated",
+              "cornerRadius": 20,
+              "gap": 6,
+              "padding": [
+                6,
+                12
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "x7zE6",
+                  "name": "Clock Icon",
+                  "width": 14,
+                  "height": 14,
+                  "icon": "timer",
+                  "library": "lucide",
+                  "fill": "$text-secondary"
+                },
+                {
+                  "type": "text",
+                  "id": "Om9jS",
+                  "name": "Elapsed Time",
+                  "fill": "$text-secondary",
+                  "content": "12:34",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "kZbL6",
+          "name": "Rest Timer",
+          "width": "fill_container",
+          "height": 178,
+          "layout": "vertical",
+          "gap": 12,
+          "padding": [
+            40,
+            20
+          ],
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "ECVy9",
+              "name": "Rest Label",
+              "fill": "$accent-orange",
+              "content": "REST",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "600",
+              "letterSpacing": 2
+            },
+            {
+              "type": "text",
+              "id": "x9uye",
+              "name": "Timer Countdown",
+              "fill": "$text-primary",
+              "textGrowth": "fixed-width-height",
+              "width": 141,
+              "height": 81,
+              "content": "1:32",
+              "fontFamily": "Space Grotesk",
+              "fontSize": 72,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "d7F80M",
+              "name": "Timer Bar Track",
+              "width": 200,
+              "height": 4,
+              "fill": "$bg-surface",
+              "cornerRadius": 2,
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 2,
+                  "id": "olf6f",
+                  "layoutPosition": "absolute",
+                  "x": 0,
+                  "y": 0,
+                  "name": "Timer Bar Fill",
+                  "fill": "$accent-orange",
+                  "width": 120,
+                  "height": 4
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "FoIR5",
+              "name": "Timer Subtitle",
+              "fill": "$text-muted",
+              "content": "out of 2:00",
+              "fontFamily": "Inter",
+              "fontSize": 13,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Pf5Hr",
+          "name": "Exercise Card",
+          "width": "fill_container",
+          "height": 247,
+          "layout": "vertical",
+          "gap": 20,
+          "padding": [
+            20,
+            20,
+            24,
+            20
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "zcARa",
+              "name": "Exercise Nav",
+              "width": "fill_container",
+              "gap": 16,
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "LcnOX",
+                  "name": "Exercise Number",
+                  "fill": "$text-muted",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "EXERCISE 3 OF 5",
+                  "textAlign": "center",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "600",
+                  "letterSpacing": 1.5
+                },
+                {
+                  "type": "frame",
+                  "id": "bhxkC",
+                  "name": "Close Btn",
+                  "width": 36,
+                  "height": 36,
+                  "fill": "$bg-elevated",
+                  "cornerRadius": 18,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "IcZvr",
+                      "name": "Close Icon",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "arrow-left-right",
+                      "library": "lucide",
+                      "fill": "$text-secondary"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "QL2mX",
+              "name": "Exercise Name",
+              "fill": "$text-primary",
+              "content": "Incline DB Press",
+              "fontFamily": "Space Grotesk",
+              "fontSize": 32,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "g7foj",
+              "name": "Target Info",
+              "gap": 16,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "cz8jX",
+                  "name": "Sets Badge",
+                  "fill": "$bg-surface",
+                  "cornerRadius": 6,
+                  "gap": 6,
+                  "padding": [
+                    6,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Nwlfs",
+                      "name": "Sets Label",
+                      "fill": "$text-primary",
+                      "content": "4 sets",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "Zmled",
+                  "name": "X Symbol",
+                  "fill": "$text-muted",
+                  "content": "×",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "F7RhI",
+                  "name": "Reps Badge",
+                  "fill": "$bg-surface",
+                  "cornerRadius": 6,
+                  "gap": 6,
+                  "padding": [
+                    6,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "G41Ve",
+                      "name": "Reps Label",
+                      "fill": "$text-primary",
+                      "content": "10 reps",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "cxfWL",
+                  "name": "At Symbol",
+                  "fill": "$text-muted",
+                  "content": "@",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "RAFce",
+                  "name": "Weight Badge",
+                  "fill": "$bg-surface",
+                  "cornerRadius": 6,
+                  "gap": 6,
+                  "padding": [
+                    6,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "dfKxD",
+                      "name": "Weight Label",
+                      "fill": "$text-primary",
+                      "content": "30 kg",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "jCWYh",
+              "name": "Set Progress",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 16,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Kltqo",
+                  "name": "Progress Dots",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "ellipse",
+                      "id": "YFdCQ",
+                      "name": "Dot 1",
+                      "fill": "$accent-teal",
+                      "width": 10,
+                      "height": 10
+                    },
+                    {
+                      "type": "ellipse",
+                      "id": "pRMCF",
+                      "name": "Dot 2",
+                      "fill": "$accent-teal",
+                      "width": 10,
+                      "height": 10
+                    },
+                    {
+                      "type": "frame",
+                      "id": "DxMqD",
+                      "name": "Dot 3",
+                      "width": 32,
+                      "height": 10,
+                      "fill": "$accent-red",
+                      "cornerRadius": 5
+                    },
+                    {
+                      "type": "ellipse",
+                      "id": "pW2Vy",
+                      "name": "Dot 4",
+                      "fill": "$bg-surface",
+                      "width": 10,
+                      "height": 10
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "MVmMx",
+                  "name": "Set Status",
+                  "fill": "$text-secondary",
+                  "content": "Set 3 — ready when you are",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "ij4uJ",
+          "name": "Last Set Result",
+          "width": "fill_container",
+          "fill": "$bg-card",
+          "padding": [
+            16,
+            20
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "rVRpo",
+              "name": "Last Set Info",
+              "layout": "vertical",
+              "gap": 4,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "oWUCw",
+                  "name": "Last Set Label",
+                  "fill": "$text-muted",
+                  "content": "LAST SET",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "600",
+                  "letterSpacing": 1.2
+                },
+                {
+                  "type": "text",
+                  "id": "FBhMC",
+                  "name": "Last Set Data",
+                  "fill": "$text-primary",
+                  "content": "10 reps × 30 kg",
+                  "fontFamily": "Space Grotesk",
+                  "fontSize": 20,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "xaDKR",
+              "name": "Check Badge",
+              "fill": "#4ecdc420",
+              "cornerRadius": 6,
+              "gap": 4,
+              "padding": [
+                6,
+                10
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "J5bNpq",
+                  "name": "Check Icon",
+                  "width": 14,
+                  "height": 14,
+                  "icon": "check",
+                  "library": "lucide",
+                  "fill": "$accent-teal"
+                },
+                {
+                  "type": "text",
+                  "id": "Kx1lF",
+                  "name": "Good Label",
+                  "fill": "$accent-teal",
+                  "content": "Good",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "H2fzaL",
+          "name": "FAB Row",
+          "width": "fill_container",
+          "gap": 12,
+          "padding": [
+            16,
+            20,
+            24,
+            20
+          ],
+          "justifyContent": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "f1HMn",
+              "name": "Show Exercise FAB",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "P0r8m3",
+                  "name": "Show Exercise Circle",
+                  "width": 52,
+                  "height": 52,
+                  "fill": "$bg-elevated",
+                  "cornerRadius": 26,
+                  "stroke": "$border-subtle",
+                  "strokeWidth": 1,
+                  "strokeAlignment": "inner",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "i4bb89",
+                      "name": "Show Exercise Icon",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "image",
+                      "library": "lucide",
+                      "fill": "$text-secondary"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "q6CdY",
+                  "name": "Show Exercise Label",
+                  "fill": "$text-muted",
+                  "content": "Form",
+                  "fontFamily": "Inter",
+                  "fontSize": 10,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "eW6z9",
+              "name": "Progress Toggle FAB",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Fe9WE",
+                  "name": "Progress Toggle Circle",
+                  "width": 52,
+                  "height": 52,
+                  "fill": "$bg-elevated",
+                  "cornerRadius": 26,
+                  "stroke": "$border-subtle",
+                  "strokeWidth": 1,
+                  "strokeAlignment": "inner",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "KMhoP",
+                      "name": "Progress Toggle Icon",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "activity",
+                      "library": "lucide",
+                      "fill": "$text-secondary"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "CLzRf",
+                  "name": "Progress Toggle Label",
+                  "fill": "$text-muted",
+                  "content": "Stats",
+                  "fontFamily": "Inter",
+                  "fontSize": 10,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "PDuC7",
+              "name": "Mic Standby FAB",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "IqZv5",
+                  "name": "Mic Standby Circle",
+                  "width": 52,
+                  "height": 52,
+                  "fill": "$bg-elevated",
+                  "cornerRadius": 26,
+                  "stroke": "$border-subtle",
+                  "strokeWidth": 1,
+                  "strokeAlignment": "inner",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "mnneG",
+                      "name": "Mic Standby Icon",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "mic-off",
+                      "library": "lucide",
+                      "fill": "$text-secondary"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "gBB93",
+                  "name": "Mic Standby Label",
+                  "fill": "$text-muted",
+                  "content": "Mute",
+                  "fontFamily": "Inter",
+                  "fontSize": 10,
+                  "fontWeight": "500"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "N1anpO",
+      "x": 940,
+      "y": 0,
+      "name": "Manual Capture",
+      "clip": true,
+      "width": 390,
+      "fill": "$bg-primary",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "BPC9R",
+          "name": "Status Bar",
+          "width": "fill_container",
+          "height": 62,
+          "padding": [
+            22,
+            24,
+            0,
+            24
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "PltCX",
+              "name": "Time",
+              "fill": "$text-primary",
+              "content": "9:41",
+              "fontFamily": "Inter",
+              "fontSize": 15,
+              "fontWeight": "600"
+            },
+            {
+              "type": "frame",
+              "id": "sWJoy",
+              "name": "Right Icons",
+              "gap": 6,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "sAyTO",
+                  "name": "Signal",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "signal",
+                  "library": "lucide",
+                  "fill": "$text-primary"
+                },
+                {
+                  "type": "icon",
+                  "id": "LLDIT",
+                  "name": "Wifi",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "wifi",
+                  "library": "lucide",
+                  "fill": "$text-primary"
+                },
+                {
+                  "type": "icon",
+                  "id": "TghpV",
+                  "name": "Battery",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "battery-full",
+                  "library": "lucide",
+                  "fill": "$text-primary"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "LVMD5",
+          "name": "Capture Header",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 8,
+          "padding": [
+            8,
+            20,
+            0,
+            20
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "pVwaF",
+              "name": "Header Row",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "b0ufqr",
+                  "name": "Title",
+                  "fill": "$text-primary",
+                  "content": "Manual Entry",
+                  "fontFamily": "Space Grotesk",
+                  "fontSize": 24,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "frame",
+                  "id": "BroTM",
+                  "name": "Close Btn",
+                  "width": 36,
+                  "height": 36,
+                  "fill": "$bg-elevated",
+                  "cornerRadius": 18,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "JBipo",
+                      "name": "Close Icon",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "x",
+                      "library": "lucide",
+                      "fill": "$text-secondary"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "W0xets",
+              "name": "Subtitle",
+              "fill": "$text-secondary",
+              "content": "Log your sets here.",
+              "fontFamily": "Inter",
+              "fontSize": 14,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "chvOs",
+          "name": "Exercise List",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 16,
+          "padding": [
+            20,
+            20,
+            0,
+            20
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "OibL8",
+              "name": "Bench Press Card",
+              "width": "fill_container",
+              "fill": "$bg-card",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "gap": 12,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Eab6p",
+                  "name": "Bench Press Header",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Ofrud",
+                      "name": "Bench Press Name",
+                      "fill": "$text-primary",
+                      "content": "Bench Press",
+                      "fontFamily": "Space Grotesk",
+                      "fontSize": 16,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "xIH82",
+                      "name": "Bench Press Target",
+                      "fill": "$text-muted",
+                      "content": "4×8 @ 80 kg",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "etIV5",
+                  "name": "Bench Press Col Labels",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Ktf9m",
+                      "name": "Set Col",
+                      "fill": "$text-muted",
+                      "content": "SET",
+                      "fontFamily": "Inter",
+                      "fontSize": 10,
+                      "fontWeight": "600",
+                      "letterSpacing": 1
+                    },
+                    {
+                      "type": "text",
+                      "id": "bDpZH",
+                      "name": "Reps Col",
+                      "fill": "$text-muted",
+                      "content": "REPS",
+                      "fontFamily": "Inter",
+                      "fontSize": 10,
+                      "fontWeight": "600",
+                      "letterSpacing": 1
+                    },
+                    {
+                      "type": "text",
+                      "id": "k8jGD",
+                      "name": "Weight Col",
+                      "fill": "$text-muted",
+                      "content": "KG",
+                      "fontFamily": "Inter",
+                      "fontSize": 10,
+                      "fontWeight": "600",
+                      "letterSpacing": 1
+                    },
+                    {
+                      "type": "text",
+                      "id": "TP21C",
+                      "name": "Prev Col",
+                      "fill": "$text-muted",
+                      "content": "PREV",
+                      "fontFamily": "Inter",
+                      "fontSize": 10,
+                      "fontWeight": "600",
+                      "letterSpacing": 1
+                    },
+                    {
+                      "type": "frame",
+                      "id": "IrDBS",
+                      "name": "Status Col",
+                      "width": 24,
+                      "height": 12
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "y2o1c",
+                  "name": "Bench Press Set 1",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "nDI5R",
+                      "name": "Set Num",
+                      "fill": "$text-secondary",
+                      "content": "1",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "I8Fgp7",
+                      "name": "Reps Wrapper",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "eK5HG",
+                          "name": "Reps Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-primary",
+                          "cornerRadius": 8,
+                          "stroke": "$border-subtle",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "L5KXwH",
+                              "name": "Reps Value",
+                              "fill": "$text-primary",
+                              "content": "8",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "zI3Bg",
+                          "name": "Prev Reps",
+                          "fill": "$text-muted",
+                          "content": "prev 8",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "z5NX8V",
+                      "name": "Weight Wrapper",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "HctyO",
+                          "name": "Weight Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-primary",
+                          "cornerRadius": 8,
+                          "stroke": "$border-subtle",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "eViP7",
+                              "name": "Weight Value",
+                              "fill": "$text-primary",
+                              "content": "80",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "udyjT",
+                          "name": "Prev Weight",
+                          "fill": "$text-muted",
+                          "content": "prev 77.5",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "icon",
+                      "id": "D0Z9Mi",
+                      "name": "Done Check",
+                      "width": 20,
+                      "height": 20,
+                      "icon": "circle-check-big",
+                      "library": "lucide",
+                      "fill": "$accent-teal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "qy1US",
+                  "name": "Bench Press Set 2",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "rKkdy",
+                      "name": "Set Num",
+                      "fill": "$text-secondary",
+                      "content": "2",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Woobz",
+                      "name": "Reps Wrapper",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "Pze3l",
+                          "name": "Reps Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-primary",
+                          "cornerRadius": 8,
+                          "stroke": "$border-subtle",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "Z2ZYZ",
+                              "name": "Reps Value",
+                              "fill": "$text-primary",
+                              "content": "8",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "s0Z9fy",
+                          "name": "Prev Reps",
+                          "fill": "$text-muted",
+                          "content": "prev 8",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Zv3Cl",
+                      "name": "Weight Wrapper",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "BAevd",
+                          "name": "Weight Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-primary",
+                          "cornerRadius": 8,
+                          "stroke": "$border-subtle",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "w0y95R",
+                              "name": "Weight Value",
+                              "fill": "$text-primary",
+                              "content": "80",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "FnIgY",
+                          "name": "Prev Weight",
+                          "fill": "$text-muted",
+                          "content": "prev 77.5",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "icon",
+                      "id": "c6k5R",
+                      "name": "Done Check",
+                      "width": 20,
+                      "height": 20,
+                      "icon": "circle-check-big",
+                      "library": "lucide",
+                      "fill": "$accent-teal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Vu6AU",
+                  "name": "Bench Press Set 3",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Zmbwh",
+                      "name": "Set Num",
+                      "fill": "$text-secondary",
+                      "content": "3",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "zQZX8",
+                      "name": "Reps Wrapper",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "p5r7BH",
+                          "name": "Reps Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-primary",
+                          "cornerRadius": 8,
+                          "stroke": "$border-subtle",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "YA7vQ",
+                              "name": "Reps Value",
+                              "fill": "$text-primary",
+                              "content": "7",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "FNPiP",
+                          "name": "Prev Reps",
+                          "fill": "$text-muted",
+                          "content": "prev 8",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "rk49T",
+                      "name": "Weight Wrapper",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "cVx7U",
+                          "name": "Weight Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-primary",
+                          "cornerRadius": 8,
+                          "stroke": "$border-subtle",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "y6XQq1",
+                              "name": "Weight Value",
+                              "fill": "$text-primary",
+                              "content": "80",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "PKbIO",
+                          "name": "Prev Weight",
+                          "fill": "$text-muted",
+                          "content": "prev 77.5",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "icon",
+                      "id": "pHoce",
+                      "name": "Done Check",
+                      "width": 20,
+                      "height": 20,
+                      "icon": "circle-check-big",
+                      "library": "lucide",
+                      "fill": "$accent-teal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "y64f7O",
+                  "name": "Bench Press Set 4",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "oqM5q",
+                      "name": "Set Num",
+                      "fill": "$text-muted",
+                      "content": "4",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "bAuU6",
+                      "name": "Reps Wrapper",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "MxAYG",
+                          "name": "Reps Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-elevated",
+                          "cornerRadius": 8,
+                          "stroke": "$text-muted",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "eEwJI",
+                              "name": "Reps Value",
+                              "fill": "$text-muted",
+                              "content": "—",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "sfWMG",
+                          "name": "Prev Reps",
+                          "fill": "$text-muted",
+                          "content": "prev 8",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "B21Tgx",
+                      "name": "Weight Wrapper",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "q4mkt",
+                          "name": "Weight Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-elevated",
+                          "cornerRadius": 8,
+                          "stroke": "$text-muted",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "z1sBWm",
+                              "name": "Weight Value",
+                              "fill": "$text-muted",
+                              "content": "—",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "pCkK9",
+                          "name": "Prev Weight",
+                          "fill": "$text-muted",
+                          "content": "prev 77.5",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "cKs1M",
+                      "name": "Empty Check",
+                      "width": 20,
+                      "height": 20,
+                      "cornerRadius": 10,
+                      "stroke": "$text-muted",
+                      "strokeWidth": 1.5,
+                      "strokeAlignment": "inner"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "v5CqKP",
+              "name": "Overhead Press Card",
+              "width": "fill_container",
+              "fill": "$bg-card",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "gap": 12,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "cAbQm",
+                  "name": "Overhead Press Header",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "nvBse",
+                      "name": "Overhead Press Name",
+                      "fill": "$text-primary",
+                      "content": "Overhead Press",
+                      "fontFamily": "Space Grotesk",
+                      "fontSize": 16,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "jEo0t",
+                      "name": "Overhead Press Target",
+                      "fill": "$text-muted",
+                      "content": "3×10 @ 40 kg",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "vz54z",
+                  "name": "Overhead Press Col Labels",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Q8OD2",
+                      "name": "Set Col",
+                      "fill": "$text-muted",
+                      "content": "SET",
+                      "fontFamily": "Inter",
+                      "fontSize": 10,
+                      "fontWeight": "600",
+                      "letterSpacing": 1
+                    },
+                    {
+                      "type": "text",
+                      "id": "ckKJi",
+                      "name": "Reps Col",
+                      "fill": "$text-muted",
+                      "content": "REPS",
+                      "fontFamily": "Inter",
+                      "fontSize": 10,
+                      "fontWeight": "600",
+                      "letterSpacing": 1
+                    },
+                    {
+                      "type": "text",
+                      "id": "PZKuL",
+                      "name": "Weight Col",
+                      "fill": "$text-muted",
+                      "content": "KG",
+                      "fontFamily": "Inter",
+                      "fontSize": 10,
+                      "fontWeight": "600",
+                      "letterSpacing": 1
+                    },
+                    {
+                      "type": "text",
+                      "id": "z2p6D",
+                      "name": "Prev Col",
+                      "fill": "$text-muted",
+                      "content": "PREV",
+                      "fontFamily": "Inter",
+                      "fontSize": 10,
+                      "fontWeight": "600",
+                      "letterSpacing": 1
+                    },
+                    {
+                      "type": "frame",
+                      "id": "OM9R9",
+                      "name": "Status Col",
+                      "width": 24,
+                      "height": 12
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "oxSPW",
+                  "name": "Overhead Press Set 1",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "uLPAb",
+                      "name": "Set Num",
+                      "fill": "$text-secondary",
+                      "content": "1",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "X5j5O",
+                      "name": "Reps Wrapper",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "fymlS",
+                          "name": "Reps Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-primary",
+                          "cornerRadius": 8,
+                          "stroke": "$border-subtle",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "x7bC08",
+                              "name": "Reps Value",
+                              "fill": "$text-primary",
+                              "content": "10",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "VAjiS",
+                          "name": "Prev Reps",
+                          "fill": "$text-muted",
+                          "content": "prev 10",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "eELPI",
+                      "name": "Weight Wrapper",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "ZQ712",
+                          "name": "Weight Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-primary",
+                          "cornerRadius": 8,
+                          "stroke": "$border-subtle",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "K9nC3",
+                              "name": "Weight Value",
+                              "fill": "$text-primary",
+                              "content": "40",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "N8OdRC",
+                          "name": "Prev Weight",
+                          "fill": "$text-muted",
+                          "content": "prev 37.5",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "icon",
+                      "id": "wLOim",
+                      "name": "Done Check",
+                      "width": 20,
+                      "height": 20,
+                      "icon": "circle-check-big",
+                      "library": "lucide",
+                      "fill": "$accent-teal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "xHX4s",
+                  "name": "Overhead Press Set 2",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "x2rVxG",
+                      "name": "Set Num",
+                      "fill": "$text-secondary",
+                      "content": "2",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "R1173Q",
+                      "name": "Reps Wrapper",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "Tlfl2",
+                          "name": "Reps Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-primary",
+                          "cornerRadius": 8,
+                          "stroke": "$border-subtle",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "q9pPTv",
+                              "name": "Reps Value",
+                              "fill": "$text-primary",
+                              "content": "10",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "K3Iqo9",
+                          "name": "Prev Reps",
+                          "fill": "$text-muted",
+                          "content": "prev 10",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "fhBQN",
+                      "name": "Weight Wrapper",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "WS6Ku",
+                          "name": "Weight Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-primary",
+                          "cornerRadius": 8,
+                          "stroke": "$border-subtle",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "waoWe",
+                              "name": "Weight Value",
+                              "fill": "$text-primary",
+                              "content": "40",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "LCAWa",
+                          "name": "Prev Weight",
+                          "fill": "$text-muted",
+                          "content": "prev 37.5",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "icon",
+                      "id": "buZUs",
+                      "name": "Done Check",
+                      "width": 20,
+                      "height": 20,
+                      "icon": "circle-check-big",
+                      "library": "lucide",
+                      "fill": "$accent-teal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "i9QJd",
+                  "name": "Overhead Press Set 3",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "gfER8",
+                      "name": "Set Num",
+                      "fill": "$text-muted",
+                      "content": "3",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "fJKXv",
+                      "name": "Reps Wrapper",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "wTG1e",
+                          "name": "Reps Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-elevated",
+                          "cornerRadius": 8,
+                          "stroke": "$text-muted",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "dUywF",
+                              "name": "Reps Value",
+                              "fill": "$text-muted",
+                              "content": "—",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "tQUOz",
+                          "name": "Prev Reps",
+                          "fill": "$text-muted",
+                          "content": "prev 10",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "iAzYd",
+                      "name": "Weight Wrapper",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "qkL58",
+                          "name": "Weight Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-elevated",
+                          "cornerRadius": 8,
+                          "stroke": "$text-muted",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "Mofv9",
+                              "name": "Weight Value",
+                              "fill": "$text-muted",
+                              "content": "—",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "QQ7Af",
+                          "name": "Prev Weight",
+                          "fill": "$text-muted",
+                          "content": "prev 37.5",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "bj1oG",
+                      "name": "Empty Check",
+                      "width": 20,
+                      "height": 20,
+                      "cornerRadius": 10,
+                      "stroke": "$text-muted",
+                      "strokeWidth": 1.5,
+                      "strokeAlignment": "inner"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "L2BxO",
+              "name": "Incline DB Press Card",
+              "width": "fill_container",
+              "fill": "$bg-card",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "gap": 12,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "H38bC",
+                  "name": "Incline DB Press Header",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "dO28c",
+                      "name": "Incline DB Press Name",
+                      "fill": "$text-primary",
+                      "content": "Incline DB Press",
+                      "fontFamily": "Space Grotesk",
+                      "fontSize": 16,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "W7Ehy",
+                      "name": "Incline DB Press Target",
+                      "fill": "$text-muted",
+                      "content": "4×10 @ 30 kg",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "P6Nee",
+                  "name": "Incline DB Press Col Labels",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "flOAS",
+                      "name": "Set Col",
+                      "fill": "$text-muted",
+                      "content": "SET",
+                      "fontFamily": "Inter",
+                      "fontSize": 10,
+                      "fontWeight": "600",
+                      "letterSpacing": 1
+                    },
+                    {
+                      "type": "text",
+                      "id": "w5Eru",
+                      "name": "Reps Col",
+                      "fill": "$text-muted",
+                      "content": "REPS",
+                      "fontFamily": "Inter",
+                      "fontSize": 10,
+                      "fontWeight": "600",
+                      "letterSpacing": 1
+                    },
+                    {
+                      "type": "text",
+                      "id": "J9oODG",
+                      "name": "Weight Col",
+                      "fill": "$text-muted",
+                      "content": "KG",
+                      "fontFamily": "Inter",
+                      "fontSize": 10,
+                      "fontWeight": "600",
+                      "letterSpacing": 1
+                    },
+                    {
+                      "type": "text",
+                      "id": "V1yaP2",
+                      "name": "Prev Col",
+                      "fill": "$text-muted",
+                      "content": "PREV",
+                      "fontFamily": "Inter",
+                      "fontSize": 10,
+                      "fontWeight": "600",
+                      "letterSpacing": 1
+                    },
+                    {
+                      "type": "frame",
+                      "id": "QelxL",
+                      "name": "Status Col",
+                      "width": 24,
+                      "height": 12
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "YmzXh",
+                  "name": "Incline DB Press Set 1",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ZlpeW",
+                      "name": "Set Num",
+                      "fill": "$text-secondary",
+                      "content": "1",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "wqjfm",
+                      "name": "Reps Wrapper",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "r9UVSM",
+                          "name": "Reps Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-primary",
+                          "cornerRadius": 8,
+                          "stroke": "$border-subtle",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "mlBBc",
+                              "name": "Reps Value",
+                              "fill": "$text-primary",
+                              "content": "10",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "RfAbF",
+                          "name": "Prev Reps",
+                          "fill": "$text-muted",
+                          "content": "prev 10",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Y5MV3E",
+                      "name": "Weight Wrapper",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "rOlXf",
+                          "name": "Weight Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-primary",
+                          "cornerRadius": 8,
+                          "stroke": "$border-subtle",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "RF0KQ",
+                              "name": "Weight Value",
+                              "fill": "$text-primary",
+                              "content": "30",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "L9lQS8",
+                          "name": "Prev Weight",
+                          "fill": "$text-muted",
+                          "content": "prev 27.5",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "icon",
+                      "id": "i6w4PM",
+                      "name": "Done Check",
+                      "width": 20,
+                      "height": 20,
+                      "icon": "circle-check-big",
+                      "library": "lucide",
+                      "fill": "$accent-teal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "xBvEI",
+                  "name": "Incline DB Press Set 2",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "t7eYBW",
+                      "name": "Set Num",
+                      "fill": "$text-secondary",
+                      "content": "2",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "SURSw",
+                      "name": "Reps Wrapper",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "KNNly",
+                          "name": "Reps Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-primary",
+                          "cornerRadius": 8,
+                          "stroke": "$border-subtle",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "C2tvz",
+                              "name": "Reps Value",
+                              "fill": "$text-primary",
+                              "content": "10",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "pwlqS",
+                          "name": "Prev Reps",
+                          "fill": "$text-muted",
+                          "content": "prev 10",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "w4x2ql",
+                      "name": "Weight Wrapper",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "U1U2s",
+                          "name": "Weight Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-primary",
+                          "cornerRadius": 8,
+                          "stroke": "$border-subtle",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "VNZ0F",
+                              "name": "Weight Value",
+                              "fill": "$text-primary",
+                              "content": "30",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "ezruh",
+                          "name": "Prev Weight",
+                          "fill": "$text-muted",
+                          "content": "prev 27.5",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "icon",
+                      "id": "nXccy",
+                      "name": "Done Check",
+                      "width": 20,
+                      "height": 20,
+                      "icon": "circle-check-big",
+                      "library": "lucide",
+                      "fill": "$accent-teal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "SlfSu",
+                  "name": "Incline DB Press Set 3",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "T8eZ0r",
+                      "name": "Set Num",
+                      "fill": "$text-muted",
+                      "content": "3",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Uz3iM",
+                      "name": "Reps Wrapper",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "Z1kcc",
+                          "name": "Reps Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-elevated",
+                          "cornerRadius": 8,
+                          "stroke": "$text-muted",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "dVxwM",
+                              "name": "Reps Value",
+                              "fill": "$text-muted",
+                              "content": "—",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "Ja3ih",
+                          "name": "Prev Reps",
+                          "fill": "$text-muted",
+                          "content": "prev 10",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "qXGOi",
+                      "name": "Weight Wrapper",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "LR5ag",
+                          "name": "Weight Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-elevated",
+                          "cornerRadius": 8,
+                          "stroke": "$text-muted",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "lXj8g",
+                              "name": "Weight Value",
+                              "fill": "$text-muted",
+                              "content": "—",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "RDcah",
+                          "name": "Prev Weight",
+                          "fill": "$text-muted",
+                          "content": "prev 27.5",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "l53HBc",
+                      "name": "Empty Check",
+                      "width": 20,
+                      "height": 20,
+                      "cornerRadius": 10,
+                      "stroke": "$text-muted",
+                      "strokeWidth": 1.5,
+                      "strokeAlignment": "inner"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "VyO8c",
+                  "name": "Incline DB Press Set 4",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "rqn2o",
+                      "name": "Set Num",
+                      "fill": "$text-muted",
+                      "content": "4",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "h5BZGj",
+                      "name": "Reps Wrapper",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "R2ZGhy",
+                          "name": "Reps Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-elevated",
+                          "cornerRadius": 8,
+                          "stroke": "$text-muted",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "KoCVS",
+                              "name": "Reps Value",
+                              "fill": "$text-muted",
+                              "content": "—",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "O4BxA6",
+                          "name": "Prev Reps",
+                          "fill": "$text-muted",
+                          "content": "prev 10",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "mlBj6",
+                      "name": "Weight Wrapper",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "Eh5du",
+                          "name": "Weight Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-elevated",
+                          "cornerRadius": 8,
+                          "stroke": "$text-muted",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "n4sc7",
+                              "name": "Weight Value",
+                              "fill": "$text-muted",
+                              "content": "—",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "kmp7r",
+                          "name": "Prev Weight",
+                          "fill": "$text-muted",
+                          "content": "prev 27.5",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Z54yX",
+                      "name": "Empty Check",
+                      "width": 20,
+                      "height": 20,
+                      "cornerRadius": 10,
+                      "stroke": "$text-muted",
+                      "strokeWidth": 1.5,
+                      "strokeAlignment": "inner"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "k2liJG",
+              "name": "Cable Flyes Card",
+              "width": "fill_container",
+              "fill": "$bg-card",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "gap": 12,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "V3qyX",
+                  "name": "Cable Flyes Header",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "KupMm",
+                      "name": "Cable Flyes Name",
+                      "fill": "$text-primary",
+                      "content": "Cable Flyes",
+                      "fontFamily": "Space Grotesk",
+                      "fontSize": 16,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "lN3Hq",
+                      "name": "Cable Flyes Target",
+                      "fill": "$text-muted",
+                      "content": "3×12 @ 15 kg",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "iIx7V",
+                  "name": "Cable Flyes Col Labels",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "E8IRMP",
+                      "name": "Set Col",
+                      "fill": "$text-muted",
+                      "content": "SET",
+                      "fontFamily": "Inter",
+                      "fontSize": 10,
+                      "fontWeight": "600",
+                      "letterSpacing": 1
+                    },
+                    {
+                      "type": "text",
+                      "id": "O1aae",
+                      "name": "Reps Col",
+                      "fill": "$text-muted",
+                      "content": "REPS",
+                      "fontFamily": "Inter",
+                      "fontSize": 10,
+                      "fontWeight": "600",
+                      "letterSpacing": 1
+                    },
+                    {
+                      "type": "text",
+                      "id": "llTXV",
+                      "name": "Weight Col",
+                      "fill": "$text-muted",
+                      "content": "KG",
+                      "fontFamily": "Inter",
+                      "fontSize": 10,
+                      "fontWeight": "600",
+                      "letterSpacing": 1
+                    },
+                    {
+                      "type": "frame",
+                      "id": "iL2OT",
+                      "name": "Status Col",
+                      "width": 24,
+                      "height": 12
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "N1Ep7f",
+                  "name": "Cable Flyes Set 1",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Z2JIJb",
+                      "name": "Set Num",
+                      "fill": "$text-secondary",
+                      "content": "1",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "XxepH",
+                      "name": "Reps Cell",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "xYpAD",
+                          "name": "Reps Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-primary",
+                          "cornerRadius": 8,
+                          "stroke": "$border-subtle",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "U2Cv1x",
+                              "name": "Reps Value",
+                              "fill": "$text-primary",
+                              "content": "12",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "p8paX",
+                          "name": "Prev Reps",
+                          "fill": "$text-muted",
+                          "content": "prev 12",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "EZeT5",
+                      "name": "Weight Cell",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "y0EWjZ",
+                          "name": "Weight Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-primary",
+                          "cornerRadius": 8,
+                          "stroke": "$border-subtle",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "GEYWc",
+                              "name": "Weight Value",
+                              "fill": "$text-primary",
+                              "content": "15",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "kTuXV",
+                          "name": "Prev Weight",
+                          "fill": "$text-muted",
+                          "content": "prev 12.5",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "icon",
+                      "id": "L9OnLs",
+                      "name": "Done Check",
+                      "width": 20,
+                      "height": 20,
+                      "icon": "circle-check-big",
+                      "library": "lucide",
+                      "fill": "$accent-teal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "G5rGI",
+                  "name": "Cable Flyes Set 2",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "uR4kx",
+                      "name": "Set Num",
+                      "fill": "$text-muted",
+                      "content": "2",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Y24Ff",
+                      "name": "Reps Cell",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "wNsVw",
+                          "name": "Reps Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-elevated",
+                          "cornerRadius": 8,
+                          "stroke": "$text-muted",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "NEHnu",
+                              "name": "Reps Value",
+                              "fill": "$text-muted",
+                              "content": "—",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "q6gdV",
+                          "name": "Prev Reps",
+                          "fill": "$text-muted",
+                          "content": "prev 12",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "s0q1ux",
+                      "name": "Weight Cell",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "xvL0z",
+                          "name": "Weight Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-elevated",
+                          "cornerRadius": 8,
+                          "stroke": "$text-muted",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "cPrka",
+                              "name": "Weight Value",
+                              "fill": "$text-muted",
+                              "content": "—",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "ibpdP",
+                          "name": "Prev Weight",
+                          "fill": "$text-muted",
+                          "content": "prev 12.5",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "jbvLw",
+                      "name": "Empty Check",
+                      "width": 20,
+                      "height": 20,
+                      "cornerRadius": 10,
+                      "stroke": "$text-muted",
+                      "strokeWidth": 1.5,
+                      "strokeAlignment": "inner"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "DiLoN",
+                  "name": "Cable Flyes Set 3",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "dZThe",
+                      "name": "Set Num",
+                      "fill": "$text-muted",
+                      "content": "3",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "JpxmI",
+                      "name": "Reps Cell",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "cKOkY",
+                          "name": "Reps Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-elevated",
+                          "cornerRadius": 8,
+                          "stroke": "$text-muted",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "P8hvg",
+                              "name": "Reps Value",
+                              "fill": "$text-muted",
+                              "content": "—",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "Cq7wb",
+                          "name": "Prev Reps",
+                          "fill": "$text-muted",
+                          "content": "prev 12",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "g6zuYg",
+                      "name": "Weight Cell",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "pvaAD",
+                          "name": "Weight Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-elevated",
+                          "cornerRadius": 8,
+                          "stroke": "$text-muted",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "M7WCA",
+                              "name": "Weight Value",
+                              "fill": "$text-muted",
+                              "content": "—",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "oFSft",
+                          "name": "Prev Weight",
+                          "fill": "$text-muted",
+                          "content": "prev 12.5",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "d2Vvh0",
+                      "name": "Empty Check",
+                      "width": 20,
+                      "height": 20,
+                      "cornerRadius": 10,
+                      "stroke": "$text-muted",
+                      "strokeWidth": 1.5,
+                      "strokeAlignment": "inner"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "lfmmS",
+              "name": "Tricep Pushdowns Card",
+              "width": "fill_container",
+              "fill": "$bg-card",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "gap": 12,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "A7mzH0",
+                  "name": "Tricep Pushdowns Header",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Y7WSKF",
+                      "name": "Tricep Pushdowns Name",
+                      "fill": "$text-primary",
+                      "content": "Tricep Pushdowns",
+                      "fontFamily": "Space Grotesk",
+                      "fontSize": 16,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "GGKuj",
+                      "name": "Tricep Pushdowns Target",
+                      "fill": "$text-muted",
+                      "content": "3×12 @ 25 kg",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Gq9uG",
+                  "name": "Tricep Pushdowns Col Labels",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "S1VOw",
+                      "name": "Set Col",
+                      "fill": "$text-muted",
+                      "content": "SET",
+                      "fontFamily": "Inter",
+                      "fontSize": 10,
+                      "fontWeight": "600",
+                      "letterSpacing": 1
+                    },
+                    {
+                      "type": "text",
+                      "id": "iQyOR",
+                      "name": "Reps Col",
+                      "fill": "$text-muted",
+                      "content": "REPS",
+                      "fontFamily": "Inter",
+                      "fontSize": 10,
+                      "fontWeight": "600",
+                      "letterSpacing": 1
+                    },
+                    {
+                      "type": "text",
+                      "id": "ZvmDW",
+                      "name": "Weight Col",
+                      "fill": "$text-muted",
+                      "content": "KG",
+                      "fontFamily": "Inter",
+                      "fontSize": 10,
+                      "fontWeight": "600",
+                      "letterSpacing": 1
+                    },
+                    {
+                      "type": "frame",
+                      "id": "uFEUt",
+                      "name": "Status Col",
+                      "width": 24,
+                      "height": 12
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "hUIyP",
+                  "name": "Tricep Pushdowns Set 1",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "hxoLO",
+                      "name": "Set Num",
+                      "fill": "$text-muted",
+                      "content": "1",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "m0glk",
+                      "name": "Reps Cell",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "yQvTn",
+                          "name": "Reps Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-elevated",
+                          "cornerRadius": 8,
+                          "stroke": "$text-muted",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "akVCp",
+                              "name": "Reps Value",
+                              "fill": "$text-muted",
+                              "content": "—",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "EhrZo",
+                          "name": "Prev Reps",
+                          "fill": "$text-muted",
+                          "content": "prev 12",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "XnQql",
+                      "name": "Weight Cell",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "j0EKs",
+                          "name": "Weight Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-elevated",
+                          "cornerRadius": 8,
+                          "stroke": "$text-muted",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "l0vmZd",
+                              "name": "Weight Value",
+                              "fill": "$text-muted",
+                              "content": "—",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "a11qA6",
+                          "name": "Prev Weight",
+                          "fill": "$text-muted",
+                          "content": "prev 22.5",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Vti0x",
+                      "name": "Empty Check",
+                      "width": 20,
+                      "height": 20,
+                      "cornerRadius": 10,
+                      "stroke": "$text-muted",
+                      "strokeWidth": 1.5,
+                      "strokeAlignment": "inner"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "NQ7nL",
+                  "name": "Tricep Pushdowns Set 2",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "fj3G9",
+                      "name": "Set Num",
+                      "fill": "$text-muted",
+                      "content": "2",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "YWwnu",
+                      "name": "Reps Cell",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "a6Cs6",
+                          "name": "Reps Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-elevated",
+                          "cornerRadius": 8,
+                          "stroke": "$text-muted",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "I4nAmv",
+                              "name": "Reps Value",
+                              "fill": "$text-muted",
+                              "content": "—",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "nl6m8",
+                          "name": "Prev Reps",
+                          "fill": "$text-muted",
+                          "content": "prev 12",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "dyVLF",
+                      "name": "Weight Cell",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "Xutvb",
+                          "name": "Weight Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-elevated",
+                          "cornerRadius": 8,
+                          "stroke": "$text-muted",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "H6g1b",
+                              "name": "Weight Value",
+                              "fill": "$text-muted",
+                              "content": "—",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "ELycP",
+                          "name": "Prev Weight",
+                          "fill": "$text-muted",
+                          "content": "prev 22.5",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "rztW1",
+                      "name": "Empty Check",
+                      "width": 20,
+                      "height": 20,
+                      "cornerRadius": 10,
+                      "stroke": "$text-muted",
+                      "strokeWidth": 1.5,
+                      "strokeAlignment": "inner"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "mPx4r",
+                  "name": "Tricep Pushdowns Set 3",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "fHfMH",
+                      "name": "Set Num",
+                      "fill": "$text-muted",
+                      "content": "3",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "iypjs",
+                      "name": "Reps Cell",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "AVZfa",
+                          "name": "Reps Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-elevated",
+                          "cornerRadius": 8,
+                          "stroke": "$text-muted",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "Fk2Fn",
+                              "name": "Reps Value",
+                              "fill": "$text-muted",
+                              "content": "—",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "mySMw",
+                          "name": "Prev Reps",
+                          "fill": "$text-muted",
+                          "content": "prev 12",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "GFSEN",
+                      "name": "Weight Cell",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "U154e4",
+                          "name": "Weight Input",
+                          "width": "fill_container",
+                          "height": 36,
+                          "fill": "$bg-elevated",
+                          "cornerRadius": 8,
+                          "stroke": "$text-muted",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "fk1D8",
+                              "name": "Weight Value",
+                              "fill": "$text-muted",
+                              "content": "—",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "oXNfL",
+                          "name": "Prev Weight",
+                          "fill": "$text-muted",
+                          "content": "prev 22.5",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ae8qz",
+                      "name": "Empty Check",
+                      "width": 20,
+                      "height": 20,
+                      "cornerRadius": 10,
+                      "stroke": "$text-muted",
+                      "strokeWidth": 1.5,
+                      "strokeAlignment": "inner"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "UjAzQ",
+          "name": "Button Area",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "padding": [
+            16,
+            20,
+            32,
+            20
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "sFcfS",
+              "name": "Back Hint",
+              "fill": "$text-muted",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Or say \"Hey Sergeant\" to switch back to voice",
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "l8SUx",
+      "x": 1410,
+      "y": 0,
+      "name": "Session Complete",
+      "clip": true,
+      "width": 390,
+      "fill": "$bg-primary",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "i3Bzz",
+          "name": "Status Bar",
+          "width": "fill_container",
+          "height": 62,
+          "padding": [
+            0,
+            20
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "BDNOz",
+              "name": "Time",
+              "fill": "$text-primary",
+              "content": "10:32",
+              "fontFamily": "$font-primary",
+              "fontSize": 15,
+              "fontWeight": "600"
+            },
+            {
+              "type": "frame",
+              "id": "u95F1I",
+              "name": "Status Icons",
+              "gap": 6,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "Hdc4f",
+                  "name": "Signal",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "signal",
+                  "library": "lucide",
+                  "fill": "$text-primary"
+                },
+                {
+                  "type": "icon",
+                  "id": "w4ZlR",
+                  "name": "Wifi",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "wifi",
+                  "library": "lucide",
+                  "fill": "$text-primary"
+                },
+                {
+                  "type": "icon",
+                  "id": "m5qr90",
+                  "name": "Battery",
+                  "width": 22,
+                  "height": 16,
+                  "icon": "battery-full",
+                  "library": "lucide",
+                  "fill": "$text-primary"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Bv0Fl",
+          "name": "Content",
+          "width": "fill_container",
+          "height": 674,
+          "layout": "vertical",
+          "gap": 28,
+          "padding": [
+            24,
+            20,
+            48,
+            20
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "q9VH6s",
+              "name": "Hero Area",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 14,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "PGv4z",
+                  "name": "Check Circle",
+                  "width": 100,
+                  "height": 100,
+                  "fill": "#4ecdc426",
+                  "cornerRadius": 50,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "U6P9d",
+                      "name": "Check Icon",
+                      "width": 52,
+                      "height": 52,
+                      "icon": "check",
+                      "library": "lucide",
+                      "fill": "$success"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "hdvDu",
+                  "name": "Complete Tag",
+                  "fill": "$success",
+                  "content": "WORKOUT COMPLETE",
+                  "fontFamily": "$font-primary",
+                  "fontSize": 11,
+                  "fontWeight": "600",
+                  "letterSpacing": 2
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "vRSyC",
+              "name": "Stats Row",
+              "width": "fill_container",
+              "gap": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "N57O9V",
+                  "name": "Exercises",
+                  "width": "fill_container",
+                  "fill": "$bg-elevated",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 4,
+                  "padding": [
+                    14,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "zbTSS",
+                      "name": "Value",
+                      "fill": "$text-primary",
+                      "content": "5 / 5",
+                      "fontFamily": "$font-display",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "TeIoX",
+                      "name": "Stat Label",
+                      "fill": "$text-muted",
+                      "content": "Exercises",
+                      "fontFamily": "$font-primary",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "z3M87k",
+                  "name": "Sets",
+                  "width": "fill_container",
+                  "fill": "$bg-elevated",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 4,
+                  "padding": [
+                    14,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "c1i24m",
+                      "name": "Value",
+                      "fill": "$text-primary",
+                      "content": "18",
+                      "fontFamily": "$font-display",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "LNpmE",
+                      "name": "Stat Label",
+                      "fill": "$text-muted",
+                      "content": "Sets",
+                      "fontFamily": "$font-primary",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "wPHDv",
+                  "name": "Duration",
+                  "width": "fill_container",
+                  "fill": "$bg-elevated",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 4,
+                  "padding": [
+                    14,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Om2aK",
+                      "name": "Value",
+                      "fill": "$text-primary",
+                      "content": "47 min",
+                      "fontFamily": "$font-display",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Zc1it",
+                      "name": "Stat Label",
+                      "fill": "$text-muted",
+                      "content": "Duration",
+                      "fontFamily": "$font-primary",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "tETTV",
+              "name": "PR Highlight",
+              "width": "fill_container",
+              "fill": "#f4a26114",
+              "cornerRadius": 12,
+              "stroke": "#f4a26140",
+              "strokeWidth": 1,
+              "strokeAlignment": "inner",
+              "gap": 14,
+              "padding": 16,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "x0gSEu",
+                  "name": "Trophy Icon",
+                  "width": 26,
+                  "height": 26,
+                  "icon": "trophy",
+                  "library": "lucide",
+                  "fill": "$warning"
+                },
+                {
+                  "type": "frame",
+                  "id": "OgvYV",
+                  "name": "PR Text",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 3,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "D5QRRG",
+                      "name": "PR Label",
+                      "fill": "$text-secondary",
+                      "content": "Bench Press",
+                      "fontFamily": "$font-primary",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Ob0mr",
+                      "name": "PR Value",
+                      "fill": "$warning",
+                      "content": "New personal record — 235 lbs",
+                      "fontFamily": "$font-display",
+                      "fontSize": 16,
+                      "fontWeight": "700"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "j4svP",
+              "name": "Exercise Breakdown",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 14,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "X6LWh3",
+                  "name": "Section Label",
+                  "fill": "$text-muted",
+                  "content": "EXERCISE LOG",
+                  "fontFamily": "$font-primary",
+                  "fontSize": 11,
+                  "fontWeight": "600",
+                  "letterSpacing": 2
+                },
+                {
+                  "type": "frame",
+                  "id": "LSP76",
+                  "name": "Bench Press",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "dJNm7",
+                      "name": "Left",
+                      "gap": 10,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "QJ2wa",
+                          "name": "Check",
+                          "width": 18,
+                          "height": 18,
+                          "icon": "circle-check",
+                          "library": "lucide",
+                          "fill": "$success"
+                        },
+                        {
+                          "type": "text",
+                          "id": "TpBnZ",
+                          "name": "Ex Name",
+                          "fill": "$text-primary",
+                          "content": "Bench Press",
+                          "fontFamily": "$font-primary",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "nAe22",
+                      "name": "Right",
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "mxU8S",
+                          "name": "Sets Count",
+                          "fill": "$text-muted",
+                          "content": "4/4 sets",
+                          "fontFamily": "$font-primary",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "dywrZ",
+                          "name": "PR Badge",
+                          "fill": "$warning",
+                          "cornerRadius": 6,
+                          "padding": [
+                            3,
+                            8
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "Qn4f5",
+                              "name": "PR Text",
+                              "fill": "$bg-primary",
+                              "content": "PR",
+                              "fontFamily": "$font-primary",
+                              "fontSize": 11,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "EOIk6",
+                  "name": "Overhead Press",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "b1whm",
+                      "name": "Left",
+                      "gap": 10,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "CysAr",
+                          "name": "Check",
+                          "width": 18,
+                          "height": 18,
+                          "icon": "circle-check",
+                          "library": "lucide",
+                          "fill": "$success"
+                        },
+                        {
+                          "type": "text",
+                          "id": "RM0tk",
+                          "name": "Ex Name",
+                          "fill": "$text-primary",
+                          "content": "Overhead Press",
+                          "fontFamily": "$font-primary",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Z5lrb",
+                      "name": "Right",
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "M4Es47",
+                          "name": "Sets Count",
+                          "fill": "$text-muted",
+                          "content": "3/3 sets",
+                          "fontFamily": "$font-primary",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "bhRve",
+                  "name": "Incline DB Press",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "OqavP",
+                      "name": "Left",
+                      "gap": 10,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "KWfF7",
+                          "name": "Check",
+                          "width": 18,
+                          "height": 18,
+                          "icon": "circle-check",
+                          "library": "lucide",
+                          "fill": "$success"
+                        },
+                        {
+                          "type": "text",
+                          "id": "UusWo",
+                          "name": "Ex Name",
+                          "fill": "$text-primary",
+                          "content": "Incline DB Press",
+                          "fontFamily": "$font-primary",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "u9pcrP",
+                      "name": "Right",
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "D1K2V",
+                          "name": "Sets Count",
+                          "fill": "$text-muted",
+                          "content": "3/3 sets",
+                          "fontFamily": "$font-primary",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "ohB4P",
+                  "name": "Cable Flyes",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "ZGZs2",
+                      "name": "Left",
+                      "gap": 10,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "V75IJ",
+                          "name": "Check",
+                          "width": 18,
+                          "height": 18,
+                          "icon": "circle-check",
+                          "library": "lucide",
+                          "fill": "$success"
+                        },
+                        {
+                          "type": "text",
+                          "id": "abB88",
+                          "name": "Ex Name",
+                          "fill": "$text-primary",
+                          "content": "Cable Flyes",
+                          "fontFamily": "$font-primary",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "C9BFJ",
+                      "name": "Right",
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "AmAVp",
+                          "name": "Sets Count",
+                          "fill": "$text-muted",
+                          "content": "3/3 sets",
+                          "fontFamily": "$font-primary",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "x61kfB",
+                  "name": "Tricep Pushdowns",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "m6dj5",
+                      "name": "Left",
+                      "gap": 10,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "S8pUE",
+                          "name": "Check",
+                          "width": 18,
+                          "height": 18,
+                          "icon": "circle-check",
+                          "library": "lucide",
+                          "fill": "$success"
+                        },
+                        {
+                          "type": "text",
+                          "id": "H5EdtK",
+                          "name": "Ex Name",
+                          "fill": "$text-primary",
+                          "content": "Tricep Pushdowns",
+                          "fontFamily": "$font-primary",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "yrBG9",
+                      "name": "Right",
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "dR5HI",
+                          "name": "Sets Count",
+                          "fill": "$text-muted",
+                          "content": "3/3 sets",
+                          "fontFamily": "$font-primary",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "B5Yr9",
+              "name": "Done Button",
+              "width": "fill_container",
+              "height": 62,
+              "fill": "$bg-elevated",
+              "cornerRadius": 14,
+              "stroke": "$border-subtle",
+              "strokeWidth": 1,
+              "strokeAlignment": "inner",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "C7qKB",
+                  "name": "Done Label",
+                  "fill": "$text-primary",
+                  "content": "Done",
+                  "fontFamily": "$font-display",
+                  "fontSize": 18,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variables": {
+    "accent-orange": {
+      "type": "color",
+      "value": "#f4a261"
+    },
+    "accent-red": {
+      "type": "color",
+      "value": "#e63946"
+    },
+    "accent-teal": {
+      "type": "color",
+      "value": "#4ecdc4"
+    },
+    "bg-card": {
+      "type": "color",
+      "value": "#141414"
+    },
+    "bg-elevated": {
+      "type": "color",
+      "value": "#1a1a1a"
+    },
+    "bg-primary": {
+      "type": "color",
+      "value": "#0a0a0a"
+    },
+    "bg-surface": {
+      "type": "color",
+      "value": "#222222"
+    },
+    "border-subtle": {
+      "type": "color",
+      "value": "#2a2a2a"
+    },
+    "danger": {
+      "type": "color",
+      "value": "#e63946"
+    },
+    "font-display": {
+      "type": "string",
+      "value": "Space Grotesk"
+    },
+    "font-primary": {
+      "type": "string",
+      "value": "Inter"
+    },
+    "success": {
+      "type": "color",
+      "value": "#4ecdc4"
+    },
+    "text-muted": {
+      "type": "color",
+      "value": "#666666"
+    },
+    "text-primary": {
+      "type": "color",
+      "value": "#ffffff"
+    },
+    "text-secondary": {
+      "type": "color",
+      "value": "#a0a0a0"
+    },
+    "warning": {
+      "type": "color",
+      "value": "#f4a261"
+    }
+  }
+}

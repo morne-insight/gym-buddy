@@ -3,11 +3,13 @@ import { createContext, useContext, useMemo, useState } from 'react';
 import { SessionProvider, useSession } from '@livekit/components-react';
 import { AudioSession, AndroidAudioTypePresets } from '@livekit/react-native';
 
-// Override per-machine in apps/mobile/.env (EXPO_PUBLIC_TOKEN_ENDPOINT).
-// Default targets the dev machine's LAN IP on the token-server port (3001).
-// Android emulator: use http://10.0.2.2:3001/getToken instead.
+// Override per-machine in apps/mobile/.env.local (EXPO_PUBLIC_TOKEN_ENDPOINT).
+// Default assumes a USB device with `adb reverse tcp:3001 tcp:3001`, which
+// tunnels the token fetch over USB — immune to Wi-Fi firewall blocks and DHCP
+// IP changes (the same mechanism Metro's 8081 already uses). For a Wi-Fi device
+// set the dev machine's LAN IP; for the Android emulator use http://10.0.2.2.
 const TOKEN_ENDPOINT =
-  process.env.EXPO_PUBLIC_TOKEN_ENDPOINT ?? 'http://192.168.1.202:3001/getToken';
+  process.env.EXPO_PUBLIC_TOKEN_ENDPOINT ?? 'http://localhost:3001/getToken';
 
 const AGENT_NAME = 'gym-buddy';
 
