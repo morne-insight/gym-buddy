@@ -39,6 +39,10 @@ export const ALL_TABLES = [
   'programs',
   'users',
   'personas',
+  'template_schedule',
+  'template_exercises',
+  'template_workouts',
+  'program_templates',
 ] as const;
 
 /** Truncates every domain table and resets identity sequences. */
@@ -485,4 +489,555 @@ export async function getPendingMessages(db: DB, now?: string): Promise<Schedule
 
 export async function markMessageDelivered(db: DB, messageId: string): Promise<void> {
   await db`UPDATE scheduled_messages SET delivered = 1 WHERE id = ${messageId}`;
+}
+
+// --- Web API: typed errors ---------------------------------------------------
+
+/** Thrown when a resource is absent or not owned by the caller (→ HTTP 404). */
+export class NotFoundError extends Error {
+  constructor(message = 'Not found') {
+    super(message);
+    this.name = 'NotFoundError';
+  }
+}
+
+/** Thrown when an operation would violate a domain invariant (→ HTTP 400). */
+export class DomainValidationError extends Error {
+  constructor(message = 'Invalid request') {
+    super(message);
+    this.name = 'DomainValidationError';
+  }
+}
+
+// --- Web API: identity provisioning & personas -------------------------------
+
+/**
+ * Idempotently provisions the domain `users` row for a verified auth identity
+ * (`sub`). On first authenticated request the row is created with placeholder
+ * profile defaults; subsequent calls return the existing row unchanged. This is
+ * the only place a `users` row is created for web users — never a DB trigger.
+ */
+export async function provisionUser(db: DB, userId: string): Promise<User> {
+  const [row] = await db`
+    INSERT INTO users (id, name)
+    VALUES (${userId}, '')
+    ON CONFLICT (id) DO UPDATE SET id = EXCLUDED.id
+    RETURNING *`;
+  return row as User;
+}
+
+export async function listPersonas(db: DB): Promise<Persona[]> {
+  return (await db`SELECT * FROM personas ORDER BY name`) as unknown as Persona[];
+}
+
+export async function personaExists(db: DB, personaId: string): Promise<boolean> {
+  const [row] = await db`SELECT 1 AS ok FROM personas WHERE id = ${personaId}`;
+  return Boolean(row);
+}
+
+// --- Web API: profile --------------------------------------------------------
+
+export interface ProfileUpdate {
+  name: string;
+  persona_id: string;
+  goal_description: string | null;
+  training_style: string;
+}
+
+/** Writes the onboarding/profile fields to the caller's own `users` row. */
+export async function updateUserProfile(db: DB, userId: string, p: ProfileUpdate): Promise<User> {
+  const [row] = await db`
+    UPDATE users
+    SET name = ${p.name},
+        persona_id = ${p.persona_id},
+        goal_description = ${p.goal_description},
+        training_style = ${p.training_style}
+    WHERE id = ${userId}
+    RETURNING *`;
+  if (!row) throw new NotFoundError('User not found');
+  return row as User;
+}
+
+export async function setGoalImageUrl(db: DB, userId: string, url: string): Promise<User> {
+  const [row] = await db`UPDATE users SET goal_image_url = ${url} WHERE id = ${userId} RETURNING *`;
+  if (!row) throw new NotFoundError('User not found');
+  return row as User;
+}
+
+// --- Web API: Template catalog -----------------------------------------------
+
+export interface AssembledTemplateExercise {
+  id: string;
+  exercise_name: string;
+  sets: number;
+  reps: string;
+  rest_seconds: number;
+  sort_order: number;
+}
+
+export interface AssembledTemplateWorkout {
+  id: string;
+  name: string;
+  sort_order: number;
+  day_of_week: number | null;
+  scheduled_time: string | null;
+  exercises: AssembledTemplateExercise[];
+}
+
+export interface AssembledTemplate {
+  id: string;
+  name: string;
+  description: string | null;
+  type: 'static' | 'rotation';
+  workouts: AssembledTemplateWorkout[];
+}
+
+/** Lists every catalog Template with its Workouts, default schedule, and exercises. */
+export async function listTemplates(db: DB): Promise<AssembledTemplate[]> {
+  const templates = (await db`
+    SELECT * FROM program_templates ORDER BY sort_order, name`) as unknown as Array<{
+    id: string;
+    name: string;
+    description: string | null;
+    type: 'static' | 'rotation';
+  }>;
+
+  const result: AssembledTemplate[] = [];
+  for (const t of templates) {
+    const workouts = (await db`
+      SELECT * FROM template_workouts WHERE program_template_id = ${t.id} ORDER BY sort_order`) as unknown as Array<{
+      id: string;
+      name: string;
+      sort_order: number;
+    }>;
+    const schedule = (await db`
+      SELECT * FROM template_schedule WHERE program_template_id = ${t.id}`) as unknown as Array<{
+      template_workout_id: string;
+      day_of_week: number | null;
+      scheduled_time: string | null;
+      sort_order: number;
+    }>;
+    const schedByWorkout = new Map(schedule.map((s) => [s.template_workout_id, s]));
+
+    const assembledWorkouts: AssembledTemplateWorkout[] = [];
+    for (const w of workouts) {
+      const exercises = (await db`
+        SELECT id, exercise_name, sets, reps, rest_seconds, sort_order
+        FROM template_exercises WHERE template_workout_id = ${w.id} ORDER BY sort_order`) as unknown as AssembledTemplateExercise[];
+      const s = schedByWorkout.get(w.id);
+      assembledWorkouts.push({
+        id: w.id,
+        name: w.name,
+        sort_order: s?.sort_order ?? w.sort_order,
+        day_of_week: s?.day_of_week ?? null,
+        scheduled_time: s?.scheduled_time ?? null,
+        exercises,
+      });
+    }
+    assembledWorkouts.sort((a, b) => a.sort_order - b.sort_order);
+    result.push({ id: t.id, name: t.name, description: t.description, type: t.type, workouts: assembledWorkouts });
+  }
+  return result;
+}
+
+// --- Web API: active Program assembly ----------------------------------------
+
+export interface AssembledProgramExercise {
+  id: string;
+  workout_id: string;
+  exercise_name: string;
+  sets: number;
+  reps: string;
+  rest_seconds: number;
+  sort_order: number;
+}
+
+export interface AssembledProgramWorkout {
+  id: string;
+  name: string;
+  sort_order: number;
+  day_of_week: number | null;
+  scheduled_time: string | null;
+  exercises: AssembledProgramExercise[];
+}
+
+export interface AssembledProgram {
+  id: string;
+  name: string;
+  type: 'static' | 'rotation';
+  rotation_current_index: number | null;
+  workouts: AssembledProgramWorkout[];
+}
+
+/**
+ * Assembles the caller's single active Program into the nested shape the editor
+ * consumes. Workouts are ordered by their schedule `sort_order`. Returns
+ * undefined when the user has no active Program.
+ */
+export async function getActiveProgramDetail(db: DB, userId: string): Promise<AssembledProgram | undefined> {
+  const program = await getActiveProgram(db, userId);
+  if (!program) return undefined;
+
+  const workouts = await getWorkoutsByProgram(db, program.id);
+  const schedules = await getSchedulesByProgram(db, program.id);
+  const schedByWorkout = new Map(schedules.map((s) => [s.workout_id, s]));
+
+  const assembled: AssembledProgramWorkout[] = [];
+  for (const w of workouts) {
+    const exercises = await getExercisesForWorkout(db, w.id);
+    const s = schedByWorkout.get(w.id);
+    assembled.push({
+      id: w.id,
+      name: w.name,
+      sort_order: s?.sort_order ?? 0,
+      day_of_week: s?.day_of_week ?? null,
+      scheduled_time: s?.scheduled_time ?? null,
+      exercises: exercises.map((e) => ({
+        id: e.id,
+        workout_id: e.workout_id,
+        exercise_name: e.exercise_name,
+        sets: e.sets,
+        reps: e.reps,
+        rest_seconds: e.rest_seconds,
+        sort_order: e.sort_order,
+      })),
+    });
+  }
+  assembled.sort((a, b) => a.sort_order - b.sort_order);
+
+  let rotationIndex: number | null = null;
+  if (program.type === 'rotation') {
+    const state = await getRotationState(db, userId, program.id);
+    rotationIndex = state?.current_index ?? 0;
+  }
+
+  return {
+    id: program.id,
+    name: program.name,
+    type: program.type,
+    rotation_current_index: rotationIndex,
+    workouts: assembled,
+  };
+}
+
+// --- Web API: Template adoption (transactional clone) ------------------------
+
+/**
+ * Clones a catalog Template into a new user-owned active Program in a single
+ * transaction: deactivates any prior Program, then creates `programs`,
+ * `workouts`, `workout_exercises`, and `schedule` rows owned by the caller.
+ * Rotation templates seed a `rotation_state` row at index 0 with NULL
+ * `day_of_week`; static templates keep their `day_of_week` values. There is no
+ * FK back to the Template — adoption is a one-time copy with no propagation.
+ */
+export async function adoptTemplate(db: DB, userId: string, templateId: string): Promise<AssembledProgram> {
+  await db.begin(async (sql) => {
+    const [template] = await sql`SELECT * FROM program_templates WHERE id = ${templateId}`;
+    if (!template) throw new NotFoundError('Template not found');
+    const isRotation = template.type === 'rotation';
+
+    await sql`UPDATE programs SET active = 0 WHERE user_id = ${userId}`;
+
+    const programId = randomUUID();
+    await sql`INSERT INTO programs (id, user_id, name, type) VALUES (${programId}, ${userId}, ${template.name}, ${template.type})`;
+
+    const tWorkouts = await sql`SELECT * FROM template_workouts WHERE program_template_id = ${templateId} ORDER BY sort_order`;
+    const tSchedule = await sql`SELECT * FROM template_schedule WHERE program_template_id = ${templateId}`;
+    const schedByWorkout = new Map(
+      (tSchedule as unknown as Array<{ template_workout_id: string; day_of_week: number | null; scheduled_time: string | null; sort_order: number }>).map(
+        (s) => [s.template_workout_id, s],
+      ),
+    );
+
+    let order = 0;
+    for (const tw of tWorkouts as unknown as Array<{ id: string; name: string }>) {
+      const workoutId = randomUUID();
+      await sql`INSERT INTO workouts (id, program_id, name) VALUES (${workoutId}, ${programId}, ${tw.name})`;
+
+      const exercises = await sql`SELECT * FROM template_exercises WHERE template_workout_id = ${tw.id} ORDER BY sort_order`;
+      for (const e of exercises as unknown as Array<{
+        exercise_name: string;
+        exercise_db_id: string | null;
+        sets: number;
+        reps: string;
+        rest_seconds: number;
+        sort_order: number;
+      }>) {
+        await sql`
+          INSERT INTO workout_exercises (id, workout_id, exercise_name, exercise_db_id, sets, reps, rest_seconds, sort_order)
+          VALUES (${randomUUID()}, ${workoutId}, ${e.exercise_name}, ${e.exercise_db_id}, ${e.sets}, ${e.reps}, ${e.rest_seconds}, ${e.sort_order})`;
+      }
+
+      const s = schedByWorkout.get(tw.id);
+      const dayOfWeek = isRotation ? null : s?.day_of_week ?? null;
+      const scheduledTime = s?.scheduled_time ?? null;
+      const sortOrder = isRotation ? order : s?.sort_order ?? order;
+      await sql`
+        INSERT INTO schedule (id, user_id, program_id, workout_id, day_of_week, scheduled_time, sort_order)
+        VALUES (${randomUUID()}, ${userId}, ${programId}, ${workoutId}, ${dayOfWeek}, ${scheduledTime}, ${sortOrder})`;
+      order++;
+    }
+
+    if (isRotation) {
+      await sql`INSERT INTO rotation_state (id, user_id, program_id, current_index) VALUES (${randomUUID()}, ${userId}, ${programId}, 0)`;
+    }
+  });
+
+  const program = await getActiveProgramDetail(db, userId);
+  if (!program) throw new Error('Adoption completed but no active program found');
+  return program;
+}
+
+// --- Web API: program configuration (intent-based, server-owned invariants) --
+
+/**
+ * Resolves the workout's owning Program, asserting it belongs to the caller's
+ * active Program. Returns the program id + type. Throws {@link NotFoundError}
+ * otherwise (so cross-user access is indistinguishable from "not found").
+ */
+async function requireOwnedWorkout(
+  sql: DB,
+  userId: string,
+  workoutId: string,
+): Promise<{ programId: string; type: 'static' | 'rotation' }> {
+  const [row] = await sql`
+    SELECT w.program_id, p.type
+    FROM workouts w
+    JOIN programs p ON p.id = w.program_id
+    WHERE w.id = ${workoutId} AND p.user_id = ${userId} AND p.active = 1`;
+  if (!row) throw new NotFoundError('Workout not found');
+  return { programId: row.program_id as string, type: row.type as 'static' | 'rotation' };
+}
+
+async function requireActiveProgram(db: DB, userId: string): Promise<Program> {
+  const program = await getActiveProgram(db, userId);
+  if (!program) throw new NotFoundError('No active program');
+  return program;
+}
+
+/** Adds a Workout to the active Program with an (unscheduled) schedule slot appended. */
+export async function addWorkout(db: DB, userId: string, name: string): Promise<string> {
+  const program = await requireActiveProgram(db, userId);
+  const workoutId = randomUUID();
+  await db.begin(async (sql) => {
+    await sql`INSERT INTO workouts (id, program_id, name) VALUES (${workoutId}, ${program.id}, ${name})`;
+    const [{ next_order }] = await sql`
+      SELECT COALESCE(MAX(sort_order), -1)::int + 1 AS next_order FROM schedule WHERE program_id = ${program.id} AND active = 1`;
+    await sql`
+      INSERT INTO schedule (id, user_id, program_id, workout_id, day_of_week, scheduled_time, sort_order)
+      VALUES (${randomUUID()}, ${userId}, ${program.id}, ${workoutId}, NULL, NULL, ${next_order})`;
+  });
+  return workoutId;
+}
+
+export async function renameWorkout(db: DB, userId: string, workoutId: string, name: string): Promise<void> {
+  await db.begin(async (sql) => {
+    await requireOwnedWorkout(sql as unknown as DB, userId, workoutId);
+    await sql`UPDATE workouts SET name = ${name} WHERE id = ${workoutId}`;
+  });
+}
+
+/** Removes a Workout and cascades its schedule entries and exercises; re-packs order. */
+export async function removeWorkout(db: DB, userId: string, workoutId: string): Promise<void> {
+  await db.begin(async (sql) => {
+    const { programId } = await requireOwnedWorkout(sql as unknown as DB, userId, workoutId);
+    await sql`DELETE FROM schedule WHERE workout_id = ${workoutId}`;
+    await sql`DELETE FROM workout_exercises WHERE workout_id = ${workoutId}`;
+    await sql`DELETE FROM workouts WHERE id = ${workoutId}`;
+
+    const remaining = await sql`SELECT id FROM schedule WHERE program_id = ${programId} AND active = 1 ORDER BY sort_order`;
+    let i = 0;
+    for (const r of remaining as unknown as Array<{ id: string }>) {
+      await sql`UPDATE schedule SET sort_order = ${i} WHERE id = ${r.id}`;
+      i++;
+    }
+  });
+}
+
+/** Reorders the active Program's Workouts; `workoutIds` must be the full set. */
+export async function reorderWorkouts(db: DB, userId: string, workoutIds: string[]): Promise<void> {
+  const program = await requireActiveProgram(db, userId);
+  await db.begin(async (sql) => {
+    const rows = await sql`SELECT workout_id FROM schedule WHERE program_id = ${program.id} AND active = 1`;
+    const existing = new Set((rows as unknown as Array<{ workout_id: string }>).map((r) => r.workout_id));
+    if (workoutIds.length !== existing.size || !workoutIds.every((id) => existing.has(id))) {
+      throw new DomainValidationError('workout_ids must list exactly the active program workouts');
+    }
+    let i = 0;
+    for (const id of workoutIds) {
+      await sql`UPDATE schedule SET sort_order = ${i} WHERE program_id = ${program.id} AND workout_id = ${id} AND active = 1`;
+      i++;
+    }
+  });
+}
+
+export interface AddExerciseInput {
+  workout_id: string;
+  exercise_name: string;
+  sets: number;
+  reps: string;
+  rest_seconds?: number;
+}
+
+export async function addExercise(db: DB, userId: string, input: AddExerciseInput): Promise<string> {
+  const exerciseId = randomUUID();
+  await db.begin(async (sql) => {
+    await requireOwnedWorkout(sql as unknown as DB, userId, input.workout_id);
+    const [{ next_order }] = await sql`
+      SELECT COALESCE(MAX(sort_order), 0)::int + 1 AS next_order FROM workout_exercises WHERE workout_id = ${input.workout_id}`;
+    await sql`
+      INSERT INTO workout_exercises (id, workout_id, exercise_name, exercise_db_id, sets, reps, rest_seconds, sort_order)
+      VALUES (${exerciseId}, ${input.workout_id}, ${input.exercise_name}, NULL, ${input.sets}, ${input.reps}, ${input.rest_seconds ?? 90}, ${next_order})`;
+  });
+  return exerciseId;
+}
+
+export interface UpdateExerciseInput {
+  exercise_id: string;
+  exercise_name?: string;
+  sets?: number;
+  reps?: string;
+  rest_seconds?: number;
+}
+
+export async function updateExercise(db: DB, userId: string, input: UpdateExerciseInput): Promise<void> {
+  await db.begin(async (sql) => {
+    const [row] = await sql`
+      SELECT we.id
+      FROM workout_exercises we
+      JOIN workouts w ON w.id = we.workout_id
+      JOIN programs p ON p.id = w.program_id
+      WHERE we.id = ${input.exercise_id} AND p.user_id = ${userId} AND p.active = 1`;
+    if (!row) throw new NotFoundError('Exercise not found');
+    // COALESCE keeps the existing value when a field is omitted (passed as null).
+    await sql`
+      UPDATE workout_exercises SET
+        exercise_name = COALESCE(${input.exercise_name ?? null}, exercise_name),
+        sets = COALESCE(${input.sets ?? null}, sets),
+        reps = COALESCE(${input.reps ?? null}, reps),
+        rest_seconds = COALESCE(${input.rest_seconds ?? null}, rest_seconds)
+      WHERE id = ${input.exercise_id}`;
+  });
+}
+
+export async function removeExercise(db: DB, userId: string, exerciseId: string): Promise<void> {
+  await db.begin(async (sql) => {
+    const [row] = await sql`
+      SELECT we.id
+      FROM workout_exercises we
+      JOIN workouts w ON w.id = we.workout_id
+      JOIN programs p ON p.id = w.program_id
+      WHERE we.id = ${exerciseId} AND p.user_id = ${userId} AND p.active = 1`;
+    if (!row) throw new NotFoundError('Exercise not found');
+    await sql`DELETE FROM workout_exercises WHERE id = ${exerciseId}`;
+  });
+}
+
+export async function reorderExercises(
+  db: DB,
+  userId: string,
+  workoutId: string,
+  exerciseIds: string[],
+): Promise<void> {
+  await db.begin(async (sql) => {
+    await requireOwnedWorkout(sql as unknown as DB, userId, workoutId);
+    const rows = await sql`SELECT id FROM workout_exercises WHERE workout_id = ${workoutId}`;
+    const existing = new Set((rows as unknown as Array<{ id: string }>).map((r) => r.id));
+    if (exerciseIds.length !== existing.size || !exerciseIds.every((id) => existing.has(id))) {
+      throw new DomainValidationError('exercise_ids must list exactly the workout exercises');
+    }
+    let i = 1;
+    for (const id of exerciseIds) {
+      await sql`UPDATE workout_exercises SET sort_order = ${i} WHERE id = ${id}`;
+      i++;
+    }
+  });
+}
+
+export type ScheduleIntent =
+  | { type: 'static'; entries: Array<{ workout_id: string; day_of_week: number; scheduled_time?: string | null }> }
+  | { type: 'rotation'; entries: Array<{ workout_id: string; scheduled_time?: string | null }> };
+
+/**
+ * Applies a schedule intent to the active Program. The intent type must match
+ * the Program type (use {@link switchProgramType} to change it). The server
+ * derives `day_of_week` / `sort_order`; the client never stores them verbatim.
+ */
+export async function setSchedule(db: DB, userId: string, intent: ScheduleIntent): Promise<void> {
+  const program = await requireActiveProgram(db, userId);
+  if (intent.type !== program.type) {
+    throw new DomainValidationError(
+      `Active program is ${program.type}; switch its type before setting a ${intent.type} schedule`,
+    );
+  }
+  await db.begin(async (sql) => {
+    const rows = await sql`SELECT workout_id FROM schedule WHERE program_id = ${program.id} AND active = 1`;
+    const owned = new Set((rows as unknown as Array<{ workout_id: string }>).map((r) => r.workout_id));
+    for (const e of intent.entries) {
+      if (!owned.has(e.workout_id)) throw new NotFoundError('Workout not found in active program');
+    }
+
+    if (intent.type === 'static') {
+      for (const e of intent.entries) {
+        await sql`
+          UPDATE schedule SET day_of_week = ${e.day_of_week}, scheduled_time = ${e.scheduled_time ?? null}
+          WHERE program_id = ${program.id} AND workout_id = ${e.workout_id} AND active = 1`;
+      }
+    } else {
+      let i = 0;
+      for (const e of intent.entries) {
+        await sql`
+          UPDATE schedule SET day_of_week = NULL, scheduled_time = ${e.scheduled_time ?? null}, sort_order = ${i}
+          WHERE program_id = ${program.id} AND workout_id = ${e.workout_id} AND active = 1`;
+        i++;
+      }
+    }
+  });
+}
+
+/**
+ * Switches the active Program's scheduling type, maintaining all invariants.
+ * → rotation: nulls every `day_of_week`, assigns contiguous `sort_order`, and
+ *   (re)creates `rotation_state` at index 0.
+ * → static: requires a `day_of_week` per Workout and deletes `rotation_state`.
+ */
+export async function switchProgramType(
+  db: DB,
+  userId: string,
+  target: 'static' | 'rotation',
+  days?: Array<{ workout_id: string; day_of_week: number; scheduled_time?: string | null }>,
+): Promise<void> {
+  const program = await requireActiveProgram(db, userId);
+  await db.begin(async (sql) => {
+    const schedules = (await sql`
+      SELECT * FROM schedule WHERE program_id = ${program.id} AND active = 1 ORDER BY sort_order`) as unknown as Schedule[];
+
+    if (target === 'rotation') {
+      let i = 0;
+      for (const s of schedules) {
+        await sql`UPDATE schedule SET day_of_week = NULL, sort_order = ${i} WHERE id = ${s.id}`;
+        i++;
+      }
+      await sql`UPDATE programs SET type = 'rotation' WHERE id = ${program.id}`;
+      await sql`DELETE FROM rotation_state WHERE program_id = ${program.id}`;
+      await sql`INSERT INTO rotation_state (id, user_id, program_id, current_index) VALUES (${randomUUID()}, ${userId}, ${program.id}, 0)`;
+    } else {
+      const dayMap = new Map((days ?? []).map((d) => [d.workout_id, d]));
+      for (const s of schedules) {
+        if (!dayMap.has(s.workout_id)) {
+          throw new DomainValidationError('Switching to static requires a day_of_week for every workout');
+        }
+      }
+      let i = 0;
+      for (const s of schedules) {
+        const d = dayMap.get(s.workout_id)!;
+        await sql`
+          UPDATE schedule SET day_of_week = ${d.day_of_week}, scheduled_time = ${d.scheduled_time ?? s.scheduled_time}, sort_order = ${i}
+          WHERE id = ${s.id}`;
+        i++;
+      }
+      await sql`UPDATE programs SET type = 'static' WHERE id = ${program.id}`;
+      await sql`DELETE FROM rotation_state WHERE program_id = ${program.id}`;
+    }
+  });
 }

@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url';
 import dotenv from 'dotenv';
 
 import { startTokenServer } from './token-server.js';
+import { startApiServer } from './api/server.js';
 import {
   createDatabase,
   runMigrations,
@@ -54,6 +55,7 @@ if (typeof process.send !== 'function') {
 
   await runMigrations(mainDb);
   startTokenServer();
+  startApiServer();
 
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   if (botToken && botToken !== 'your-telegram-bot-token') {

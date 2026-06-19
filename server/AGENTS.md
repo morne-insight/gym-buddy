@@ -34,6 +34,48 @@ All domain data lives in a **Supabase-hosted Postgres** database. The LiveKit se
 
 Tests run against an **ephemeral Docker Postgres** container (not the cloud DB), started automatically by `jest.global-setup.cjs` on `localhost:5433`. **Docker must be running.** Override with `TEST_DATABASE_URL` to target a different test database. The suite runs serially (`maxWorkers: 1`) and truncates between tests for isolation.
 
+## Web REST API (`src/api/`)
+
+Alongside the LiveKit token server, the agent process starts an **authenticated REST API**
+(`startApiServer()` in `src/api/server.ts`, default port **3002**) consumed by `apps/web`. It is
+the only web-facing data surface; the single-DB-client invariant is preserved (the browser never
+touches Postgres or Storage directly).
+
+- **Auth (`src/api/auth.ts`):** Supabase Auth is identity-only. Every data route requires an
+  `Authorization: Bearer <supabase access token>` and verifies it against the project's **JWKS**
+  endpoint with `jose` (signature + `iss`/`aud`/`exp`). The `sub` claim is the caller's identity.
+  Missing/invalid tokens get **401 with no DB access**. No signing secret lives in env; no RLS.
+- **Identity provisioning:** on the first authenticated request for a `sub`, the server idempotently
+  upserts the domain `users` row (`provisionUser`) — never a DB trigger. `users.id` stores the `sub`.
+- **Validation:** every request body is validated against the matching Zod schema from
+  `@gym-buddy/contracts` (`packages/contracts`) **before** any DB access; failures return 400.
+- **Authorization:** all reads/writes are scoped to the caller's `users.id` in query logic; another
+  user's resource is treated as not-found (404).
+- **Endpoints:** `GET /api/me`, `GET|PUT /api/profile`, `GET /api/personas`,
+  `POST /api/profile/goal-image/upload-url` + `POST /api/profile/goal-image` (signed-URL upload, D6),
+  `GET /api/templates`, `GET /api/program`, `POST /api/program/adopt`, and intent routes under
+  `/api/program/{workouts,exercises,schedule,type,...}`. The editor sends **intent**; the server
+  owns every scheduling invariant (single active Program, `rotation_state` lifecycle, `day_of_week`
+  rules, contiguous `sort_order`). New `db/index.ts` functions back these: `listTemplates`,
+  `adoptTemplate` (transactional clone), `getActiveProgramDetail`, workout/exercise CRUD,
+  `setSchedule`, `switchProgramType`. Errors use typed classes (`NotFoundError` → 404,
+  `DomainValidationError` → 400).
+
+### Additional environment variables
+
+- `SUPABASE_URL` (or `SUPABASE_PROJECT_REF`) — used to derive the JWKS URL / issuer. Optional
+  overrides: `SUPABASE_JWKS_URL`, `SUPABASE_JWT_AUD` (default `authenticated`).
+- `SUPABASE_SERVICE_ROLE_KEY` — service-role key used **only** to mint signed `goal-images` upload
+  URLs. Never exposed to the browser.
+- `WEB_ORIGIN` (default `http://localhost:5173`) — CORS allow-origin for the API.
+- `API_PORT` (default `3002`).
+
+Catalog tables (`program_templates`, `template_workouts`, `template_exercises`,
+`template_schedule`) have **no `user_id`** and are seeded in `seed.sql`. Adoption clones them into
+user-owned rows with no FK back to the template (no propagation). The contracts package is consumed
+as built output — run `npm run build -w @gym-buddy/contracts` after installing/changing it (tests
+resolve it from source via a jest module mapper, so TDD needs no prebuild).
+
 ## LiveKit Documentation
 
 LiveKit is a fast-evolving project. Always refer to the latest documentation. Run `lk docs --help` to see available commands. Key commands: `lk docs overview`, `lk docs search`, `lk docs get-page`, `lk docs code-search`, `lk docs changelog`, `lk docs pricing-info`. Run `lk docs <command> --help` before using a command for the first time. Prefer browsing (`overview`, `get-page`) over search, and `search` over `code-search`, as docs pages provide better context than raw code.
