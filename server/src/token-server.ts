@@ -1,8 +1,11 @@
 import http from 'node:http';
+import { randomUUID } from 'node:crypto';
 import { AccessToken } from 'livekit-server-sdk';
 import { RoomAgentDispatch, RoomConfiguration } from '@livekit/protocol';
+import type { StartWorkoutCredentialsResponse } from '@gym-buddy/contracts';
 
 const PORT = 3001;
+const DEV_USER_ID = 'user-founder';
 
 function parseBody(req: http.IncomingMessage): Promise<Record<string, unknown>> {
   return new Promise((resolve, reject) => {
@@ -17,6 +20,74 @@ function parseBody(req: http.IncomingMessage): Promise<Record<string, unknown>> 
     });
     req.on('error', reject);
   });
+}
+
+export interface StartWorkoutCredentialInput {
+  userId: string;
+  participantName?: string;
+}
+
+export async function buildStartWorkoutCredentials(
+  input: StartWorkoutCredentialInput,
+): Promise<StartWorkoutCredentialsResponse> {
+  const apiKey = process.env.LIVEKIT_API_KEY;
+  const apiSecret = process.env.LIVEKIT_API_SECRET;
+  const serverUrl = process.env.LIVEKIT_URL;
+
+  if (!apiKey || !apiSecret || !serverUrl) {
+    throw new Error('Server configuration error');
+  }
+
+  const agentName = process.env.LIVEKIT_AGENT_NAME ?? 'gym-buddy';
+  const attemptNonce = randomUUID();
+  const roomName = `workout-${input.userId}-${attemptNonce}`;
+  const attemptId = roomName;
+  const participantIdentity = `user-${input.userId}-${attemptNonce}`;
+  const metadata = JSON.stringify({
+    userId: input.userId,
+    attemptId,
+    roomName,
+  });
+
+  const at = new AccessToken(apiKey, apiSecret, {
+    identity: participantIdentity,
+    name: input.participantName ?? 'User',
+    metadata,
+    attributes: {
+      userId: input.userId,
+      attemptId,
+      roomName,
+    },
+    ttl: '10m',
+  });
+
+  at.addGrant({
+    roomJoin: true,
+    room: roomName,
+    canPublish: true,
+    canSubscribe: true,
+  });
+
+  at.roomConfig = new RoomConfiguration({
+    agents: [new RoomAgentDispatch({ agentName, metadata })],
+  });
+
+  console.log('[start-workout] minted credentials', {
+    userId: input.userId,
+    attemptId,
+    roomName,
+    participantIdentity,
+    agentName,
+  });
+
+  return {
+    server_url: serverUrl,
+    participant_token: await at.toJwt(),
+    room_name: roomName,
+    participant_identity: participantIdentity,
+    attempt_id: attemptId,
+    agent_name: agentName,
+  };
 }
 
 export function startTokenServer() {
@@ -41,49 +112,13 @@ export function startTokenServer() {
       const body = await parseBody(req);
       console.log('Token request body:', JSON.stringify(body, null, 2));
 
-      const apiKey = process.env.LIVEKIT_API_KEY;
-      const apiSecret = process.env.LIVEKIT_API_SECRET;
-      const serverUrl = process.env.LIVEKIT_URL;
-
-      if (!apiKey || !apiSecret || !serverUrl) {
-        res.writeHead(500, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: 'Server configuration error' }));
-        return;
-      }
-
-      const roomName = (body.room_name as string) || `session-${Date.now()}`;
-      const participantIdentity = (body.participant_identity as string) || `user-${Date.now()}`;
-      const participantName = (body.participant_name as string) || 'User';
-
-      const at = new AccessToken(apiKey, apiSecret, {
-        identity: participantIdentity,
-        name: participantName,
-        metadata: (body.participant_metadata as string) || '',
-        attributes: (body.participant_attributes as Record<string, string>) || {},
-        ttl: '10m',
+      const credentials = await buildStartWorkoutCredentials({
+        userId: DEV_USER_ID,
+        participantName: (body.participant_name as string) || 'User',
       });
-
-      at.addGrant({
-        roomJoin: true,
-        room: roomName,
-        canPublish: true,
-        canSubscribe: true,
-      });
-
-      const rawConfig = body.room_config as Record<string, unknown> | undefined;
-      const rawAgents = (rawConfig?.agents as Array<Record<string, string>>) ?? [];
-      const agents = rawAgents.map(
-        (a) => new RoomAgentDispatch({ agentName: a.agent_name ?? a.agentName }),
-      );
-
-      at.roomConfig = new RoomConfiguration({
-        agents: agents.length > 0 ? agents : [new RoomAgentDispatch({ agentName: 'gym-buddy' })],
-      });
-
-      const participantToken = await at.toJwt();
 
       res.writeHead(201, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ server_url: serverUrl, participant_token: participantToken }));
+      res.end(JSON.stringify(credentials));
     } catch (err) {
       console.error('Token generation error:', err);
       res.writeHead(500, { 'Content-Type': 'application/json' });

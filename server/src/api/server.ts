@@ -3,6 +3,7 @@ import type { ZodType } from 'zod';
 import {
   updateProfileRequest,
   signedUploadRequest,
+  startWorkoutCredentialsRequest,
   setGoalImageRequest,
   adoptTemplateRequest,
   addWorkoutRequest,
@@ -52,6 +53,7 @@ import {
   type AuthConfig,
 } from './auth.js';
 import { createGoalImageUploadUrl, objectPathBelongsToUser } from './storage.js';
+import { buildStartWorkoutCredentials } from '../token-server.js';
 
 const PORT = Number(process.env.API_PORT ?? 3002);
 const WEB_ORIGIN = process.env.WEB_ORIGIN ?? 'http://localhost:5173';
@@ -93,6 +95,14 @@ const routes: Record<string, RouteDef> = {
       const onboarded = Boolean(user && user.name.trim() !== '' && program);
       return { body: { id: userId, onboarded } };
     },
+  },
+
+  'POST /api/workout/start': {
+    schema: startWorkoutCredentialsRequest,
+    handler: async ({ userId }) => ({
+      status: 201,
+      body: await buildStartWorkoutCredentials({ userId }),
+    }),
   },
 
   'GET /api/personas': {

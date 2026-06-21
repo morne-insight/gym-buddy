@@ -341,6 +341,21 @@ export async function completeSession(db: DB, sessionId: string): Promise<void> 
   });
 }
 
+async function markSessionIncomplete(db: DB, sessionId: string, status: 'abandoned' | 'cancelled'): Promise<void> {
+  await db`
+    UPDATE sessions
+    SET status = ${status}, completed_at = NULL, notes = COALESCE(notes, ${status === 'abandoned' ? 'Abandoned before workout completion' : 'Cancelled before session readiness'})
+    WHERE id = ${sessionId} AND status = 'in_progress'`;
+}
+
+export async function abandonSession(db: DB, sessionId: string): Promise<void> {
+  await markSessionIncomplete(db, sessionId, 'abandoned');
+}
+
+export async function cancelSession(db: DB, sessionId: string): Promise<void> {
+  await markSessionIncomplete(db, sessionId, 'cancelled');
+}
+
 export async function getActiveSession(db: DB, userId: string): Promise<Session | undefined> {
   const [row] = await db`SELECT * FROM sessions WHERE user_id = ${userId} AND status = 'in_progress' ORDER BY started_at DESC LIMIT 1`;
   return row as Session | undefined;

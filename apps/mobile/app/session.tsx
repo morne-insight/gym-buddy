@@ -1,8 +1,8 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useState, useCallback } from 'react';
 import { useRouter } from 'expo-router';
-import { useAgent } from '@livekit/components-react';
-import type { UseAgentReturn } from '@livekit/components-react';
+import { useVoiceAssistant } from '@livekit/components-react';
+import type { VoiceAssistant } from '@livekit/components-react';
 import { useConnection } from '../hooks/useConnection';
 import { useDataMessages } from '../hooks/useDataMessages';
 import { ExerciseGifOverlay } from '../components/ExerciseGifOverlay';
@@ -16,8 +16,8 @@ import { AuraVisualizer } from '../components/AuraVisualizer';
 // (pre-connect-buffering, idle, disconnected, failed), all of which previously
 // fell through to "Connecting..." — leaving the label stuck on "Connecting..."
 // even after the agent was connected and listening.
-function agentStatus(agent: UseAgentReturn): { label: string; color: string } {
-  switch (agent.state) {
+function agentStatus(assistant: VoiceAssistant): { label: string; color: string } {
+  switch (assistant.state) {
     case 'speaking':
       return { label: 'Speaking', color: '#e63946' };
     case 'thinking':
@@ -32,7 +32,7 @@ function agentStatus(agent: UseAgentReturn): { label: string; color: string } {
 
   // pre-connect-buffering: the client can already hear the user while the
   // preconnect audio buffer is active, so treat it as listening.
-  if (agent.canListen) {
+  if (assistant.agent && assistant.state === 'connecting') {
     return { label: 'Listening', color: '#4ecdc4' };
   }
 
@@ -42,23 +42,27 @@ function agentStatus(agent: UseAgentReturn): { label: string; color: string } {
 
 export default function SessionScreen() {
   const router = useRouter();
-  const { disconnect } = useConnection();
-  const agent = useAgent();
-  const { state } = agent;
-  const { exerciseMedia, exerciseProgress, restTimer, reset } = useDataMessages();
+  const { connection, disconnect } = useConnection();
+  const assistant = useVoiceAssistant();
+  const { state } = assistant;
+  const { exerciseMedia, exerciseProgress: liveExerciseProgress, restTimer, reset } = useDataMessages({
+    attemptId: connection.attemptId,
+    roomName: connection.roomName,
+  });
+  const exerciseProgress = liveExerciseProgress ?? connection.readyPayload?.initialExerciseProgress ?? null;
 
   const [gifVisible, setGifVisible] = useState(false);
   const [progressPinned, setProgressPinned] = useState(false);
 
-  const handleEnd = useCallback(() => {
+  const handleEnd = useCallback(async () => {
     reset();
     setGifVisible(false);
     setProgressPinned(false);
-    disconnect();
+    await disconnect();
     router.back();
   }, [disconnect, router, reset]);
 
-  const { label, color } = agentStatus(agent);
+  const { label, color } = agentStatus(assistant);
 
   return (
     <View style={styles.container}>
@@ -76,7 +80,7 @@ export default function SessionScreen() {
           <Text style={[styles.statusText, { color }]}>{label}</Text>
         </View>
 
-        <AuraVisualizer state={state} audioTrack={agent.microphoneTrack} />
+        <AuraVisualizer state={state} audioTrack={assistant.audioTrack} />
       </View>
 
       <Pressable style={styles.endButton} onPress={handleEnd}>

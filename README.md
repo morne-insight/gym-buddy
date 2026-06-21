@@ -130,6 +130,14 @@ adb reverse tcp:3001 tcp:3001    # device's localhost:3001 -> your machine's :30
 
 Make sure the server (port 3001) is running. `EXPO_PUBLIC_` vars are inlined at bundle time — restart the bundler with `npm start -c` after changing `.env.local`.
 
+### Start Workout connection flow
+
+Start Workout now waits for a full readiness handshake before opening the Session screen: token credentials, native audio setup, LiveKit room/agent connection, domain Session creation, and a matching `session_ready` data message. If any startup step fails, the app stays on the start screen, tears down audio/LiveKit state, and exposes Retry/Cancel instead of recording a completed workout.
+
+- Local/dev mobile builds can keep using `http://localhost:3001/getToken`; that compatibility path now generates room, participant, attempt, and agent dispatch server-side for `user-founder`.
+- Production/authenticated starts should use `POST /api/workout/start` on the API server with a Supabase bearer token. The client sends an empty intent body; the server derives the domain user from the verified token and owns all LiveKit dispatch fields.
+- If Start fails instantly, check token endpoint reachability first (`adb reverse`, LAN IP, firewall, `API_PORT`/3001). If LiveKit connects but the app never enters the Session screen, inspect server logs for `session_failed` or missing `session_ready`.
+
 ### 2. Build & run a development build
 
 Because of the native WebRTC modules, run a dev build on a simulator/emulator or a physical device:

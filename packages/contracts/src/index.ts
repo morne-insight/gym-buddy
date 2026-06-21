@@ -62,6 +62,25 @@ export const meResponse = z.object({
 });
 export type MeResponse = z.infer<typeof meResponse>;
 
+// --- Start Workout credentials ----------------------------------------------
+
+/**
+ * Intent-only request to start a Workout. The client does not choose LiveKit
+ * room, participant, domain user, or agent dispatch values.
+ */
+export const startWorkoutCredentialsRequest = z.object({}).strict();
+export type StartWorkoutCredentialsRequest = z.infer<typeof startWorkoutCredentialsRequest>;
+
+export const startWorkoutCredentialsResponse = z.object({
+  server_url: z.string().url(),
+  participant_token: z.string().min(1),
+  room_name: z.string().min(1),
+  participant_identity: z.string().min(1),
+  attempt_id: z.string().min(1),
+  agent_name: z.string().min(1),
+});
+export type StartWorkoutCredentialsResponse = z.infer<typeof startWorkoutCredentialsResponse>;
+
 // --- Personas (Buddy picker) -------------------------------------------------
 
 export const personaSummary = z.object({

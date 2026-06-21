@@ -3,15 +3,28 @@ import { View, Text, Pressable, ActivityIndicator, StyleSheet } from 'react-nati
 import { useRouter } from 'expo-router';
 import { useConnection } from '../hooks/useConnection';
 
+const DEBUG_CONNECTION = process.env.EXPO_PUBLIC_DEBUG_CONNECTION === '1';
+
 export default function HomeScreen() {
   const router = useRouter();
-  const { isConnectionActive, connect } = useConnection();
+  const { connection, connect, disconnect } = useConnection();
 
   useEffect(() => {
-    if (isConnectionActive) {
+    if (DEBUG_CONNECTION) {
+      console.log('[home] connection state changed', {
+        status: connection.status,
+        attemptId: connection.attemptId,
+        roomName: connection.roomName,
+        hasReadyPayload: Boolean(connection.readyPayload),
+      });
+    }
+    if (connection.status === 'ready') {
       router.push('/session');
     }
-  }, [isConnectionActive, router]);
+  }, [connection, router]);
+
+  const starting = connection.status === 'starting';
+  const failed = connection.status === 'failed';
 
   return (
     <View style={styles.container}>
@@ -21,15 +34,30 @@ export default function HomeScreen() {
       <Pressable
         style={styles.button}
         onPress={connect}
-        disabled={isConnectionActive}
+        disabled={starting || connection.status === 'disconnecting'}
       >
-        {isConnectionActive ? (
+        {starting ? (
           <ActivityIndicator size="small" color="#ffffff" style={{ marginRight: 8 }} />
         ) : null}
         <Text style={styles.buttonText}>
-          {isConnectionActive ? 'Connecting...' : 'Start Workout'}
+          {starting ? 'Connecting...' : failed ? 'Retry Workout' : 'Start Workout'}
         </Text>
       </Pressable>
+
+      {starting ? (
+        <Pressable style={styles.secondaryButton} onPress={disconnect}>
+          <Text style={styles.secondaryButtonText}>Cancel</Text>
+        </Pressable>
+      ) : null}
+
+      {failed ? (
+        <>
+          <Text style={styles.errorText}>{connection.error ?? 'Unable to start workout'}</Text>
+          <Pressable style={styles.secondaryButton} onPress={disconnect}>
+            <Text style={styles.secondaryButtonText}>Cancel</Text>
+          </Pressable>
+        </>
+      ) : null}
     </View>
   );
 }
@@ -65,5 +93,21 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 18,
     fontWeight: '600',
+  },
+  secondaryButton: {
+    marginTop: 16,
+    paddingHorizontal: 32,
+    paddingVertical: 12,
+  },
+  secondaryButtonText: {
+    color: '#bbbbbb',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  errorText: {
+    color: '#ff8a8a',
+    fontSize: 14,
+    marginTop: 16,
+    textAlign: 'center',
   },
 });

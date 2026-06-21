@@ -16,10 +16,11 @@ import {
   createDatabase,
   runMigrations,
   createSession,
-  completeSession,
-  getActiveSession,
+  abandonSession,
+  cancelSession,
   getWorkoutExerciseById,
   closePool,
+  type Session,
 } from './db/index.js';
 import { createAgentTools } from './tools/index.js';
 import { buildSystemPrompt } from './prompts/index.js';
@@ -92,14 +93,49 @@ if (typeof process.send !== 'function') {
 }
 
 const USER_ID = 'user-founder';
+const JOB_PROCESS_INITIALIZE_TIMEOUT_MS = 30 * 1000;
 
 const exerciseInfoFetcher: ExerciseInfoFetcher = async () => null;
+
+interface StartMetadata {
+  userId: string;
+  attemptId: string;
+  roomName: string;
+}
+
+function readStartMetadata(ctx: JobContext): StartMetadata {
+  const roomName = ctx.job.room?.name ?? 'unknown-room';
+  const fallback: StartMetadata = {
+    userId: USER_ID,
+    attemptId: roomName,
+    roomName,
+  };
+
+  try {
+    const parsed = JSON.parse(ctx.info.acceptArguments.metadata || '{}') as Partial<StartMetadata>;
+    return {
+      userId: typeof parsed.userId === 'string' && parsed.userId ? parsed.userId : fallback.userId,
+      attemptId: typeof parsed.attemptId === 'string' && parsed.attemptId ? parsed.attemptId : fallback.attemptId,
+      roomName: typeof parsed.roomName === 'string' && parsed.roomName ? parsed.roomName : fallback.roomName,
+    };
+  } catch {
+    return fallback;
+  }
+}
 
 export default defineAgent({
   entry: async (ctx: JobContext) => {
     const db = createDatabase();
 
     await ctx.connect();
+    const startMetadata = readStartMetadata(ctx);
+    console.log('[agent] job connected', {
+      jobId: ctx.job.id,
+      roomName: startMetadata.roomName,
+      attemptId: startMetadata.attemptId,
+      userId: startMetadata.userId,
+      agentName: ctx.job.agentName,
+    });
 
     const localParticipant = ctx.room.localParticipant;
     const dataPublisher = {
@@ -109,6 +145,9 @@ export default defineAgent({
     };
 
     let restTimer: ReturnType<typeof setTimeout> | null = null;
+    let dbSession: Session | null = null;
+    let readinessPublished = false;
+    let session: voice.AgentSession | null = null;
 
     const onRestTimerStart = (_exerciseId: string, durationSeconds: number) => {
       if (restTimer) clearTimeout(restTimer);
@@ -117,26 +156,13 @@ export default defineAgent({
           type: 'rest_timer',
           payload: { action: 'end', durationSeconds },
         });
-        session.generateReply({
+        session?.generateReply({
           instructions: 'Rest is over. Announce it and prompt the user for their next set.',
         });
       }, durationSeconds * 1000);
     };
 
-    const tools = createAgentTools(db, exerciseInfoFetcher, telegramSender, dataPublisher, onRestTimerStart);
-    const { prompt } = await buildSystemPrompt(db, USER_ID);
-
-    const workout = await getCurrentWorkout(db, USER_ID);
-
-    const dbSession = await createSession(db, USER_ID, workout.scheduleId);
-
-    const sessionContext = workout.restDay
-      ? `Today is a rest day. The user's active session ID is ${dbSession.id}.`
-      : `Today's workout: ${workout.workoutName}. Session ID: ${dbSession.id}. Exercises: ${workout.exercises.map((e) => `${e.name} (ID: ${e.id}, ${e.sets}x${e.reps})`).join(', ')}.`;
-
-    const fullPrompt = `${prompt}\n\nSESSION CONTEXT:\n${sessionContext}`;
-
-    const session = new voice.AgentSession({
+    session = new voice.AgentSession({
       vad: await silero.VAD.load(),
       turnHandling: {
         turnDetection: 'vad',
@@ -152,9 +178,12 @@ export default defineAgent({
 
     ctx.addShutdownCallback(async () => {
       if (restTimer) clearTimeout(restTimer);
-      const active = await getActiveSession(db, USER_ID);
-      if (active) {
-        await completeSession(db, active.id);
+      if (dbSession) {
+        if (readinessPublished) {
+          await abandonSession(db, dbSession.id);
+        } else {
+          await cancelSession(db, dbSession.id);
+        }
       }
       await closePool();
     });
@@ -165,66 +194,151 @@ export default defineAgent({
 
     ctx.room.on('participantConnected', (participant: { identity: string }) => {
       console.log(`[Session] Participant ${participant.identity} reconnected`);
-      session.generateReply({
+      session?.generateReply({
         instructions: 'The user just reconnected after a network drop. Briefly acknowledge the interruption and remind them where you left off.',
       });
     });
 
-    await ctx.waitForParticipant();
+    try {
+      console.log('[agent] waiting for participant', {
+        roomName: startMetadata.roomName,
+        attemptId: startMetadata.attemptId,
+      });
+      await ctx.waitForParticipant();
+      console.log('[agent] participant ready', {
+        roomName: startMetadata.roomName,
+        attemptId: startMetadata.attemptId,
+      });
 
-    const agent = new voice.Agent({
-      instructions: fullPrompt,
-      tools,
-    });
+      const tools = createAgentTools(
+        db,
+        exerciseInfoFetcher,
+        telegramSender,
+        dataPublisher,
+        onRestTimerStart,
+        { attemptId: startMetadata.attemptId, roomName: startMetadata.roomName },
+      );
+      const { prompt } = await buildSystemPrompt(db, startMetadata.userId);
+      const workout = await getCurrentWorkout(db, startMetadata.userId);
+      dbSession = await createSession(db, startMetadata.userId, workout.scheduleId);
+      console.log('[agent] domain session created', {
+        sessionId: dbSession.id,
+        roomName: startMetadata.roomName,
+        attemptId: startMetadata.attemptId,
+        restDay: workout.restDay,
+        workoutName: workout.workoutName,
+      });
 
-    const backgroundAudio = new voice.BackgroundAudioPlayer({
-      thinkingSound: {
-        source: voice.BuiltinAudioClip.KEYBOARD_TYPING,
-        volume: 0.5,
-      },
-    });
+      const sessionContext = workout.restDay
+        ? `Today is a rest day. The user's active session ID is ${dbSession.id}.`
+        : `Today's workout: ${workout.workoutName}. Session ID: ${dbSession.id}. Exercises: ${workout.exercises.map((e) => `${e.name} (ID: ${e.id}, ${e.sets}x${e.reps})`).join(', ')}.`;
 
-    await session.start({
-      agent,
-      room: ctx.room,
-    });
+      const fullPrompt = `${prompt}\n\nSESSION CONTEXT:\n${sessionContext}`;
 
-    await backgroundAudio.start({ room: ctx.room, agentSession: session });
+      const agent = new voice.Agent({
+        instructions: fullPrompt,
+        tools,
+      });
 
-    const greeting = workout.restDay
-      ? 'Greet the user. Tell them today is a rest day. Ask how they are recovering.'
-      : `Greet the user. Tell them today is ${workout.workoutName}. Ask if they are ready to get started.`;
-
-    session.generateReply({ instructions: greeting });
-
-    if (!workout.restDay && workout.exercises.length > 0) {
-      const firstExercise = workout.exercises[0];
-      await publishDataMessage(dataPublisher, {
-        type: 'exercise_progress',
-        payload: {
-          exerciseName: firstExercise.name,
-          targetSets: firstExercise.sets,
-          targetReps: firstExercise.reps,
-          targetWeight: null,
-          completedSets: 0,
-          currentSetNumber: 1,
-          exerciseIndex: 0,
-          totalExercises: workout.exercises.length,
+      const backgroundAudio = new voice.BackgroundAudioPlayer({
+        thinkingSound: {
+          source: voice.BuiltinAudioClip.KEYBOARD_TYPING,
+          volume: 0.5,
         },
       });
 
-      const firstWe = await getWorkoutExerciseById(db, firstExercise.id);
-      if (firstWe?.exercise_db_id) {
+      await session.start({
+        agent,
+        room: ctx.room,
+      });
+
+      await backgroundAudio.start({ room: ctx.room, agentSession: session });
+
+      const initialExerciseProgress =
+        !workout.restDay && workout.exercises.length > 0
+          ? {
+              attemptId: startMetadata.attemptId,
+              roomName: startMetadata.roomName,
+              exerciseName: workout.exercises[0].name,
+              targetSets: workout.exercises[0].sets,
+              targetReps: workout.exercises[0].reps,
+              targetWeight: null,
+              completedSets: 0,
+              currentSetNumber: 1,
+              exerciseIndex: 0,
+              totalExercises: workout.exercises.length,
+            }
+          : null;
+
+      await publishDataMessage(dataPublisher, {
+        type: 'session_ready',
+        payload: {
+          attemptId: startMetadata.attemptId,
+          roomName: startMetadata.roomName,
+          sessionId: dbSession.id,
+          restDay: workout.restDay,
+          workoutName: workout.workoutName,
+          initialExerciseProgress,
+        },
+      });
+      readinessPublished = true;
+      console.log('[agent] session_ready published', {
+        sessionId: dbSession.id,
+        roomName: startMetadata.roomName,
+        attemptId: startMetadata.attemptId,
+      });
+
+      const greeting = workout.restDay
+        ? 'Greet the user. Tell them today is a rest day. Ask how they are recovering.'
+        : `Greet the user. Tell them today is ${workout.workoutName}. Ask if they are ready to get started.`;
+
+      session.generateReply({ instructions: greeting });
+
+      if (initialExerciseProgress) {
         await publishDataMessage(dataPublisher, {
-          type: 'exercise_media',
-          payload: {
-            gifUrl: firstWe.exercise_db_id,
-            exerciseName: firstExercise.name,
-          },
+          type: 'exercise_progress',
+          payload: initialExerciseProgress,
         });
+
+        const firstExercise = workout.exercises[0];
+        const firstWe = await getWorkoutExerciseById(db, firstExercise.id);
+        if (firstWe?.exercise_db_id) {
+          await publishDataMessage(dataPublisher, {
+            type: 'exercise_media',
+            payload: {
+              gifUrl: firstWe.exercise_db_id,
+              exerciseName: firstExercise.name,
+            },
+          });
+        }
       }
+    } catch (err) {
+      console.error('[agent] startup failed', {
+        roomName: startMetadata.roomName,
+        attemptId: startMetadata.attemptId,
+        error: err,
+      });
+      if (dbSession && !readinessPublished) {
+        await cancelSession(db, dbSession.id);
+      }
+      await publishDataMessage(dataPublisher, {
+        type: 'session_failed',
+        payload: {
+          attemptId: startMetadata.attemptId,
+          roomName: startMetadata.roomName,
+          code: dbSession ? 'agent_start_failed' : 'session_creation_failed',
+          message: err instanceof Error ? err.message : 'Unable to start workout session',
+        },
+      });
+      throw err;
     }
   },
 });
 
-cli.runApp(new ServerOptions({ agent: fileURLToPath(import.meta.url), agentName: 'gym-buddy' }));
+cli.runApp(
+  new ServerOptions({
+    agent: fileURLToPath(import.meta.url),
+    agentName: 'gym-buddy',
+    initializeProcessTimeout: JOB_PROCESS_INITIALIZE_TIMEOUT_MS,
+  }),
+);
