@@ -1,3 +1,25 @@
+## ADDED Requirements
+
+### Requirement: Workout completion is explicit and advances rotation
+A domain Session SHALL be marked `completed` only when the workout flow reaches workout completion (every exercise in the resolved Workout has been completed or skipped) or the user explicitly ends an already-completed workout. Marking a Session `completed` is the single trigger that advances rotation state for rotation programs. Agent shutdown, participant disconnect, and ending before completion SHALL NOT mark a Session `completed`.
+
+This requirement closes the gap created by removing shutdown auto-completion: with the implicit completion path gone, an explicit completion trigger MUST exist or no Session is ever recorded as completed and rotation never advances.
+
+#### Scenario: Completed workout advances rotation
+- **WHEN** every exercise in the resolved Workout for a rotation program at index 1 has been completed or skipped and the workout flow reaches completion
+- **THEN** the system SHALL mark the Session `completed`
+- **AND** rotation state SHALL advance to index 2
+
+#### Scenario: Completion is not triggered by disconnect
+- **WHEN** the agent shuts down or the participant disconnects while the Session is still `in_progress`
+- **THEN** the system SHALL NOT mark the Session `completed`
+- **AND** rotation state SHALL NOT advance
+
+#### Scenario: Completed Session survives a later disconnect
+- **WHEN** a Session has already been marked `completed` and the participant subsequently disconnects
+- **THEN** the disconnect SHALL NOT downgrade the Session to `abandoned` or `cancelled`
+- **AND** rotation state SHALL remain advanced
+
 ## MODIFIED Requirements
 
 ### Requirement: Session creation records program context

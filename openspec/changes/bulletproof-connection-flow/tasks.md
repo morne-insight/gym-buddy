@@ -12,8 +12,9 @@
 - [x] 2.2 Resolve the current Workout and create the domain Session only after participant readiness.
 - [x] 2.3 Publish reliable `session_ready` after Session creation with Session ID and initial workout/rest-day payload.
 - [x] 2.4 Publish a startup failure message when the agent can still reach the room but cannot establish readiness.
-- [x] 2.5 Replace shutdown auto-completion with explicit completed/abandoned/cancelled handling.
+- [ ] 2.5 Replace shutdown auto-completion with explicit completed/abandoned/cancelled handling. Abandoned/cancelled handling shipped; the completed half is missing — no production code calls `completeSession` (the old shutdown call was removed and `completeExercise.workoutComplete` is unhandled), so completion and rotation advancement are currently broken.
 - [ ] 2.6 Add server tests for successful readiness, pre-readiness disconnect, agent startup failure, and ready-but-abandoned disconnect.
+- [ ] 2.7 Wire an explicit Session-completion trigger when the workout flow reaches completion (all exercises completed/skipped), and ensure a `completed` Session is not downgraded by the shutdown abandon/cancel path. Add a server test proving a completed workout advances rotation. (Satisfies the new "Workout completion is explicit and advances rotation" requirement.)
 
 ## 3. Token and Identity Boundary
 
@@ -32,6 +33,7 @@
 - [x] 4.4 Track attempt correlation and ignore stale startup/progress messages from old attempts.
 - [x] 4.5 Expose retryable failed state and cancel behavior from the start screen.
 - [x] 4.6 Navigate to the Session screen only after a matching `session_ready` message transitions the lifecycle to ready.
+- [ ] 4.7 Add a client-side agent-readiness timeout: if the LiveKit room connects but no matching `session_ready`/`session_failed` arrives within the configured timeout, transition to `failed`, disconnect the room, and stop native audio. The rewrite to raw `room.connect()` dropped the previous `useSession` `agentConnectTimeoutMilliseconds`, so the "Agent connection times out" scenario is currently unhandled (the app hangs in `starting` with only a Cancel action).
 
 ## 5. Session UI and Teardown
 
