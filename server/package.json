@@ -14,12 +14,15 @@
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "dependencies": {
+    "@gym-buddy/contracts": "*",
     "@livekit/agents": "^1.4.2",
+    "@supabase/supabase-js": "^2.49.1",
     "@livekit/agents-plugin-livekit": "^1.4.2",
     "@livekit/agents-plugin-silero": "^1.4.2",
     "@livekit/protocol": "^1.46.0",
     "@livekit/rtc-node": "^0.13.28",
     "dotenv": "^17.4.2",
+    "jose": "^6.1.0",
     "livekit-server-sdk": "^2.15.3",
     "node-cron": "^4.2.1",
     "node-telegram-bot-api": "^0.67.0",

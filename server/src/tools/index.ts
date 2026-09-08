@@ -18,6 +18,7 @@ export interface AgentToolsOptions {
   telegramSender: TelegramSender;
   dataPublisher?: DataPublisher;
   onRestTimerStart?: (exerciseId: string, durationSeconds: number) => void;
+  messageCorrelation?: { attemptId: string; roomName: string };
 }
 
 export function createAgentTools(
@@ -26,6 +27,7 @@ export function createAgentTools(
   telegramSender: TelegramSender,
   dataPublisher?: DataPublisher,
   onRestTimerStart?: (exerciseId: string, durationSeconds: number) => void,
+  messageCorrelation?: { attemptId: string; roomName: string },
 ) {
   return {
     getCurrentWorkout: llm.tool({
@@ -67,6 +69,7 @@ export function createAgentTools(
             await publishDataMessage(dataPublisher, {
               type: 'exercise_progress',
               payload: {
+                ...messageCorrelation,
                 exerciseName: exercise.exercise_name,
                 targetSets: exercise.sets,
                 targetReps: exercise.reps,
@@ -122,6 +125,7 @@ export function createAgentTools(
                 await publishDataMessage(dataPublisher, {
                   type: 'exercise_progress',
                   payload: {
+                    ...messageCorrelation,
                     exerciseName: nextExercise.exercise_name,
                     targetSets: nextExercise.sets,
                     targetReps: nextExercise.reps,

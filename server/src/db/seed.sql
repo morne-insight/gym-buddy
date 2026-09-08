@@ -259,3 +259,74 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO rotation_state (id, user_id, program_id, current_index, last_completed_at)
 VALUES ('rstate-founder', 'user-founder', 'prog-rotation-ppl', 0, NULL)
 ON CONFLICT (id) DO NOTHING;
+
+-- =============================================================
+-- Workout Template catalog (team-curated; adopted via the web flow)
+-- =============================================================
+-- These rows have NO user_id. Adopting a Template clones it into user-owned
+-- rows; the catalog itself is never edited by users.
+
+-- Template 1: Static PPL (Mon/Wed/Fri) — mirrors the founder's static program.
+INSERT INTO program_templates (id, name, description, type, sort_order)
+VALUES ('tmpl-ppl-static', 'Push / Pull / Legs (3-Day Split)', 'A classic 3-day push/pull/legs split on fixed days — great for a steady weekly routine.', 'static', 0)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO template_workouts (id, program_template_id, name, sort_order) VALUES
+  ('twk-static-push', 'tmpl-ppl-static', 'Push Day', 0),
+  ('twk-static-pull', 'tmpl-ppl-static', 'Pull Day', 1),
+  ('twk-static-legs', 'tmpl-ppl-static', 'Legs Day', 2)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO template_schedule (id, program_template_id, template_workout_id, day_of_week, scheduled_time, sort_order) VALUES
+  ('tsch-static-push', 'tmpl-ppl-static', 'twk-static-push', 1, '06:00', 0),
+  ('tsch-static-pull', 'tmpl-ppl-static', 'twk-static-pull', 3, '06:00', 1),
+  ('tsch-static-legs', 'tmpl-ppl-static', 'twk-static-legs', 5, '06:00', 2)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO template_exercises (id, template_workout_id, exercise_name, exercise_db_id, sets, reps, rest_seconds, sort_order) VALUES
+  ('tex-s-bench',   'twk-static-push', 'Barbell Bench Press', 'https://cdn.exercisedb.dev/media/w/images/A8OLBqBa26.jpg', 4, '8-10', 120, 1),
+  ('tex-s-ohp',     'twk-static-push', 'Overhead Press', 'https://cdn.exercisedb.dev/media/w/images/bQUAOjC7qA.jpg', 3, '8-10', 90, 2),
+  ('tex-s-incline', 'twk-static-push', 'Incline Dumbbell Press', NULL, 3, '10-12', 90, 3),
+  ('tex-s-lateral', 'twk-static-push', 'Lateral Raises', 'https://cdn.exercisedb.dev/media/w/images/qODXfaAVcz.jpg', 3, '12-15', 60, 4),
+  ('tex-s-tricep',  'twk-static-push', 'Tricep Pushdowns', 'https://cdn.exercisedb.dev/media/w/images/Ocsii6p15A.jpg', 3, '12-15', 60, 5),
+  ('tex-s-dead',    'twk-static-pull', 'Deadlift', NULL, 4, '5-6', 180, 1),
+  ('tex-s-row',     'twk-static-pull', 'Barbell Row', NULL, 4, '8-10', 90, 2),
+  ('tex-s-latpd',   'twk-static-pull', 'Lat Pulldown', NULL, 3, '10-12', 90, 3),
+  ('tex-s-face',    'twk-static-pull', 'Face Pulls', NULL, 3, '15-20', 60, 4),
+  ('tex-s-curl',    'twk-static-pull', 'Barbell Curls', NULL, 3, '10-12', 60, 5),
+  ('tex-s-squat',   'twk-static-legs', 'Barbell Squat', 'https://cdn.exercisedb.dev/media/w/images/QBL8IYGdYK.jpg', 4, '6-8', 180, 1),
+  ('tex-s-rdl',     'twk-static-legs', 'Romanian Deadlift', 'https://cdn.exercisedb.dev/media/w/images/3wgSOkOkH5.jpg', 3, '8-10', 120, 2),
+  ('tex-s-lpress',  'twk-static-legs', 'Leg Press', NULL, 3, '10-12', 90, 3),
+  ('tex-s-lcurl',   'twk-static-legs', 'Leg Curl', NULL, 3, '10-12', 60, 4),
+  ('tex-s-calf',    'twk-static-legs', 'Standing Calf Raises', 'https://cdn.exercisedb.dev/media/w/images/RfXMrjCG6o.jpg', 4, '12-15', 60, 5)
+ON CONFLICT (id) DO NOTHING;
+
+-- Template 2: Rotation PPL (cycles Push → Pull → Legs regardless of weekday).
+INSERT INTO program_templates (id, name, description, type, sort_order)
+VALUES ('tmpl-ppl-rotation', 'Push / Pull / Legs (Rotation)', 'The same push/pull/legs split as a rolling rotation — train when you can; the next day advances on completion.', 'rotation', 1)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO template_workouts (id, program_template_id, name, sort_order) VALUES
+  ('twk-rot-push', 'tmpl-ppl-rotation', 'Push Day', 0),
+  ('twk-rot-pull', 'tmpl-ppl-rotation', 'Pull Day', 1),
+  ('twk-rot-legs', 'tmpl-ppl-rotation', 'Legs Day', 2)
+ON CONFLICT (id) DO NOTHING;
+
+-- Rotation schedule: day_of_week NULL, ordered by sort_order.
+INSERT INTO template_schedule (id, program_template_id, template_workout_id, day_of_week, scheduled_time, sort_order) VALUES
+  ('tsch-rot-push', 'tmpl-ppl-rotation', 'twk-rot-push', NULL, NULL, 0),
+  ('tsch-rot-pull', 'tmpl-ppl-rotation', 'twk-rot-pull', NULL, NULL, 1),
+  ('tsch-rot-legs', 'tmpl-ppl-rotation', 'twk-rot-legs', NULL, NULL, 2)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO template_exercises (id, template_workout_id, exercise_name, exercise_db_id, sets, reps, rest_seconds, sort_order) VALUES
+  ('tex-r-bench',  'twk-rot-push', 'Barbell Bench Press', 'https://cdn.exercisedb.dev/media/w/images/A8OLBqBa26.jpg', 4, '8-10', 120, 1),
+  ('tex-r-ohp',    'twk-rot-push', 'Overhead Press', 'https://cdn.exercisedb.dev/media/w/images/bQUAOjC7qA.jpg', 3, '8-10', 90, 2),
+  ('tex-r-incline','twk-rot-push', 'Incline Dumbbell Press', NULL, 3, '10-12', 90, 3),
+  ('tex-r-dead',   'twk-rot-pull', 'Deadlift', NULL, 4, '5-6', 180, 1),
+  ('tex-r-row',    'twk-rot-pull', 'Barbell Row', NULL, 4, '8-10', 90, 2),
+  ('tex-r-latpd',  'twk-rot-pull', 'Lat Pulldown', NULL, 3, '10-12', 90, 3),
+  ('tex-r-squat',  'twk-rot-legs', 'Barbell Squat', 'https://cdn.exercisedb.dev/media/w/images/QBL8IYGdYK.jpg', 4, '6-8', 180, 1),
+  ('tex-r-rdl',    'twk-rot-legs', 'Romanian Deadlift', NULL, 3, '8-10', 120, 2),
+  ('tex-r-lpress', 'twk-rot-legs', 'Leg Press', NULL, 3, '10-12', 90, 3)
+ON CONFLICT (id) DO NOTHING;

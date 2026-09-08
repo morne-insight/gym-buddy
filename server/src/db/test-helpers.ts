@@ -207,6 +207,51 @@ export async function seedTestPPL(db: DB, userId: string): Promise<string> {
   return programId;
 }
 
+/**
+ * Seeds the Template catalog with a static and a rotation Template, each with
+ * three Workouts and a couple of exercises. Mirrors the production seed shapes
+ * but is self-contained for the test DB. Returns the two template ids.
+ */
+export async function seedTestTemplates(
+  db: DB,
+): Promise<{ staticId: string; rotationId: string }> {
+  const staticId = 'tmpl-static';
+  const rotationId = 'tmpl-rotation';
+
+  // Static template (Mon/Wed/Fri).
+  await db`INSERT INTO program_templates (id, name, description, type, sort_order) VALUES (${staticId}, 'Static PPL', 'desc', 'static', 0)`;
+  await db`INSERT INTO template_workouts (id, program_template_id, name, sort_order) VALUES
+    ('tw-s-push', ${staticId}, 'Push Day', 0),
+    ('tw-s-pull', ${staticId}, 'Pull Day', 1),
+    ('tw-s-legs', ${staticId}, 'Legs Day', 2)`;
+  await db`INSERT INTO template_schedule (id, program_template_id, template_workout_id, day_of_week, scheduled_time, sort_order) VALUES
+    ('ts-s-push', ${staticId}, 'tw-s-push', 1, '06:00', 0),
+    ('ts-s-pull', ${staticId}, 'tw-s-pull', 3, '06:00', 1),
+    ('ts-s-legs', ${staticId}, 'tw-s-legs', 5, '06:00', 2)`;
+  await db`INSERT INTO template_exercises (id, template_workout_id, exercise_name, exercise_db_id, sets, reps, rest_seconds, sort_order) VALUES
+    ('te-s-bench', 'tw-s-push', 'Bench Press', NULL, 4, '8-10', 120, 1),
+    ('te-s-ohp', 'tw-s-push', 'Overhead Press', NULL, 3, '8-10', 90, 2),
+    ('te-s-dead', 'tw-s-pull', 'Deadlift', NULL, 4, '5-6', 180, 1),
+    ('te-s-squat', 'tw-s-legs', 'Squat', NULL, 4, '6-8', 180, 1)`;
+
+  // Rotation template (no days; ordered cycle).
+  await db`INSERT INTO program_templates (id, name, description, type, sort_order) VALUES (${rotationId}, 'Rotation PPL', NULL, 'rotation', 1)`;
+  await db`INSERT INTO template_workouts (id, program_template_id, name, sort_order) VALUES
+    ('tw-r-push', ${rotationId}, 'Push Day', 0),
+    ('tw-r-pull', ${rotationId}, 'Pull Day', 1),
+    ('tw-r-legs', ${rotationId}, 'Legs Day', 2)`;
+  await db`INSERT INTO template_schedule (id, program_template_id, template_workout_id, day_of_week, scheduled_time, sort_order) VALUES
+    ('ts-r-push', ${rotationId}, 'tw-r-push', NULL, NULL, 0),
+    ('ts-r-pull', ${rotationId}, 'tw-r-pull', NULL, NULL, 1),
+    ('ts-r-legs', ${rotationId}, 'tw-r-legs', NULL, NULL, 2)`;
+  await db`INSERT INTO template_exercises (id, template_workout_id, exercise_name, exercise_db_id, sets, reps, rest_seconds, sort_order) VALUES
+    ('te-r-bench', 'tw-r-push', 'Bench Press', NULL, 4, '8-10', 120, 1),
+    ('te-r-dead', 'tw-r-pull', 'Deadlift', NULL, 4, '5-6', 180, 1),
+    ('te-r-squat', 'tw-r-legs', 'Squat', NULL, 4, '6-8', 180, 1)`;
+
+  return { staticId, rotationId };
+}
+
 export async function seedTestRotationPPL(db: DB, userId: string): Promise<string> {
   const programId = 'prog-rotation-ppl';
 

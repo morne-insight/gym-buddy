@@ -122,3 +122,52 @@ CREATE TABLE IF NOT EXISTS rotation_state (
   current_index INTEGER NOT NULL DEFAULT 0,
   last_completed_at TIMESTAMPTZ
 );
+
+-- =============================================================
+-- Workout Template catalog (team-curated; NO user_id)
+-- =============================================================
+-- A read-only catalog the web onboarding flow lists and "adopts". Adoption
+-- clones these rows into user-owned programs/workouts/workout_exercises/schedule
+-- (+ rotation_state for rotation templates). There is intentionally NO foreign
+-- key from a user's Program back to a Template: adoption is a one-time copy with
+-- no propagation in either direction. These tables mirror the shapes of their
+-- user-owned counterparts so the clone is a straight column copy.
+
+CREATE TABLE IF NOT EXISTS program_templates (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT,
+  type TEXT NOT NULL CHECK (type IN ('static', 'rotation')),
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS template_workouts (
+  id TEXT PRIMARY KEY,
+  program_template_id TEXT NOT NULL REFERENCES program_templates(id),
+  name TEXT NOT NULL,
+  sort_order INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS template_exercises (
+  id TEXT PRIMARY KEY,
+  template_workout_id TEXT NOT NULL REFERENCES template_workouts(id),
+  exercise_name TEXT NOT NULL,
+  exercise_db_id TEXT,
+  sets INTEGER NOT NULL,
+  reps TEXT NOT NULL,
+  rest_seconds INTEGER DEFAULT 90,
+  sort_order INTEGER NOT NULL
+);
+
+-- Default schedule for a Template. `day_of_week` is set for static templates and
+-- NULL for rotation templates (where `sort_order` defines the cycle), mirroring
+-- the user-owned `schedule` table.
+CREATE TABLE IF NOT EXISTS template_schedule (
+  id TEXT PRIMARY KEY,
+  program_template_id TEXT NOT NULL REFERENCES program_templates(id),
+  template_workout_id TEXT NOT NULL REFERENCES template_workouts(id),
+  day_of_week INTEGER,
+  scheduled_time TEXT,
+  sort_order INTEGER NOT NULL DEFAULT 0
+);

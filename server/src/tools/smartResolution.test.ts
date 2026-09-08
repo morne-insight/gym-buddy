@@ -12,6 +12,8 @@ import {
 import {
   createSession,
   completeSession,
+  abandonSession,
+  cancelSession,
   getRotationState,
   insertProgram,
   type DB,
@@ -171,15 +173,37 @@ describe('Session completion advancing rotation pointer', () => {
     await seedTestRotationPPL(db, userId);
 
     const session = await createSession(db, userId, 'rsched-push');
-    // Abandon the session
-    await db`UPDATE sessions SET status = 'abandoned' WHERE id = ${session.id}`;
-
-    // Now try completing — should not advance because status is already abandoned
-    const session2 = await createSession(db, userId, 'rsched-push');
-    await db`UPDATE sessions SET status = 'abandoned' WHERE id = ${session2.id}`;
+    await abandonSession(db, session.id);
 
     const state = await getRotationState(db, userId, 'prog-rotation-ppl');
     expect(state!.current_index).toBe(0); // Still at 0
+  });
+
+  it('cancelled session does NOT advance rotation pointer', async () => {
+    const userId = await seedTestUser(db);
+    await seedTestRotationPPL(db, userId);
+
+    const session = await createSession(db, userId, 'rsched-push');
+    await cancelSession(db, session.id);
+
+    const state = await getRotationState(db, userId, 'prog-rotation-ppl');
+    expect(state!.current_index).toBe(0);
+  });
+
+  it('does not complete a session after it has been abandoned or cancelled', async () => {
+    const userId = await seedTestUser(db);
+    await seedTestRotationPPL(db, userId);
+
+    const abandoned = await createSession(db, userId, 'rsched-push');
+    await abandonSession(db, abandoned.id);
+    await completeSession(db, abandoned.id);
+
+    const cancelled = await createSession(db, userId, 'rsched-push');
+    await cancelSession(db, cancelled.id);
+    await completeSession(db, cancelled.id);
+
+    const state = await getRotationState(db, userId, 'prog-rotation-ppl');
+    expect(state!.current_index).toBe(0);
   });
 
   it('does not advance for static program completion', async () => {

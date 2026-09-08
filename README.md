@@ -6,13 +6,20 @@ A voice AI training partner. A [LiveKit Agents](https://docs.livekit.io/agents/)
 
 ```
 gym-buddy/
-├── server/        # LiveKit Agents server + token server + Supabase data layer
-├── apps/mobile/   # Expo (React Native) voice client
-├── openspec/      # Change proposals & specs
-└── docs/          # Design notes & handoffs
+├── server/             # LiveKit Agents server + token server + web REST API + Supabase data layer
+├── apps/mobile/        # Expo (React Native) voice client
+├── apps/web/           # Vite + React web client (sign-up, onboarding, program config)
+├── packages/contracts/ # Shared Zod request/response schemas + inferred types (web ↔ server)
+├── openspec/           # Change proposals & specs
+└── docs/               # Design notes & handoffs
 ```
 
 This is an npm **workspaces** monorepo. Dependencies hoist to the root `node_modules`; run app-specific scripts from each package directory.
+
+> `packages/contracts` is consumed as built output. After `npm install` (and whenever you change the contracts), build it once so the server and web resolve it:
+> ```bash
+> npm run build -w @gym-buddy/contracts
+> ```
 
 ## Prerequisites
 
@@ -70,8 +77,14 @@ npm start        # production mode
 ```
 
 This starts:
-- the **LiveKit agent worker** (registers as agent `gym-buddy`), and
-- the **token server** at `http://0.0.0.0:3001/getToken` (used by the mobile app to join a room).
+- the **LiveKit agent worker** (registers as agent `gym-buddy`),
+- the **token server** at `http://0.0.0.0:3001/getToken` (used by the mobile app to join a room), and
+- the **web REST API** at `http://0.0.0.0:3002` (authenticated; consumed by `apps/web`).
+
+> The web API verifies Supabase access tokens via the project's JWKS endpoint and mints
+> signed goal-image upload URLs. Set `SUPABASE_URL` (or `SUPABASE_PROJECT_REF`),
+> `SUPABASE_SERVICE_ROLE_KEY`, and (optionally) `WEB_ORIGIN` / `API_PORT` in `.env` —
+> see `.env.example`. Without these, authenticated routes reject every request with 401.
 
 ### Other server commands
 
@@ -117,6 +130,14 @@ adb reverse tcp:3001 tcp:3001    # device's localhost:3001 -> your machine's :30
 
 Make sure the server (port 3001) is running. `EXPO_PUBLIC_` vars are inlined at bundle time — restart the bundler with `npm start -c` after changing `.env.local`.
 
+### Start Workout connection flow
+
+Start Workout now waits for a full readiness handshake before opening the Session screen: token credentials, native audio setup, LiveKit room/agent connection, domain Session creation, and a matching `session_ready` data message. If any startup step fails, the app stays on the start screen, tears down audio/LiveKit state, and exposes Retry/Cancel instead of recording a completed workout.
+
+- Local/dev mobile builds can keep using `http://localhost:3001/getToken`; that compatibility path now generates room, participant, attempt, and agent dispatch server-side for `user-founder`.
+- Production/authenticated starts should use `POST /api/workout/start` on the API server with a Supabase bearer token. The client sends an empty intent body; the server derives the domain user from the verified token and owns all LiveKit dispatch fields.
+- If Start fails instantly, check token endpoint reachability first (`adb reverse`, LAN IP, firewall, `API_PORT`/3001). If LiveKit connects but the app never enters the Session screen, inspect server logs for `session_failed` or missing `session_ready`.
+
 ### 2. Build & run a development build
 
 Because of the native WebRTC modules, run a dev build on a simulator/emulator or a physical device:
@@ -148,6 +169,56 @@ npm run android                  # (or npm run ios) full native rebuild
 ```
 
 If you hit `WebRTC native module not found`, it almost always means the native build is stale — run the two commands above.
+
+---
+
+## Web client (`apps/web/`)
+
+The web client is where a real user signs up, sets up their profile, adopts a Workout
+Template, and configures their Program. It is a Vite + React SPA (TanStack Router/Query/Form,
+Tailwind + shadcn-style UI) using `supabase-js` **for authentication only** — all domain data
+flows through the server REST API.
+
+### 1. Configure environment
+
+```bash
+cd apps/web
+cp .env.example .env.local
+```
+
+Fill in `.env.local`:
+
+- `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` — from Supabase → Project Settings → API.
+- `VITE_API_BASE_URL` — the server web API (default `http://localhost:3002`).
+
+### 2. Supabase setup (one-time, dashboard)
+
+- **Auth → Providers:** enable **Email** and **Google**.
+- **Auth → URL Configuration:** set **Site URL** to the web origin (`http://localhost:5173` in dev)
+  and add it to **Redirect URLs**, so the email-confirmation link returns to the app. The client
+  then auto-detects the session in the URL and signs the user in.
+- **Auth → SMTP:** configure a provider (e.g. Resend). Email confirmation is **on** — the web client
+  shows a "check your inbox" screen after sign-up and signs the user in once they confirm. (Without
+  custom SMTP, Supabase's built-in email is rate-limited to ~2/hour and not for production.)
+- **Storage:** create a **private** bucket named **`goal-images`**. No bucket policies are needed —
+  uploads use a server-minted signed URL (service-role key, which bypasses Storage RLS).
+- Ensure the server `.env` has `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `WEB_ORIGIN`. The
+  project must use **asymmetric JWT signing keys** (ECC P-256 / RSA) so the server can verify tokens
+  via JWKS.
+
+### 3. Run
+
+```bash
+npm run dev -w @gym-buddy/web    # Vite dev server at http://localhost:5173
+```
+
+Make sure the server (`npm run dev` in `server/`) is running so the API at `:3002` is reachable,
+and that the Template catalog is seeded (`npm run provision`).
+
+> **Email confirmation & password reset.** These require a custom SMTP provider (Supabase's
+> built-in email is rate-limited to ~2/hour and not for production). With SMTP configured (e.g.
+> Resend), email confirmation is on and the web client handles the "check your inbox" flow.
+> Password reset is not yet built into the web client — add it before launch.
 
 ---
 

@@ -48,6 +48,51 @@ describe('DataMessage encoding/decoding', () => {
     expect(decoded).toEqual(msg);
   });
 
+  it('encodes and decodes session_ready with attempt and room correlation', () => {
+    const msg: DataMessage = {
+      type: 'session_ready',
+      payload: {
+        attemptId: 'attempt-1',
+        roomName: 'workout-user-1-attempt-1',
+        sessionId: 'session-1',
+        restDay: false,
+        workoutName: 'Push Day',
+        initialExerciseProgress: {
+          exerciseName: 'Bench Press',
+          targetSets: 4,
+          targetReps: '8-10',
+          targetWeight: null,
+          completedSets: 0,
+          currentSetNumber: 1,
+          exerciseIndex: 0,
+          totalExercises: 3,
+        },
+      },
+    };
+
+    const encoded = encodeDataMessage(msg);
+    const decoded = decodeDataMessage(encoded);
+
+    expect(decoded).toEqual(msg);
+  });
+
+  it('encodes and decodes session_failed with attempt and room correlation', () => {
+    const msg: DataMessage = {
+      type: 'session_failed',
+      payload: {
+        attemptId: 'attempt-1',
+        roomName: 'workout-user-1-attempt-1',
+        code: 'session_creation_failed',
+        message: 'Could not create workout session',
+      },
+    };
+
+    const encoded = encodeDataMessage(msg);
+    const decoded = decodeDataMessage(encoded);
+
+    expect(decoded).toEqual(msg);
+  });
+
   it('returns null for invalid data', () => {
     const invalid = new TextEncoder().encode('not json');
     expect(decodeDataMessage(invalid)).toBeNull();

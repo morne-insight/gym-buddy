@@ -4,6 +4,8 @@ export interface ExerciseMediaPayload {
 }
 
 export interface ExerciseProgressPayload {
+  attemptId?: string;
+  roomName?: string;
   exerciseName: string;
   targetSets: number;
   targetReps: string;
@@ -20,10 +22,28 @@ export interface RestTimerPayload {
   remainingSeconds?: number;
 }
 
+export interface SessionReadyPayload {
+  attemptId: string;
+  roomName: string;
+  sessionId: string;
+  restDay: boolean;
+  workoutName: string | null;
+  initialExerciseProgress: ExerciseProgressPayload | null;
+}
+
+export interface SessionFailedPayload {
+  attemptId: string;
+  roomName: string;
+  code: 'user_resolution_failed' | 'workout_resolution_failed' | 'session_creation_failed' | 'agent_start_failed';
+  message: string;
+}
+
 export type DataMessage =
   | { type: 'exercise_media'; payload: ExerciseMediaPayload }
   | { type: 'exercise_progress'; payload: ExerciseProgressPayload }
-  | { type: 'rest_timer'; payload: RestTimerPayload };
+  | { type: 'rest_timer'; payload: RestTimerPayload }
+  | { type: 'session_ready'; payload: SessionReadyPayload }
+  | { type: 'session_failed'; payload: SessionFailedPayload };
 
 export function encodeDataMessage(msg: DataMessage): Uint8Array {
   return new TextEncoder().encode(JSON.stringify(msg));

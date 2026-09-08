@@ -11,6 +11,9 @@ const config: Config = {
   globalTeardown: '<rootDir>/jest.global-teardown.cjs',
   testTimeout: 30000,
   moduleNameMapper: {
+    // Resolve the shared contracts package to its TypeScript source so the test
+    // suite (TDD) runs without a prior `npm run build -w @gym-buddy/contracts`.
+    '^@gym-buddy/contracts$': '<rootDir>/../packages/contracts/src/index.ts',
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   transform: {

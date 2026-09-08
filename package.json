@@ -4,6 +4,8 @@
   "private": true,
   "workspaces": [
     "apps/mobile",
+    "apps/web",
+    "packages/contracts",
     "server"
   ],
   "overrides": {
